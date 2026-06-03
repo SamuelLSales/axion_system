@@ -1,0 +1,42 @@
+# Bancos de dados SQLite locais
+*.db
+*.db-journal
+*.db-wal
+*.db-shm
+*.sqlite3
+
+# Arquivos de ambiente e segredos
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Node.js (Frontend)
+node_modules/
+frontend/node_modules/
+frontend/dist/
+.eslintcache
+
+# Python (Backend)
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+pip-log.txt
+.pytest_cache/
+.coverage
+
+# Arquivos gerados dinamicamente
+backend/historico_alteracoes.csv
+*.csv
+
+# Logs e Sistema Operacional
+*.log
+.DS_Store
+Thumbs.db
+.vscode/

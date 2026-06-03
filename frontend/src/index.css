@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-base: #F8F9FA;
+    --bg-base-darker: #F3F4F6;
+    --bg-surface: #FFFFFF;
+    --border-subtle: #E5E7EB;
+    --text-strong: #0F172A;
+    --text-normal: #374151;
+    --text-weak: #6B7280;
+    --accent-orange: #0D9488;
+    --accent-gold: #1E3A8A;
+  }
+}
+
+body {
+  margin: 0;
+  background-color: var(--bg-base);
+  color: var(--text-normal);
+  
+  font-family: 'Montserrat', system-ui, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, h2, h3, h4, h5, h6 {
+  font-family: 'Libre Franklin', sans-serif;
+}
+
+/* Custom Scrollbar for professional corporate feel */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #F1F5F9;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Fade-in animation for pages and elements */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Base Panel utility (replacing glassmorphism with solid corporate panels) */
+.glass-panel, .panel {
+  background: #FFFFFF;
+  border: 1px solid #E5E7EB;
+  border-radius: 0.375rem; /* sharper corners for minimalism */
+  box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.05); /* soft corporate shadow */
+}
