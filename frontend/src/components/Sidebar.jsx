@@ -98,6 +98,23 @@ const Sidebar = () => {
   </span>
   </NavLink>
 
+  <NavLink 
+  to="/dashboard/financeiro" 
+  title={!isExpanded ? "Painel Financeiro" : ""}
+  className={({ isActive }) => 
+  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
+  isActive 
+  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
+  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
+  }`
+  }
+  >
+  <FileSpreadsheet className="w-5 h-5 shrink-0" />
+  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
+  Painel Financeiro
+  </span>
+  </NavLink>
+
   {areas.map(area => {
     const areaUrl = area.nome.toLowerCase().replace(/\s+/g, '-');
     return (
@@ -157,6 +174,23 @@ const Sidebar = () => {
 
   <NavLink 
   to="/areas" 
+  title={!isExpanded ? "Áreas de Atuação" : ""}
+  className={({ isActive }) => 
+  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
+  isActive 
+  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
+  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
+  }`
+  }
+  >
+  <Compass className="w-5 h-5 shrink-0" />
+  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
+  Áreas de Atuação
+  </span>
+  </NavLink>
+
+  <NavLink 
+  to="/configuracoes" 
   title={!isExpanded ? "Configurações" : ""}
   className={({ isActive }) => 
   `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
@@ -168,7 +202,7 @@ const Sidebar = () => {
   >
   <Settings className="w-5 h-5 shrink-0" />
   <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Áreas de Atuação
+  Configurações
   </span>
   </NavLink>
   </nav>

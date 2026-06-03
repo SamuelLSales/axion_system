@@ -7,7 +7,10 @@ from database import get_db
 from app.models.usuario import Usuario
 from app.models.sessao import Sessao
 from app.models.empresa import Empresa
-from app.schemas.auth import LoginRequest, LoginResponse, UserResponse, RegisterRequest, RegisterResponse
+from app.schemas.auth import (
+    LoginRequest, LoginResponse, UserResponse, RegisterRequest, RegisterResponse,
+    ProfileUpdateRequest, PasswordChangeRequest, CompanyUpdateRequest, CompanyResponse
+)
 from app.services.auth import verificar_senha, gerar_hash_senha, criar_sessao, get_usuario_atual
 from app.services.email import enviar_email_ativacao
 
@@ -113,3 +116,83 @@ def logout(usuario: Usuario = Depends(get_usuario_atual), db: Session = Depends(
 @router.get("/me", response_model=UserResponse)
 def me(usuario: Usuario = Depends(get_usuario_atual)):
     return usuario
+
+@router.put("/profile", response_model=UserResponse)
+def update_profile(request: ProfileUpdateRequest, usuario: Usuario = Depends(get_usuario_atual), db: Session = Depends(get_db)):
+    usuario.nome = request.nome
+    db.commit()
+    db.refresh(usuario)
+    return usuario
+
+@router.post("/change-password")
+def change_password(request: PasswordChangeRequest, usuario: Usuario = Depends(get_usuario_atual), db: Session = Depends(get_db)):
+    # 1. Verifica se a senha antiga está correta
+    if not verificar_senha(request.old_password, usuario.password_hash, usuario.salt):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="A senha atual fornecida está incorreta."
+        )
+    
+    # 2. Gera a nova senha e salva
+    pwdhash, salt = gerar_hash_senha(request.new_password)
+    usuario.password_hash = pwdhash
+    usuario.salt = salt
+    db.commit()
+    
+    return {"message": "Senha alterada com sucesso!"}
+
+@router.get("/company", response_model=CompanyResponse)
+def get_company(usuario: Usuario = Depends(get_usuario_atual), db: Session = Depends(get_db)):
+    if not usuario.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuário não possui uma empresa associada."
+        )
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.tenant_id).first()
+    if not empresa:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empresa não encontrada."
+        )
+    return empresa
+
+@router.put("/company", response_model=CompanyResponse)
+def update_company(request: CompanyUpdateRequest, usuario: Usuario = Depends(get_usuario_atual), db: Session = Depends(get_db)):
+    # Garantir que apenas admins podem atualizar os dados da empresa
+    if usuario.role != "admin":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="Acesso negado. Apenas administradores podem gerenciar as configurações da empresa."
+        )
+    
+    if not usuario.tenant_id:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Usuário não possui uma empresa associada."
+        )
+        
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.tenant_id).first()
+    if not empresa:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="Empresa não encontrada."
+        )
+        
+    # Verificar se o CNPJ fornecido já está em uso por outra empresa
+    if request.cnpj:
+        cnpj_limpo = request.cnpj.strip()
+        if cnpj_limpo:
+            empresa_existente = db.query(Empresa).filter(Empresa.cnpj == cnpj_limpo, Empresa.id != empresa.id).first()
+            if empresa_existente:
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Este CNPJ já está sendo utilizado por outra empresa cadastrada."
+                )
+            empresa.cnpj = cnpj_limpo
+            
+    empresa.nome_fantasia = request.nome_fantasia
+    empresa.razao_social = request.razao_social
+    
+    db.commit()
+    db.refresh(empresa)
+    return empresa

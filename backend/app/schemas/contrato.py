@@ -26,6 +26,7 @@ class ContratoBase(BaseModel):
     data_inicio: Optional[datetime] = None
     data_entrega_final: Optional[datetime] = None
     dias_campo_total: int = 0
+    valor_total: float = 0.0
     status: str = "no_prazo"
     observacoes: Optional[str] = None
 
@@ -42,6 +43,7 @@ class ContratoUpdate(BaseModel):
     data_inicio: Optional[datetime] = None
     data_entrega_final: Optional[datetime] = None
     dias_campo_total: Optional[int] = None
+    valor_total: Optional[float] = None
     status: Optional[str] = None
     observacoes: Optional[str] = None
 

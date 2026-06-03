@@ -68,7 +68,9 @@ const DetalheContrato = () => {
   data_termino: '',
   data_conclusao: '',
   dias_previstos: 0,
-  observacoes: ''
+  observacoes: '',
+  valor_faturamento: 0.0,
+  status_faturamento: 'pendente'
   });
 
  const carregarDados = async () => {
@@ -158,18 +160,19 @@ const DetalheContrato = () => {
  const dataInicio = editContratoForm.data_inicio ? new Date(editContratoForm.data_inicio).toISOString() : null;
  const dataEntrega = editContratoForm.data_entrega_final ? new Date(editContratoForm.data_entrega_final).toISOString() : null;
  
- await updateContrato(contrato.id, {
- ...editContratoForm,
- data_inicio: dataInicio,
- data_entrega_final: dataEntrega,
- dias_campo_total: parseInt(editContratoForm.dias_campo_total) || 0
- });
- setModalContratoAberto(false);
- carregarDados();
- } catch (err) {
- console.error('Erro ao atualizar contrato:', err);
- alert('Erro ao atualizar dados do contrato.');
- }
+  await updateContrato(contrato.id, {
+  ...editContratoForm,
+  data_inicio: dataInicio,
+  data_entrega_final: dataEntrega,
+  dias_campo_total: parseInt(editContratoForm.dias_campo_total) || 0,
+  valor_total: parseFloat(editContratoForm.valor_total) || 0.0
+  });
+  setModalContratoAberto(false);
+  carregarDados();
+  } catch (err) {
+  console.error('Erro ao atualizar contrato:', err);
+  alert('Erro ao atualizar dados do contrato.');
+  }
  };
 
  // 2. Salvar Fase (Criar ou Editar)
@@ -221,21 +224,23 @@ const DetalheContrato = () => {
  };
 
  // 3. Abrir Modal de Etapa (Criar)
-  const abrirModalCriarEtapa = (faseId) => {
-  setEtapaForm({
-  id: null,
-  fase_id: faseId,
-  nome_tarefa: '',
-  responsavel: responsaveis[0]?.nome || '',
-  progresso: 0,
-  data_inicio: '',
-  data_termino: '',
-  data_conclusao: '',
-  dias_previstos: 0,
-  observacoes: ''
-  });
-  setModalEtapaAberto(true);
-  };
+   const abrirModalCriarEtapa = (faseId) => {
+   setEtapaForm({
+   id: null,
+   fase_id: faseId,
+   nome_tarefa: '',
+   responsavel: responsaveis[0]?.nome || '',
+   progresso: 0,
+   data_inicio: '',
+   data_termino: '',
+   data_conclusao: '',
+   dias_previstos: 0,
+   observacoes: '',
+   valor_faturamento: 0.0,
+   status_faturamento: 'pendente'
+   });
+   setModalEtapaAberto(true);
+   };
 
  // Abrir Modal de Etapa (Editar)
   const abrirModalEditarEtapa = (etapa) => {
@@ -249,7 +254,9 @@ const DetalheContrato = () => {
   data_termino: etapa.data_termino ? etapa.data_termino.split('T')[0] : '',
   data_conclusao: etapa.data_conclusao ? etapa.data_conclusao.split('T')[0] : '',
   dias_previstos: etapa.dias_previstos,
-  observacoes: etapa.observacoes || ''
+  observacoes: etapa.observacoes || '',
+  valor_faturamento: etapa.valor_faturamento || 0.0,
+  status_faturamento: etapa.status_faturamento || 'pendente'
   });
   setModalEtapaAberto(true);
   };
@@ -266,7 +273,9 @@ const DetalheContrato = () => {
   data_termino: etapaForm.data_termino ? new Date(etapaForm.data_termino).toISOString() : null,
   data_conclusao: etapaForm.data_conclusao ? new Date(etapaForm.data_conclusao).toISOString() : null,
   dias_previstos: parseInt(etapaForm.dias_previstos) || 0,
-  observacoes: etapaForm.observacoes
+  observacoes: etapaForm.observacoes,
+  valor_faturamento: parseFloat(etapaForm.valor_faturamento) || 0.0,
+  status_faturamento: etapaForm.status_faturamento || 'pendente'
   };
 
  if (etapaForm.id) {
@@ -478,24 +487,30 @@ const DetalheContrato = () => {
  </div>
 
  {/* Informações detalhadas em Grid */}
- <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 pt-4 border-t border-aldebaran-border/60 text-sm">
- <div>
- <span className="text-theme-weak text-xs block">Diretor do Projeto</span>
- <span className="text-theme-normal font-semibold mt-0.5 block">{contrato.diretor_projeto}</span>
- </div>
- <div>
- <span className="text-theme-weak text-xs block">Direitos Minerários</span>
- <span className="text-theme-normal font-semibold mt-0.5 block font-mono">{contrato.direitos_minerarios || '-'}</span>
- </div>
- <div>
- <span className="text-theme-weak text-xs block">Início das Atividades</span>
- <span className="text-theme-normal font-semibold mt-0.5 block">{formatarData(contrato.data_inicio)}</span>
- </div>
- <div>
- <span className="text-theme-weak text-xs block">Total de Dias de Campo</span>
- <span className="text-theme-normal font-semibold mt-0.5 block">{contrato.dias_campo_total} dias</span>
- </div>
- </div>
+  <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 pt-4 border-t border-aldebaran-border/60 text-sm">
+  <div>
+  <span className="text-theme-weak text-xs block">Diretor do Projeto</span>
+  <span className="text-theme-normal font-semibold mt-0.5 block">{contrato.diretor_projeto}</span>
+  </div>
+  <div>
+  <span className="text-theme-weak text-xs block">Valor Total do Contrato</span>
+  <span className="text-theme-normal font-semibold mt-0.5 block text-aldebaran-gold">
+    {contrato.valor_total ? contrato.valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
+  </span>
+  </div>
+  <div>
+  <span className="text-theme-weak text-xs block">Direitos Minerários</span>
+  <span className="text-theme-normal font-semibold mt-0.5 block font-mono">{contrato.direitos_minerarios || '-'}</span>
+  </div>
+  <div>
+  <span className="text-theme-weak text-xs block">Início das Atividades</span>
+  <span className="text-theme-normal font-semibold mt-0.5 block">{formatarData(contrato.data_inicio)}</span>
+  </div>
+  <div>
+  <span className="text-theme-weak text-xs block">Total de Dias de Campo</span>
+  <span className="text-theme-normal font-semibold mt-0.5 block">{contrato.dias_campo_total} dias</span>
+  </div>
+  </div>
 
  {contrato.observacoes && (
  <div className="pt-3 border-t border-aldebaran-border/40 text-xs">
@@ -593,6 +608,21 @@ const DetalheContrato = () => {
   <h4 className={`text-sm font-bold text-theme-strong truncate ${progressoCem === 100 ? 'text-theme-normal' : ''}`}>
   {etapa.nome_tarefa}
   </h4>
+  {etapa.valor_faturamento > 0 && (
+     <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold border flex items-center gap-1 shrink-0 ${
+       etapa.status_faturamento === 'pago' 
+         ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500' 
+         : etapa.status_faturamento === 'faturado'
+         ? 'bg-blue-500/10 border-blue-500/30 text-blue-500'
+         : etapa.status_faturamento === 'atrasado'
+         ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
+         : 'bg-amber-500/10 border-amber-500/30 text-amber-500'
+     }`}>
+       <span>💲</span>
+       <span>{etapa.valor_faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
+       <span className="uppercase text-[9px] font-extrabold opacity-90">({etapa.status_faturamento || 'pendente'})</span>
+     </span>
+   )}
   {etapa.observacoes && (
   <span className="text-[10px] text-theme-weak italic truncate hidden sm:block">
   - {etapa.observacoes}
@@ -816,15 +846,26 @@ const DetalheContrato = () => {
  />
  </div>
 
- <div>
- <label className="text-xs font-semibold text-theme-weak block mb-1">Dias de Campo Total</label>
- <input 
- type="number" 
- value={editContratoForm.dias_campo_total || 0}
- onChange={(e) => setEditContratoForm({...editContratoForm, dias_campo_total: e.target.value})}
- className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
- />
- </div>
+  <div>
+  <label className="text-xs font-semibold text-theme-weak block mb-1">Dias de Campo Total</label>
+  <input 
+  type="number" 
+  value={editContratoForm.dias_campo_total || 0}
+  onChange={(e) => setEditContratoForm({...editContratoForm, dias_campo_total: e.target.value})}
+  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+  />
+  </div>
+
+  <div>
+  <label className="text-xs font-semibold text-theme-weak block mb-1">Valor Total (R$)</label>
+  <input 
+  type="number" 
+  step="0.01"
+  value={editContratoForm.valor_total || 0}
+  onChange={(e) => setEditContratoForm({...editContratoForm, valor_total: parseFloat(e.target.value) || 0})}
+  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+  />
+  </div>
 
  <div>
  <label className="text-xs font-semibold text-theme-weak block mb-1">Data Início</label>
@@ -1036,27 +1077,60 @@ const DetalheContrato = () => {
  />
  </div>
 
- <div>
- <label className="text-xs font-semibold text-theme-weak block mb-1">Dias Previstos</label>
- <input 
- type="number" 
- value={etapaForm.dias_previstos}
- onChange={(e) => setEtapaForm({...etapaForm, dias_previstos: e.target.value})}
- className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
- />
- </div>
- </div>
+  <div>
+  <label className="text-xs font-semibold text-theme-weak block mb-1">Dias Previstos</label>
+  <input 
+  type="number" 
+  value={etapaForm.dias_previstos}
+  onChange={(e) => setEtapaForm({...etapaForm, dias_previstos: e.target.value})}
+  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+  />
+  </div>
 
- <div>
- <label className="text-xs font-semibold text-theme-weak block mb-1">Observações da Tarefa</label>
- <textarea 
- value={etapaForm.observacoes}
- onChange={(e) => setEtapaForm({...etapaForm, observacoes: e.target.value})}
- rows="2"
- placeholder="Instruções ou andamento específico da tarefa..."
- className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
- ></textarea>
- </div>
+  {/* Campos Financeiros */}
+  <div className="grid grid-cols-2 gap-4 border-t border-aldebaran-border/40 pt-4 col-span-2">
+    <div>
+      <label className="text-xs font-semibold text-theme-weak block mb-1">Valor do Faturamento / Parcela (R$)</label>
+      <input 
+        type="number" 
+        step="0.01"
+        min="0"
+        value={etapaForm.valor_faturamento}
+        onChange={(e) => setEtapaForm({...etapaForm, valor_faturamento: parseFloat(e.target.value) || 0.0})}
+        className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+        placeholder="ex: 1500.00"
+      />
+      <span className="text-[10px] text-theme-weak mt-1 block">Insira um valor maior que zero para criar um Marco de Faturamento.</span>
+    </div>
+
+    <div>
+      <label className="text-xs font-semibold text-theme-weak block mb-1">Status do Faturamento</label>
+      <select 
+        value={etapaForm.status_faturamento}
+        onChange={(e) => setEtapaForm({...etapaForm, status_faturamento: e.target.value})}
+        className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+        disabled={!(etapaForm.valor_faturamento > 0)}
+      >
+        <option value="pendente">Pendente</option>
+        <option value="faturado">Faturado</option>
+        <option value="pago">Pago</option>
+        <option value="atrasado">Atrasado</option>
+      </select>
+      <span className="text-[10px] text-theme-weak mt-1 block">Habilitado apenas se houver valor de faturamento.</span>
+    </div>
+  </div>
+  </div>
+ 
+  <div>
+  <label className="text-xs font-semibold text-theme-weak block mb-1">Observações da Tarefa</label>
+  <textarea 
+  value={etapaForm.observacoes}
+  onChange={(e) => setEtapaForm({...etapaForm, observacoes: e.target.value})}
+  rows="2"
+  placeholder="Instruções ou andamento específico da tarefa..."
+  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+  ></textarea>
+  </div>
 
   <div className="flex justify-end gap-3 pt-3 border-t border-aldebaran-border">
   <button 

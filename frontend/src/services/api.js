@@ -85,6 +85,11 @@ export const getDashboardData = async () => {
   return response.data;
 };
 
+export const getDashboardFinanceiro = async () => {
+  const response = await api.get('/dashboard/financeiro');
+  return response.data;
+};
+
 // === RESPONSÁVEIS ===
 export const getResponsaveis = async () => {
   const response = await api.get('/responsaveis');
@@ -156,6 +161,26 @@ export const getMe = async () => {
 
 export const activateUser = async (token) => {
   const response = await api.get(`/auth/activate?token=${token}`);
+  return response.data;
+};
+
+export const updateProfile = async (profileData) => {
+  const response = await api.put('/auth/profile', profileData);
+  return response.data;
+};
+
+export const changePassword = async (passwordData) => {
+  const response = await api.post('/auth/change-password', passwordData);
+  return response.data;
+};
+
+export const getCompanyDetails = async () => {
+  const response = await api.get('/auth/company');
+  return response.data;
+};
+
+export const updateCompanyDetails = async (companyData) => {
+  const response = await api.put('/auth/company', companyData);
   return response.data;
 };
 

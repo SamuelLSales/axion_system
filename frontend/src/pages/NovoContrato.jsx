@@ -36,6 +36,7 @@ const NovoContrato = () => {
  data_inicio: '',
  data_entrega_final: '',
  dias_campo_total: 0,
+ valor_total: 0.0,
  observacoes: ''
  });
 
@@ -126,7 +127,8 @@ const NovoContrato = () => {
  ...form,
  data_inicio: form.data_inicio ? new Date(form.data_inicio).toISOString() : null,
  data_entrega_final: form.data_entrega_final ? new Date(form.data_entrega_final).toISOString() : null,
- dias_campo_total: parseInt(form.dias_campo_total) || 0
+ dias_campo_total: parseInt(form.dias_campo_total) || 0,
+ valor_total: parseFloat(form.valor_total) || 0.0
  };
 
  const contratoCriado = await createContrato(payload);
@@ -310,6 +312,21 @@ const NovoContrato = () => {
  onChange={handleInputChange}
  min="0"
  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm focus:outline-none focus:border-aldebaran-gold"
+ />
+ </div>
+
+ {/* Valor Total do Contrato */}
+ <div>
+ <label className="text-xs font-semibold text-theme-weak block mb-1">Valor Total do Contrato (R$)</label>
+ <input 
+ type="number"
+ name="valor_total"
+ value={form.valor_total}
+ onChange={handleInputChange}
+ min="0"
+ step="0.01"
+ className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm focus:outline-none focus:border-aldebaran-gold"
+ placeholder="ex: 150000.00"
  />
  </div>
 

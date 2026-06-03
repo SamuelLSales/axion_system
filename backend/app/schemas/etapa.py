@@ -12,6 +12,8 @@ class EtapaBase(BaseModel):
     data_conclusao: Optional[datetime] = None
     dias_previstos: int = 0
     observacoes: Optional[str] = None
+    valor_faturamento: float = 0.0
+    status_faturamento: Optional[str] = "pendente"
 
 class EtapaCreate(EtapaBase):
     fase_id: int
@@ -25,6 +27,8 @@ class EtapaUpdate(BaseModel):
     data_conclusao: Optional[datetime] = None
     dias_previstos: Optional[int] = None
     observacoes: Optional[str] = None
+    valor_faturamento: Optional[float] = None
+    status_faturamento: Optional[str] = None
 
 class EtapaResponse(EtapaBase):
     id: int

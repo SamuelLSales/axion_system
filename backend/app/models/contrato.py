@@ -1,6 +1,6 @@
 # backend/app/models/contrato.py
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey
+from sqlalchemy import Column, Integer, String, Text, DateTime, ForeignKey, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -42,6 +42,9 @@ class Contrato(Base):
     
     # Dias totais previstos para trabalho de campo
     dias_campo_total = Column(Integer, default=0, nullable=False)
+    
+    # Valor total do contrato
+    valor_total = Column(Float, default=0.0, nullable=False)
     
     # Status do contrato (no_prazo, atencao, atrasado, concluido)
     status = Column(String(50), default="no_prazo", nullable=False)

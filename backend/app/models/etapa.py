@@ -39,6 +39,10 @@ class Etapa(Base):
     # Observações específicas sobre a etapa
     observacoes = Column(Text, nullable=True)
 
+    # Faturamento e controle financeiro
+    valor_faturamento = Column(Float, default=0.0, nullable=False)
+    status_faturamento = Column(String(50), default="pendente", nullable=True)
+
     # Relacionamento reverso com a Fase
     fase = relationship("Fase", back_populates="etapas")
 

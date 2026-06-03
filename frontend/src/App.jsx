@@ -12,6 +12,8 @@ import Login from './pages/Login';
 import Cadastro from './pages/Cadastro';
 import LandingPage from './pages/LandingPage';
 import ActivateAccount from './pages/ActivateAccount';
+import Configuracoes from './pages/Configuracoes';
+import DashboardFinanceiro from './pages/DashboardFinanceiro';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Componente para rotas protegidas
@@ -66,10 +68,12 @@ function App() {
           {/* Rotas Principais (Protegidas) */}
           <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/dashboard/financeiro" element={<DashboardFinanceiro />} />
             <Route path="/contratos/:id" element={<DetalheContrato />} />
             <Route path="/contratos/novo" element={<NovoContrato />} />
             <Route path="/responsaveis" element={<Responsaveis />} />
             <Route path="/areas" element={<AreasAtuacao />} />
+            <Route path="/configuracoes" element={<Configuracoes />} />
             <Route path="/area/:area" element={<Contratos />} />
             <Route path="/contratos" element={<Contratos />} />
           </Route>
