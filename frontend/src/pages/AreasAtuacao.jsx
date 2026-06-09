@@ -10,6 +10,11 @@ import {
 import { getAreasAtuacao, createAreaAtuacao, deleteAreaAtuacao } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+const formatArea = (nome) => {
+  if (!nome) return '';
+  return nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+};
+
 const AreasAtuacao = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
@@ -130,7 +135,7 @@ const AreasAtuacao = () => {
             <div key={area.id} className="bg-aldebaran-dark border border-aldebaran-border p-4 flex items-center justify-between hover:border-aldebaran-gold/50 transition-all">
               <div className="flex items-center gap-3">
                 <div className="w-4 h-4 rounded-full" style={{ backgroundColor: area.cor_visual }}></div>
-                <span className="font-bold text-sm text-theme-strong">{area.nome}</span>
+                <span className="font-bold text-sm text-theme-strong">{formatArea(area.nome)}</span>
               </div>
               {user?.role === 'admin' && (
                 <button

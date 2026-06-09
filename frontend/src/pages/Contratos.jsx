@@ -32,6 +32,17 @@ const Contratos = () => {
     return urlArea.split('-').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
   };
 
+  // Função para formatar o nome da área para exibição mais limpa
+  const formatAreaExibicao = (areaNome) => {
+    if (!areaNome || areaNome === 'Todas') return 'Todas';
+    return areaNome
+      .split('-')
+      .join(' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const initialArea = formatUrlArea(area);
   const [filtroArea, setFiltroArea] = useState(initialArea);
   const [filtroStatus, setFiltroStatus] = useState('Todos');
@@ -89,7 +100,10 @@ const Contratos = () => {
       c.cliente.toLowerCase().includes(busca.toLowerCase());
     
     const areaNome = c.area_atuacao ? c.area_atuacao.nome : 'Desconhecida';
-    const matchArea = filtroArea === 'Todas' || areaNome === filtroArea;
+    const matchArea = 
+      filtroArea === 'Todas' || 
+      areaNome.toLowerCase() === filtroArea.toLowerCase() ||
+      areaNome.toLowerCase().replace(/\s+/g, '-') === filtroArea.toLowerCase().replace(/\s+/g, '-');
     const matchStatus = filtroStatus === 'Todos' || c.status === filtroStatus;
 
     return matchBusca && matchArea && matchStatus;
@@ -111,7 +125,7 @@ const Contratos = () => {
         <div>
           <h1 className="text-2xl font-extrabold flex items-center gap-3 font-title">
             <FolderOpen className="text-aldebaran-gold w-8 h-8" />
-            Contratos: {filtroArea !== 'Todas' ? filtroArea : 'Todos os Projetos'}
+            Contratos: {filtroArea !== 'Todas' ? formatAreaExibicao(filtroArea) : 'Todos os Projetos'}
           </h1>
           <p className="text-theme-weak text-xs mt-1">
             Gerencie e acompanhe os detalhes operacionais dos contratos
@@ -157,13 +171,20 @@ const Contratos = () => {
             <div className="flex items-center gap-2 bg-aldebaran-dark px-3 py-1.5 rounded-none border border-aldebaran-border">
               <Filter className="w-3.5 h-3.5 text-theme-weak" />
               <select
-                value={filtroArea}
+                value={
+                  filtroArea === 'Todas'
+                    ? 'Todas'
+                    : (areasOptions.find(a => 
+                        a.nome.toLowerCase() === filtroArea.toLowerCase() || 
+                        a.nome.toLowerCase().replace(/\s+/g, '-') === filtroArea.toLowerCase().replace(/\s+/g, '-')
+                      )?.nome || filtroArea)
+                }
                 onChange={(e) => setFiltroArea(e.target.value)}
                 className="bg-transparent text-xs text-theme-normal focus:outline-none cursor-pointer"
               >
                 <option value="Todas" className="bg-aldebaran-dark">Todas as Áreas</option>
                 {areasOptions.map(a => (
-                  <option key={a.id} value={a.nome} className="bg-aldebaran-dark">{a.nome}</option>
+                  <option key={a.id} value={a.nome} className="bg-aldebaran-dark">{formatAreaExibicao(a.nome)}</option>
                 ))}
               </select>
             </div>

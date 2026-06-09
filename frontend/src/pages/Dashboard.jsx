@@ -14,8 +14,13 @@ import {
   AlertTriangle,
   CheckCircle
 } from 'lucide-react';
-import { getDashboardData, getContratos, exportarCSV } from '../services/api';
+import { getDashboardData, getContratos, exportarCSV, getAreasAtuacao } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
+
+const formatArea = (nome) => {
+  if (!nome) return '';
+  return nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+};
 
 const Dashboard = () => {
   const navigate = useNavigate();
@@ -30,6 +35,7 @@ const Dashboard = () => {
     proximos_vencimentos: []
   });
   const [contratos, setContratos] = useState([]);
+  const [areas, setAreas] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -44,12 +50,14 @@ const Dashboard = () => {
     const carregarDados = async () => {
       try {
         setLoading(true);
-        const [dadosDashboard, listaContratos] = await Promise.all([
+        const [dadosDashboard, listaContratos, listaAreas] = await Promise.all([
           getDashboardData(),
-          getContratos()
+          getContratos(),
+          getAreasAtuacao()
         ]);
         setStats(dadosDashboard);
         setContratos(listaContratos);
+        setAreas(listaAreas);
         setError(null);
       } catch (err) {
         console.error("Erro ao carregar dashboard:", err);
@@ -329,8 +337,11 @@ const Dashboard = () => {
                   className="px-3 py-1.5 bg-aldebaran-dark border border-aldebaran-border text-theme-normal text-xs rounded-none focus:outline-none focus:border-theme-strong"
                 >
                   <option value="todas">todas as áreas</option>
-                  <option value="topografia">topografia</option>
-                  <option value="geologia">geologia</option>
+                  {areas.map(area => (
+                    <option key={area.id} value={area.nome.toLowerCase()}>
+                      {formatArea(area.nome)}
+                    </option>
+                  ))}
                 </select>
               </div>
             </div>
@@ -380,9 +391,9 @@ const Dashboard = () => {
                             <div className="text-xs text-theme-weak font-mono lowercase">{contrato.cliente}</div>
                           </td>
                           <td className="py-4 px-2">
-                            <span className={`inline-block text-[10px] font-bold px-2 py-0.5 rounded-none font-mono lowercase bg-blue-500/10 text-blue-400 border border-blue-500/20`}>
-                              {contrato.area_atuacao ? contrato.area_atuacao.nome : 'Sem Área'}
-                            </span>
+                             <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-none font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                               {contrato.area_atuacao ? formatArea(contrato.area_atuacao.nome) : 'Sem Área'}
+                             </span>
                           </td>
                           <td className="py-4 px-2">
                             <div className="flex items-center gap-2">

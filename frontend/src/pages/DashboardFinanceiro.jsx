@@ -13,10 +13,10 @@ import {
   Coins,
   ArrowLeft
 } from 'lucide-react';
-import { 
-  getDashboardFinanceiro, 
-  updateEtapa, 
-  exportarCSV 
+import {
+  getDashboardFinanceiro,
+  updateEtapa,
+  exportarCSV
 } from '../services/api';
 import {
   ResponsiveContainer,
@@ -76,7 +76,7 @@ const DashboardFinanceiro = () => {
     try {
       // 1. Atualizar no backend
       await updateEtapa(marçoId, { status_faturamento: novoStatus });
-      
+
       // 2. Recarregar dados para atualizar KPIs e gráficos
       const res = await getDashboardFinanceiro();
       setData(res);
@@ -104,15 +104,15 @@ const DashboardFinanceiro = () => {
 
   // Filtros aplicados sobre a listagem de marcos
   const marcosFiltrados = data.marcos.filter((m) => {
-    const correspondeTexto = 
+    const correspondeTexto =
       m.nome_projeto.toLowerCase().includes(busca.toLowerCase()) ||
       m.cliente.toLowerCase().includes(busca.toLowerCase()) ||
       m.nome_tarefa.toLowerCase().includes(busca.toLowerCase());
-      
-    const correspondeStatus = 
-      filtroStatus === 'todos' || 
+
+    const correspondeStatus =
+      filtroStatus === 'todos' ||
       m.status_faturamento.toLowerCase() === filtroStatus.toLowerCase();
-      
+
     return correspondeTexto && correspondeStatus;
   });
 
@@ -132,11 +132,11 @@ const DashboardFinanceiro = () => {
 
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto animate-fade-in text-theme-strong">
-      
+
       {/* CABEÇALHO */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-aldebaran-border pb-6">
         <div>
-          <button 
+          <button
             onClick={() => navigate('/dashboard')}
             className="flex items-center gap-2 text-theme-weak hover:text-theme-strong transition-all text-xs font-semibold group mb-2"
           >
@@ -254,7 +254,7 @@ const DashboardFinanceiro = () => {
 
       {/* GRÁFICOS FINANCEIROS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        
+
         {/* Previsão de Fluxo de Caixa (Barras) */}
         <div className="border border-aldebaran-border p-6 bg-aldebaran-gray rounded-none lg:col-span-2 flex flex-col space-y-4">
           <div>
@@ -275,13 +275,13 @@ const DashboardFinanceiro = () => {
                 >
                   <CartesianGrid strokeDasharray="3 3" stroke="#2a2e3d" />
                   <XAxis dataKey="mes" stroke="#6b7280" />
-                  <YAxis 
-                    stroke="#6b7280" 
-                    tickFormatter={(tick) => `R$ ${(tick / 1000)}k`} 
+                  <YAxis
+                    stroke="#6b7280"
+                    tickFormatter={(tick) => `R$ ${(tick / 1000)}k`}
                   />
                   <Tooltip
-                    contentStyle={{ 
-                      backgroundColor: '#161922', 
+                    contentStyle={{
+                      backgroundColor: '#161922',
                       borderColor: '#2d3345',
                       borderRadius: '0px',
                       color: '#f3f4f6'
@@ -327,8 +327,8 @@ const DashboardFinanceiro = () => {
                       ))}
                     </Pie>
                     <Tooltip
-                      contentStyle={{ 
-                        backgroundColor: '#161922', 
+                      contentStyle={{
+                        backgroundColor: '#161922',
                         borderColor: '#2d3345',
                         borderRadius: '0px',
                         color: '#f3f4f6'
@@ -337,7 +337,7 @@ const DashboardFinanceiro = () => {
                     />
                   </PieChart>
                 </ResponsiveContainer>
-                
+
                 {/* Central text for Donut */}
                 <div className="absolute flex flex-col items-center justify-center">
                   <span className="text-[9px] uppercase font-bold text-theme-weak tracking-wider">Total TCV</span>
@@ -351,8 +351,8 @@ const DashboardFinanceiro = () => {
           <div className="grid grid-cols-2 gap-2 pt-2 border-t border-aldebaran-border/50 text-[11px] font-mono">
             {data.receita_por_area.map((area, idx) => (
               <div key={area.name} className="flex items-center gap-1.5 min-w-0">
-                <span 
-                  className="w-2.5 h-2.5 shrink-0" 
+                <span
+                  className="w-2.5 h-2.5 shrink-0"
                   style={{ backgroundColor: COLORS[idx % COLORS.length] }}
                 ></span>
                 <span className="truncate text-theme-normal font-semibold">{area.name}</span>
@@ -368,7 +368,7 @@ const DashboardFinanceiro = () => {
 
       {/* TABELA DE CONCILIAÇÃO DE MARCOS FINANCEIROS */}
       <div className="border border-aldebaran-border rounded-none p-6 bg-aldebaran-gray space-y-6">
-        
+
         {/* Topo da tabela e Filtros */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           <div>
@@ -426,7 +426,7 @@ const DashboardFinanceiro = () => {
               <tbody className="divide-y divide-aldebaran-border/50 text-sm">
                 {marcosFiltrados.map((marco) => {
                   const status = (marco.status_faturamento || 'pendente').toLowerCase();
-                  
+
                   // Classes de cores do badge com base no status de faturamento
                   let statusStyles = '';
                   if (status === 'pago') {
@@ -442,9 +442,8 @@ const DashboardFinanceiro = () => {
                   return (
                     <tr
                       key={marco.id}
-                      className={`group transition-colors ${
-                        updatingId === marco.id ? 'opacity-50 pointer-events-none' : 'hover:bg-aldebaran-border/10'
-                      }`}
+                      className={`group transition-colors ${updatingId === marco.id ? 'opacity-50 pointer-events-none' : 'hover:bg-aldebaran-border/10'
+                        }`}
                     >
                       {/* Projeto / Cliente */}
                       <td className="py-4 px-2">

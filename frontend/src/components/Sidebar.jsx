@@ -15,6 +15,11 @@ import {
 import { exportarCSV, getAreasAtuacao } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 
+const formatArea = (nome) => {
+  if (!nome) return '';
+  return nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+};
+
 const Sidebar = () => {
  const [isExpanded, setIsExpanded] = useState(true);
  const { user, logoutUser } = useAuth();
@@ -121,7 +126,7 @@ const Sidebar = () => {
       <NavLink 
       key={area.id}
       to={`/area/${areaUrl}`} 
-      title={!isExpanded ? area.nome : ""}
+      title={!isExpanded ? formatArea(area.nome) : ""}
       className={({ isActive }) => 
       `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
       isActive 
@@ -132,7 +137,7 @@ const Sidebar = () => {
       >
       <FolderOpen className="w-5 h-5 shrink-0" style={{ color: area.cor_visual }} />
       <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-      {area.nome}
+      {formatArea(area.nome)}
       </span>
       </NavLink>
     );
