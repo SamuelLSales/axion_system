@@ -314,7 +314,7 @@ const NovoContrato = () => {
               <input
                 type="number"
                 name="dias_campo_total"
-                value={form.dias_campo_total}
+                value={form.dias_campo_total === 0 ? '' : form.dias_campo_total}
                 onChange={handleInputChange}
                 min="0"
                 className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm focus:outline-none focus:border-aldebaran-gold"
@@ -327,7 +327,7 @@ const NovoContrato = () => {
               <input
                 type="number"
                 name="valor_total"
-                value={form.valor_total}
+                value={form.valor_total === 0 ? '' : form.valor_total}
                 onChange={handleInputChange}
                 min="0"
                 step="0.01"

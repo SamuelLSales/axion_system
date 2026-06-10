@@ -12,7 +12,6 @@ class DespesaBase(BaseModel):
 
 class DespesaCreate(DespesaBase):
     contrato_id: int
-    etapa_id: int
 
 class DespesaUpdate(BaseModel):
     tipo_despesa: Optional[str] = None
@@ -24,7 +23,6 @@ class DespesaUpdate(BaseModel):
 class DespesaResponse(DespesaBase):
     id: int
     contrato_id: int
-    etapa_id: int
     criado_em: datetime
     atualizado_em: datetime
 

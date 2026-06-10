@@ -274,8 +274,8 @@ const Dashboard = () => {
         <button
           onClick={() => setAbaAtiva('geral')}
           className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all relative ${abaAtiva === 'geral'
-              ? 'text-aldebaran-gold border-b-2 border-aldebaran-gold font-extrabold'
-              : 'text-theme-weak hover:text-theme-normal'
+            ? 'text-aldebaran-gold border-b-2 border-aldebaran-gold font-extrabold'
+            : 'text-theme-weak hover:text-theme-normal'
             }`}
         >
           Visão Geral & Contratos
@@ -283,8 +283,8 @@ const Dashboard = () => {
         <button
           onClick={() => setAbaAtiva('gargalos')}
           className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all relative flex items-center gap-1.5 ${abaAtiva === 'gargalos'
-              ? 'text-aldebaran-gold border-b-2 border-aldebaran-gold font-extrabold'
-              : 'text-theme-weak hover:text-theme-normal'
+            ? 'text-aldebaran-gold border-b-2 border-aldebaran-gold font-extrabold'
+            : 'text-theme-weak hover:text-theme-normal'
             }`}
         >
           Análise de Gargalos & Atrasos
@@ -313,7 +313,7 @@ const Dashboard = () => {
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
                 <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Contratos em Aberto</span>
-                <h3 className="text-lg font-bold text-theme-strong lowercase mt-1">todos os projetos em andamento</h3>
+                <h3 className="text-lg font-bold text-theme-strong lowercase mt-1">Todos os projetos em andamento</h3>
               </div>
 
               {/* Filtros */}
@@ -348,7 +348,7 @@ const Dashboard = () => {
 
             {contratosEmAberto.length === 0 ? (
               <div className="text-center py-12 border border-dashed border-aldebaran-border text-theme-weak text-sm lowercase font-mono">
-                nenhum contrato em aberto localizado com os filtros aplicados.
+                Nenhum contrato em aberto localizado com os filtros aplicados.
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -391,9 +391,9 @@ const Dashboard = () => {
                             <div className="text-xs text-theme-weak font-mono lowercase">{contrato.cliente}</div>
                           </td>
                           <td className="py-4 px-2">
-                             <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-none font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                               {contrato.area_atuacao ? formatArea(contrato.area_atuacao.nome) : 'Sem Área'}
-                             </span>
+                            <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-none font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
+                              {contrato.area_atuacao ? formatArea(contrato.area_atuacao.nome) : 'Sem Área'}
+                            </span>
                           </td>
                           <td className="py-4 px-2">
                             <div className="flex items-center gap-2">
@@ -422,10 +422,10 @@ const Dashboard = () => {
                               <div className="flex-1 h-1.5 bg-aldebaran-border rounded-none relative overflow-hidden">
                                 <div
                                   className={`absolute left-0 top-0 h-full transition-all duration-500 ${contrato.status === 'atrasado'
-                                      ? 'bg-rose-500'
-                                      : contrato.status === 'atencao'
-                                        ? 'bg-aldebaran-gold'
-                                        : 'bg-emerald-500'
+                                    ? 'bg-rose-500'
+                                    : contrato.status === 'atencao'
+                                      ? 'bg-aldebaran-gold'
+                                      : 'bg-emerald-500'
                                     }`}
                                   style={{ width: `${progresso}%` }}
                                 ></div>

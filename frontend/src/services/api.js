@@ -32,6 +32,23 @@ export const getContrato = async (id) => {
   return response.data;
 };
 
+export const getHistoricoAlteracoes = async (contratoId) => {
+  const response = await api.get(`/contratos/${contratoId}/historico`);
+  return response.data;
+};
+
+// === EMPRESA / CONFIGURAÇÕES ===
+export const getEmpresaConfig = async () => {
+  const response = await api.get('/empresa/config');
+  return response.data;
+};
+
+export const updateEmpresaConfig = async (configData) => {
+  const response = await api.put('/empresa/config', configData);
+  return response.data;
+};
+
+
 export const createContrato = async (contratoData) => {
   const response = await api.post('/contratos', contratoData);
   return response.data;
@@ -80,11 +97,10 @@ export const deleteEtapa = async (id) => {
 };
 
 // === DESPESAS ===
-export const getDespesas = async (contratoId = null, etapaId = null) => {
+export const getDespesas = async (contratoId = null) => {
   let url = '/despesas';
   const params = [];
   if (contratoId) params.push(`contrato_id=${contratoId}`);
-  if (etapaId) params.push(`etapa_id=${etapaId}`);
   if (params.length > 0) {
     url += `?${params.join('&')}`;
   }
@@ -113,8 +129,15 @@ export const getDashboardData = async () => {
   return response.data;
 };
 
-export const getDashboardFinanceiro = async (contratoId) => {
-  const url = contratoId ? `/dashboard/financeiro?contrato_id=${contratoId}` : '/dashboard/financeiro';
+export const getDashboardFinanceiro = async (contratoId, areaId, ano) => {
+  let url = '/dashboard/financeiro';
+  const params = [];
+  if (contratoId) params.push(`contrato_id=${contratoId}`);
+  if (areaId) params.push(`area_id=${areaId}`);
+  if (ano) params.push(`ano=${ano}`);
+  if (params.length > 0) {
+    url += '?' + params.join('&');
+  }
   const response = await api.get(url);
   return response.data;
 };

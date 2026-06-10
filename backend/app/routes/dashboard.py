@@ -3,15 +3,16 @@ from datetime import datetime, timedelta
 from typing import Optional
 from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session, selectinload, joinedload
+from sqlalchemy import extract
 from database import get_db
 from app.models.contrato import Contrato
 from app.models.fase import Fase
 from app.models.etapa import Etapa
+from app.models.empresa import Empresa
 from app.models.area_atuacao import AreaAtuacao
-from app.models.despesa import Despesa
-from app.routes.contratos import calcular_e_atualizar_status
 from app.models.usuario import Usuario
 from app.services.auth import get_usuario_atual
+from app.routes.contratos import calcular_e_atualizar_status
 
 router = APIRouter(prefix="/dashboard", tags=["Dashboard"])
 
@@ -85,6 +86,8 @@ def obter_dados_dashboard(db: Session = Depends(get_db), usuario_atual: Usuario 
 @router.get("/financeiro")
 def obter_dados_financeiros(
     contrato_id: Optional[int] = Query(None),
+    area_id: Optional[int] = Query(None),
+    ano: Optional[int] = Query(None),
     db: Session = Depends(get_db), 
     usuario_atual: Usuario = Depends(get_usuario_atual)
 ):
@@ -97,6 +100,16 @@ def obter_dados_financeiros(
     query_contratos = db.query(Contrato).filter(Contrato.tenant_id == tenant_id)
     if contrato_id:
         query_contratos = query_contratos.filter(Contrato.id == contrato_id)
+    if area_id:
+        query_contratos = query_contratos.filter(Contrato.area_id == area_id)
+    if ano:
+        from sqlalchemy import or_
+        query_contratos = query_contratos.filter(
+            or_(
+                extract('year', Contrato.data_entrega_final) == ano,
+                extract('year', Contrato.data_inicio) == ano
+            )
+        )
     contratos = query_contratos.all()
     
     # 2. Obter todas as etapas com faturamento do tenant (valor_faturamento > 0)
@@ -109,21 +122,20 @@ def obter_dados_financeiros(
     )
     if contrato_id:
         query_etapas = query_etapas.filter(Contrato.id == contrato_id)
+    if area_id:
+        query_etapas = query_etapas.filter(Contrato.area_id == area_id)
+    if ano:
+        query_etapas = query_etapas.filter(
+            or_(
+                extract('year', Contrato.data_entrega_final) == ano,
+                extract('year', Contrato.data_inicio) == ano,
+                extract('year', Etapa.data_termino) == ano
+            )
+        )
         
     etapas_financeiras = query_etapas.options(joinedload(Etapa.fase).joinedload(Fase.contrato)).all()
     
-    # 3. Obter todas as despesas/gastos do tenant
-    query_despesas = (
-        db.query(Despesa)
-        .join(Etapa, Despesa.etapa_id == Etapa.id)
-        .join(Fase, Etapa.fase_id == Fase.id)
-        .join(Contrato, Fase.contrato_id == Contrato.id)
-        .filter(Despesa.tenant_id == tenant_id)
-    )
-    if contrato_id:
-        query_despesas = query_despesas.filter(Contrato.id == contrato_id)
-        
-    despesas = query_despesas.options(joinedload(Despesa.etapa)).all()
+    # Não precisamos mais carregar tabela de despesas separadamente, pois é um campo no contrato
     
     # TCV: Total Contract Value
     tcv = sum(c.valor_total for c in contratos)
@@ -160,18 +172,25 @@ def obter_dados_financeiros(
                 total_a_receber += val
                 
     # KPI Totals — Gastos/Despesas
-    total_despesas = sum(d.valor_custo for d in despesas)
-    despesas_pagas = sum(d.valor_custo for d in despesas if d.status_pagamento == "pago")
-    despesas_pendentes = sum(d.valor_custo for d in despesas if d.status_pagamento == "pendente")
+    total_despesas = sum(c.gasto_total for c in contratos if hasattr(c, 'gasto_total') and c.gasto_total)
+    despesas_pagas = total_despesas # Assumiremos tudo como pago ou ignoraremos separação
+    despesas_pendentes = 0.0
+    
+    # Obter Taxa de Imposto da Empresa
+    empresa = db.query(Empresa).filter(Empresa.id == tenant_id).first()
+    taxa_imposto = empresa.taxa_imposto if empresa else 0.0
+    
+    imposto_projetado = tcv * (taxa_imposto / 100)
+    imposto_pago = total_recebido * (taxa_imposto / 100)
     
     # Cálculo de Margens
     margem_real = 0.0
     if total_recebido > 0:
-        margem_real = ((total_recebido - despesas_pagas) / total_recebido) * 100
+        margem_real = ((total_recebido - despesas_pagas - imposto_pago) / total_recebido) * 100
         
     margem_projetada = 0.0
     if tcv > 0:
-        margem_projetada = ((tcv - total_despesas) / tcv) * 100
+        margem_projetada = ((tcv - total_despesas - imposto_projetado) / tcv) * 100
         
     # 4. Receita por Área de Atuação (agrupada pelo valor total do contrato)
     areas = db.query(AreaAtuacao).filter(AreaAtuacao.tenant_id == tenant_id).all()
@@ -184,86 +203,22 @@ def obter_dados_financeiros(
         
     receita_por_area = [{"name": area, "value": val} for area, val in receita_por_area_dict.items()]
     
-    # 5. Gastos por Categoria
-    categorias_map = {
-        "logistica": "Logística",
-        "pessoal": "Mão de Obra",
-        "terceiros": "Serviços Terceiros",
-        "taxas": "Taxas e Licenças"
-    }
-    despesas_por_categoria_dict = {cat: 0.0 for cat in categorias_map.values()}
-    despesas_por_categoria_dict["Outros"] = 0.0
-    
-    for d in despesas:
-        cat_nome = categorias_map.get(d.tipo_despesa.lower(), "Outros")
-        despesas_por_categoria_dict[cat_nome] = despesas_por_categoria_dict.get(cat_nome, 0.0) + d.valor_custo
-        
+    # 5. Gastos por Categoria (Simplificado)
     despesas_por_categoria = [
-        {"name": cat, "value": val} 
-        for cat, val in despesas_por_categoria_dict.items() 
-        if val > 0 or cat in categorias_map.values()
+        {"name": "Gastos Gerais", "value": total_despesas}
     ]
     
-    # 6. Projeção de Fluxo de Caixa (6 meses a partir do mês atual)
-    nomes_meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
-    ano_atual = hoje.year
-    mes_atual = hoje.month
-    
-    meses_lista = []
-    for i in range(6):
-        m = mes_atual + i
-        y = ano_atual
-        if m > 12:
-            m = m - 12
-            y = y + 1
-        chave_mes = f"{y}-{m:02d}"
-        nome_mes = f"{nomes_meses[m-1]}/{str(y)[2:]}" # Ex: Jan/26
-        meses_lista.append((chave_mes, nome_mes))
+    # 6. Rentabilidade e Margem por Área
+    rentabilidade_por_area_dict = {}
+    for c in contratos:
+        area_nome = areas_map.get(c.area_id, "Não Categorizado")
+        if area_nome not in rentabilidade_por_area_dict:
+            rentabilidade_por_area_dict[area_nome] = {"name": area_nome, "faturado": 0.0, "gasto": 0.0}
         
-    dados_fluxo = {
-        chave: {
-            "mes": nome,
-            "pago": 0.0, 
-            "previsto": 0.0,
-            "despesa_paga": 0.0,
-            "despesa_prevista": 0.0
-        } for chave, nome in meses_lista
-    }
-    
-    # Fluxo Receitas
-    for etapa in etapas_financeiras:
-        if not etapa.data_termino:
-            continue
-        y_etapa = etapa.data_termino.year
-        m_etapa = etapa.data_termino.month
-        chave_etapa = f"{y_etapa}-{m_etapa:02d}"
+        rentabilidade_por_area_dict[area_nome]["faturado"] += c.valor_total or 0.0
+        rentabilidade_por_area_dict[area_nome]["gasto"] += c.gasto_total or 0.0
         
-        if chave_etapa in dados_fluxo:
-            val = etapa.valor_faturamento
-            status = (etapa.status_faturamento or "pendente").lower()
-            if status == "pago":
-                dados_fluxo[chave_etapa]["pago"] += val
-            else:
-                dados_fluxo[chave_etapa]["previsto"] += val
-                
-    # Fluxo Despesas
-    for d in despesas:
-        data_ref = d.etapa.data_termino if d.etapa and d.etapa.data_termino else d.criado_em
-        if not data_ref:
-            continue
-        y_d = data_ref.year
-        m_d = data_ref.month
-        chave_d = f"{y_d}-{m_d:02d}"
-        
-        if chave_d in dados_fluxo:
-            val = d.valor_custo
-            status = (d.status_pagamento or "pendente").lower()
-            if status == "pago":
-                dados_fluxo[chave_d]["despesa_paga"] += val
-            else:
-                dados_fluxo[chave_d]["despesa_prevista"] += val
-                
-    fluxo_caixa = [dados_fluxo[chave] for chave, _ in meses_lista]
+    rentabilidade_por_area = list(rentabilidade_por_area_dict.values())
     
     # 7. Listagem de Marcos (Milestones)
     marcos = []
@@ -300,11 +255,14 @@ def obter_dados_financeiros(
         "total_despesas": total_despesas,
         "despesas_pagas": despesas_pagas,
         "despesas_pendentes": despesas_pendentes,
+        "taxa_imposto": taxa_imposto,
+        "imposto_projetado": imposto_projetado,
+        "imposto_pago": imposto_pago,
         "margem_real": round(margem_real, 1),
         "margem_projetada": round(margem_projetada, 1),
         "receita_por_area": receita_por_area,
         "despesas_por_categoria": despesas_por_categoria,
-        "fluxo_caixa": fluxo_caixa,
+        "rentabilidade_por_area": rentabilidade_por_area,
         "marcos": marcos
     }
 

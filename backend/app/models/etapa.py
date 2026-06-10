@@ -46,8 +46,5 @@ class Etapa(Base):
     # Relacionamento reverso com a Fase
     fase = relationship("Fase", back_populates="etapas")
 
-    # Relacionamento com despesas
-    despesas = relationship("Despesa", back_populates="etapa", cascade="all, delete-orphan")
-
     # SaaS Isolamento
     tenant_id = Column(Integer, ForeignKey("empresas.id"), nullable=False, index=True)

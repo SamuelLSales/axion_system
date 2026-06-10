@@ -1,6 +1,6 @@
 # backend/app/models/empresa.py
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Boolean, DateTime
+from sqlalchemy import Column, Integer, String, Boolean, DateTime, Float
 from sqlalchemy.orm import relationship
 from database import Base
 
@@ -16,6 +16,8 @@ class Empresa(Base):
     cnpj = Column(String(20), unique=True, index=True, nullable=True)
     
     ativo = Column(Boolean, default=True, nullable=False)
+    
+    taxa_imposto = Column(Float, default=0.0, nullable=False)
     
     criado_em = Column(DateTime, default=datetime.utcnow, nullable=False)
     atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

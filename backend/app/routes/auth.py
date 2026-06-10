@@ -192,6 +192,8 @@ def update_company(request: CompanyUpdateRequest, usuario: Usuario = Depends(get
             
     empresa.nome_fantasia = request.nome_fantasia
     empresa.razao_social = request.razao_social
+    if request.taxa_imposto is not None:
+        empresa.taxa_imposto = request.taxa_imposto
     
     db.commit()
     db.refresh(empresa)

@@ -4,7 +4,6 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 from database import get_db
 from app.models.despesa import Despesa
-from app.models.etapa import Etapa
 from app.models.contrato import Contrato
 from app.models.historico import HistoricoAlteracao
 from app.schemas.despesa import DespesaCreate, DespesaResponse, DespesaUpdate
@@ -21,14 +20,9 @@ def criar_despesa(despesa_in: DespesaCreate, db: Session = Depends(get_db), usua
     contrato = db.query(Contrato).filter(Contrato.id == despesa_in.contrato_id, Contrato.tenant_id == usuario_atual.tenant_id).first()
     if not contrato:
         raise HTTPException(status_code=404, detail="Contrato não encontrado")
-        
-    etapa = db.query(Etapa).filter(Etapa.id == despesa_in.etapa_id, Etapa.tenant_id == usuario_atual.tenant_id).first()
-    if not etapa:
-        raise HTTPException(status_code=404, detail="Etapa não encontrada")
 
     db_despesa = Despesa(
         contrato_id=despesa_in.contrato_id,
-        etapa_id=despesa_in.etapa_id,
         tipo_despesa=despesa_in.tipo_despesa,
         descricao=despesa_in.descricao,
         valor_custo=despesa_in.valor_custo,
@@ -44,7 +38,7 @@ def criar_despesa(despesa_in: DespesaCreate, db: Session = Depends(get_db), usua
     historico = HistoricoAlteracao(
         contrato_id=contrato.id,
         tenant_id=usuario_atual.tenant_id,
-        campo_alterado=f"Despesa Adicionada ({etapa.nome_tarefa})",
+        campo_alterado="Despesa Adicionada",
         valor_anterior=None,
         valor_novo=f"{db_despesa.descricao} (R$ {db_despesa.valor_custo:.2f})",
         alterado_por=usuario_atual.nome
@@ -57,19 +51,16 @@ def criar_despesa(despesa_in: DespesaCreate, db: Session = Depends(get_db), usua
 @router.get("", response_model=List[DespesaResponse])
 def listar_despesas(
     contrato_id: Optional[int] = None,
-    etapa_id: Optional[int] = None,
     db: Session = Depends(get_db),
     usuario_atual: Usuario = Depends(get_usuario_atual)
 ):
     """
-    Lista as despesas do tenant logado, com filtros opcionais por contrato e/ou etapa.
+    Lista as despesas do tenant logado, com filtros opcionais por contrato.
     """
     query = db.query(Despesa).filter(Despesa.tenant_id == usuario_atual.tenant_id)
     
     if contrato_id is not None:
         query = query.filter(Despesa.contrato_id == contrato_id)
-    if etapa_id is not None:
-        query = query.filter(Despesa.etapa_id == etapa_id)
         
     return query.all()
 
@@ -83,7 +74,6 @@ def atualizar_despesa(id: int, despesa_in: DespesaUpdate, db: Session = Depends(
         raise HTTPException(status_code=404, detail="Despesa não encontrada")
         
     contrato = db.query(Contrato).filter(Contrato.id == db_despesa.contrato_id).first()
-    etapa = db.query(Etapa).filter(Etapa.id == db_despesa.etapa_id).first()
     
     update_data = despesa_in.model_dump(exclude_unset=True)
     
@@ -96,7 +86,7 @@ def atualizar_despesa(id: int, despesa_in: DespesaUpdate, db: Session = Depends(
             historico = HistoricoAlteracao(
                 contrato_id=contrato.id,
                 tenant_id=usuario_atual.tenant_id,
-                campo_alterado=f"Despesa '{db_despesa.descricao}' ({etapa.nome_tarefa}): {campo}",
+                campo_alterado=f"Despesa '{db_despesa.descricao}': {campo}",
                 valor_anterior=str(valor_anterior),
                 valor_novo=str(novo_valor),
                 alterado_por=usuario_atual.nome
@@ -117,12 +107,11 @@ def remover_despesa(id: int, db: Session = Depends(get_db), usuario_atual: Usuar
         raise HTTPException(status_code=404, detail="Despesa não encontrada")
         
     contrato = db.query(Contrato).filter(Contrato.id == db_despesa.contrato_id).first()
-    etapa = db.query(Etapa).filter(Etapa.id == db_despesa.etapa_id).first()
     
     historico = HistoricoAlteracao(
         contrato_id=contrato.id,
         tenant_id=usuario_atual.tenant_id,
-        campo_alterado=f"Despesa Removida ({etapa.nome_tarefa})",
+        campo_alterado="Despesa Removida",
         valor_anterior=f"{db_despesa.descricao} (R$ {db_despesa.valor_custo:.2f})",
         valor_novo=None,
         alterado_por=usuario_atual.nome

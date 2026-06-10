@@ -25,12 +25,14 @@ class CompanyUpdateRequest(BaseModel):
     nome_fantasia: str
     razao_social: str | None = None
     cnpj: str | None = None
+    taxa_imposto: float | None = 0.0
 
 class CompanyResponse(BaseModel):
     id: int
     nome_fantasia: str
     razao_social: str | None = None
     cnpj: str | None = None
+    taxa_imposto: float = 0.0
 
     class Config:
         from_attributes = True

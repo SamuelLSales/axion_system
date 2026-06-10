@@ -28,10 +28,6 @@ import {
   createEtapa,
   updateEtapa,
   deleteEtapa,
-  getDespesas,
-  createDespesa,
-  updateDespesa,
-  deleteDespesa,
   getResponsaveis,
   getAreasAtuacao,
   exportarCSV
@@ -73,7 +69,6 @@ const DetalheContrato = () => {
   const [fasesExpandidas, setFasesExpandidas] = useState({});
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
-  const [modalDespesaAberto, setModalDespesaAberto] = useState(false);
 
   // Estados dos Formulários
   const [editContratoForm, setEditContratoForm] = useState({});
@@ -92,16 +87,6 @@ const DetalheContrato = () => {
     valor_faturamento: 0.0,
     status_faturamento: 'pendente'
   });
-  const [despesaForm, setDespesaForm] = useState({
-    id: null,
-    etapa_id: null,
-    descricao: '',
-    valor_costo: 0.0,
-    tipo_despesa: 'logistica',
-    status_pagamento: 'pendente',
-    reembolsavel: false
-  });
-
   const carregarDados = async () => {
     try {
       setLoading(true);
@@ -194,7 +179,8 @@ const DetalheContrato = () => {
         data_inicio: dataInicio,
         data_entrega_final: dataEntrega,
         dias_campo_total: parseInt(editContratoForm.dias_campo_total) || 0,
-        valor_total: parseFloat(editContratoForm.valor_total) || 0.0
+        valor_total: parseFloat(editContratoForm.valor_total) || 0.0,
+        gasto_total: parseFloat(editContratoForm.gasto_total) || 0.0
       });
       setModalContratoAberto(false);
       carregarDados();
@@ -338,70 +324,7 @@ const DetalheContrato = () => {
     }
   };
 
-  // === FUNÇÕES DE DESPESA (GASTOS DA ETAPA) ===
-  const abrirModalCriarDespesa = (etapaId) => {
-    setDespesaForm({
-      id: null,
-      etapa_id: etapaId,
-      descricao: '',
-      valor_custo: 0.0,
-      tipo_despesa: 'logistica',
-      status_pagamento: 'pendente',
-      reembolsavel: false
-    });
-    setModalDespesaAberto(true);
-  };
 
-  const abrirModalEditarDespesa = (despesa) => {
-    setDespesaForm({
-      id: despesa.id,
-      etapa_id: despesa.etapa_id,
-      descricao: despesa.descricao,
-      valor_custo: despesa.valor_custo,
-      tipo_despesa: despesa.tipo_despesa,
-      status_pagamento: despesa.status_pagamento,
-      reembolsavel: despesa.reembolsavel
-    });
-    setModalDespesaAberto(true);
-  };
-
-  const handleSalvarDespesa = async (e) => {
-    e.preventDefault();
-    try {
-      const payload = {
-        descricao: despesaForm.descricao,
-        valor_custo: parseFloat(despesaForm.valor_custo) || 0.0,
-        tipo_despesa: despesaForm.tipo_despesa,
-        status_pagamento: despesaForm.status_pagamento,
-        reembolsavel: despesaForm.reembolsavel,
-        etapa_id: despesaForm.etapa_id,
-        contrato_id: contrato.id
-      };
-
-      if (despesaForm.id) {
-        await updateDespesa(despesaForm.id, payload);
-      } else {
-        await createDespesa(payload);
-      }
-      setModalDespesaAberto(false);
-      carregarDados();
-    } catch (err) {
-      console.error('Erro ao salvar despesa:', err);
-      alert('Erro ao salvar os dados do gasto.');
-    }
-  };
-
-  const handleExcluirDespesa = async (despesaId, descricao) => {
-    if (window.confirm(`Deseja realmente excluir o gasto "${descricao}"?`)) {
-      try {
-        await deleteDespesa(despesaId);
-        carregarDados();
-      } catch (err) {
-        console.error('Erro ao excluir despesa:', err);
-        alert('Erro ao excluir despesa.');
-      }
-    }
-  };
 
   // Slider de alteração direta de progresso no card
   const handleProgressoSlider = async (etapa, novoValorDecimal) => {
@@ -468,19 +391,7 @@ const DetalheContrato = () => {
 
   const progressoGeral = calcularProgressoGeral();
 
-  const calcularTotalGastos = () => {
-    if (!contrato || !contrato.fases) return 0;
-    return contrato.fases.reduce((acc, fase) => {
-      if (!fase.etapas) return acc;
-      const somaFase = fase.etapas.reduce((accFase, etapa) => {
-        if (!etapa.despesas) return accFase;
-        const somaEtapa = etapa.despesas.reduce((accDesp, desp) => accDesp + (desp.valor_custo || 0), 0);
-        return accFase + somaEtapa;
-      }, 0);
-      return acc + somaFase;
-    }, 0);
-  };
-  const totalGastos = calcularTotalGastos();
+  const totalGastos = contrato?.gasto_total || 0;
 
   // Cores das Fases na Timeline
   const faseColors = {
@@ -636,6 +547,8 @@ const DetalheContrato = () => {
         </div>
         <ProgressBar value={progressoGeral} showText={false} />
       </div>
+
+
 
       {/* TIMELINE DE FASES E ETAPAS */}
       <div className="space-y-6">
@@ -810,83 +723,7 @@ const DetalheContrato = () => {
                                   </div>
                                 </div>
 
-                                {/* GASTOS E DESPESAS DA ETAPA */}
-                                <div className="border-t border-aldebaran-border/30 pt-2.5">
-                                  <div className="flex items-center justify-between mb-2">
-                                    <span className="text-[11px] uppercase font-bold text-theme-weak tracking-wider flex items-center gap-1">
-                                      💸 Gastos da Etapa
-                                    </span>
-                                    {user?.role === 'admin' && (
-                                      <button
-                                        onClick={() => abrirModalCriarDespesa(etapa.id)}
-                                        className="text-[10px] font-bold text-aldebaran-gold hover:underline flex items-center gap-1 transition"
-                                      >
-                                        <Plus className="w-3.5 h-3.5" /> Registrar Gasto
-                                      </button>
-                                    )}
-                                  </div>
 
-                                  {etapa.despesas && etapa.despesas.length > 0 ? (
-                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
-                                      {etapa.despesas.map((desp) => (
-                                        <div
-                                          key={desp.id}
-                                          className="bg-aldebaran-dark/40 border border-aldebaran-border/60 p-2 flex items-center justify-between gap-2 text-xs"
-                                        >
-                                          <div className="min-w-0">
-                                            <div className="flex items-center gap-1.5 flex-wrap">
-                                              <span className="font-bold text-theme-strong truncate" title={desp.descricao}>
-                                                {desp.descricao}
-                                              </span>
-                                              <span className="px-1.5 py-0.2 bg-aldebaran-dark text-[9px] border border-aldebaran-border text-theme-weak font-semibold uppercase rounded-none">
-                                                {formatarCategoria(desp.tipo_despesa)}
-                                              </span>
-                                            </div>
-                                            <div className="text-[10px] text-theme-weak mt-0.5 flex items-center gap-2">
-                                              <span className="font-bold text-aldebaran-gold">
-                                                {desp.valor_custo?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
-                                              </span>
-                                              <span className={`capitalize font-semibold ${
-                                                desp.status_pagamento === 'pago' ? 'text-emerald-500' :
-                                                desp.status_pagamento === 'atrasado' ? 'text-rose-500' : 'text-amber-500'
-                                              }`}>
-                                                ({desp.status_pagamento})
-                                              </span>
-                                              {desp.reembolsavel && (
-                                                <span className="text-blue-400 font-semibold" title="Reembolsável">
-                                                  [Reembolsável]
-                                                </span>
-                                              )}
-                                            </div>
-                                          </div>
-
-                                          {user?.role === 'admin' && (
-                                            <div className="flex items-center gap-1 shrink-0">
-                                              <button
-                                                onClick={() => abrirModalEditarDespesa(desp)}
-                                                className="p-1 text-theme-weak hover:text-aldebaran-gold transition"
-                                                title="Editar Gasto"
-                                              >
-                                                <Edit3 className="w-3.5 h-3.5" />
-                                              </button>
-                                              <button
-                                                onClick={() => handleExcluirDespesa(desp.id, desp.descricao)}
-                                                className="p-1 text-theme-weak hover:text-rose-500 transition"
-                                                title="Remover Gasto"
-                                              >
-                                                <Trash2 className="w-3.5 h-3.5" />
-                                              </button>
-                                            </div>
-                                          )}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  ) : (
-                                    <div className="text-[10px] text-theme-weak italic">
-                                      Nenhum gasto registrado para esta etapa.
-                                    </div>
-                                  )}
-                                </div>
                               </div>
                             );
                           })
@@ -1021,7 +858,7 @@ const DetalheContrato = () => {
                   <label className="text-xs font-semibold text-theme-weak block mb-1">Dias de Campo Total</label>
                   <input
                     type="number"
-                    value={editContratoForm.dias_campo_total || 0}
+                    value={editContratoForm.dias_campo_total === 0 ? '' : editContratoForm.dias_campo_total}
                     onChange={(e) => setEditContratoForm({ ...editContratoForm, dias_campo_total: e.target.value })}
                     className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
                   />
@@ -1032,8 +869,19 @@ const DetalheContrato = () => {
                   <input
                     type="number"
                     step="0.01"
-                    value={editContratoForm.valor_total || 0}
-                    onChange={(e) => setEditContratoForm({ ...editContratoForm, valor_total: parseFloat(e.target.value) || 0 })}
+                    value={editContratoForm.valor_total === 0 ? '' : editContratoForm.valor_total}
+                    onChange={(e) => setEditContratoForm({ ...editContratoForm, valor_total: e.target.value })}
+                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-theme-weak block mb-1">Gasto Total (R$)</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    value={editContratoForm.gasto_total === 0 ? '' : editContratoForm.gasto_total}
+                    onChange={(e) => setEditContratoForm({ ...editContratoForm, gasto_total: e.target.value })}
                     className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
                   />
                 </div>
@@ -1291,115 +1139,6 @@ const DetalheContrato = () => {
         </div>
       )}
 
-      {/* 4. MODAL ADICIONAR / EDITAR DESPESA */}
-      {modalDespesaAberto && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
-          <div className="bg-aldebaran-gray border border-aldebaran-border rounded-none w-full max-w-md overflow-hidden shadow-md">
-            <div className="p-5 border-b border-aldebaran-border flex justify-between items-center bg-aldebaran-dark/40">
-              <h3 className="text-base font-bold text-theme-strong flex items-center gap-2">
-                {despesaForm.id ? <Edit3 className="w-5 h-5 text-aldebaran-goldDark" /> : <Plus className="w-5 h-5 text-aldebaran-goldDark" />}
-                {despesaForm.id ? 'Editar Gasto' : 'Registrar Gasto da Etapa'}
-              </h3>
-              <button
-                onClick={() => setModalDespesaAberto(false)}
-                className="text-theme-weak hover:text-theme-strong transition"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <form onSubmit={handleSalvarDespesa} className="p-5 space-y-4">
-              <div>
-                <label className="text-xs font-semibold text-theme-weak block mb-1">Descrição do Gasto *</label>
-                <input
-                  type="text"
-                  required
-                  placeholder="ex: Combustível para viagem a campo"
-                  value={despesaForm.descricao}
-                  onChange={(e) => setDespesaForm({ ...despesaForm, descricao: e.target.value })}
-                  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-xs font-semibold text-theme-weak block mb-1">Valor do Gasto (R$) *</label>
-                  <input
-                    type="number"
-                    step="0.01"
-                    min="0.01"
-                    required
-                    placeholder="ex: 350.00"
-                    value={despesaForm.valor_custo || ''}
-                    onChange={(e) => setDespesaForm({ ...despesaForm, valor_custo: parseFloat(e.target.value) || 0.0 })}
-                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
-                  />
-                </div>
-
-                <div>
-                  <label className="text-xs font-semibold text-theme-weak block mb-1">Categoria *</label>
-                  <select
-                    required
-                    value={despesaForm.tipo_despesa}
-                    onChange={(e) => setDespesaForm({ ...despesaForm, tipo_despesa: e.target.value })}
-                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
-                  >
-                    <option value="logistica">Logística</option>
-                    <option value="pessoal">Mão de Obra</option>
-                    <option value="terceiros">Serviços Terceiros</option>
-                    <option value="taxas">Taxas e Licenças</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4 items-center">
-                <div>
-                  <label className="text-xs font-semibold text-theme-weak block mb-1">Status Pagamento *</label>
-                  <select
-                    required
-                    value={despesaForm.status_pagamento}
-                    onChange={(e) => setDespesaForm({ ...despesaForm, status_pagamento: e.target.value })}
-                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
-                  >
-                    <option value="pendente">Pendente</option>
-                    <option value="pago">Pago</option>
-                    <option value="atrasado">Atrasado</option>
-                  </select>
-                </div>
-
-                <div className="flex items-center gap-2 mt-4">
-                  <input
-                    type="checkbox"
-                    id="reembolsavel"
-                    checked={despesaForm.reembolsavel}
-                    onChange={(e) => setDespesaForm({ ...despesaForm, reembolsavel: e.target.checked })}
-                    className="w-4 h-4 text-aldebaran-gold bg-aldebaran-dark border-aldebaran-border rounded-none focus:ring-0 focus:ring-offset-0"
-                  />
-                  <label htmlFor="reembolsavel" className="text-xs font-semibold text-theme-normal cursor-pointer select-none">
-                    Reembolsável pelo cliente
-                  </label>
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-3 border-t border-aldebaran-border">
-                <button
-                  type="button"
-                  onClick={() => setModalDespesaAberto(false)}
-                  className="px-4 py-2 bg-transparent border border-aldebaran-border hover:bg-aldebaran-dark text-theme-normal rounded-none text-xs font-bold transition"
-                >
-                  Cancelar
-                </button>
-                <button
-                  type="submit"
-                  className="px-4 py-2 bg-aldebaran-gold hover:opacity-90 text-white font-bold rounded-none text-xs transition flex items-center gap-1.5"
-                >
-                  {despesaForm.id ? 'Salvar Alterações' : 'Registrar Gasto'}
-                </button>
-              </div>
-            </form>
-          </div>
-        </div>
-      )}
 
       {modalExcluirAberto && (
         <div className="fixed inset-0 bg-black/60 flex items-center justify-center p-4 z-50 animate-fade-in backdrop-blur-sm">

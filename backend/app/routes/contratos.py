@@ -63,7 +63,8 @@ def listar_contratos(db: Session = Depends(get_db), usuario_atual: Usuario = Dep
     """
     contratos = db.query(Contrato).filter(Contrato.tenant_id == usuario_atual.tenant_id).options(
         selectinload(Contrato.area_atuacao),
-        selectinload(Contrato.fases).selectinload(Fase.etapas).selectinload(Etapa.despesas)
+        selectinload(Contrato.fases).selectinload(Fase.etapas),
+        selectinload(Contrato.despesas)
     ).all()
     for contrato in contratos:
         calcular_e_atualizar_status(contrato, db)
@@ -76,7 +77,8 @@ def obter_contrato(id: int, db: Session = Depends(get_db), usuario_atual: Usuari
     """
     contrato = db.query(Contrato).filter(Contrato.id == id, Contrato.tenant_id == usuario_atual.tenant_id).options(
         selectinload(Contrato.area_atuacao),
-        selectinload(Contrato.fases).selectinload(Fase.etapas).selectinload(Etapa.despesas)
+        selectinload(Contrato.fases).selectinload(Fase.etapas),
+        selectinload(Contrato.despesas)
     ).first()
     if not contrato:
         raise HTTPException(status_code=404, detail="Contrato não encontrado")
@@ -101,6 +103,8 @@ def criar_contrato(contrato_in: ContratoCreate, db: Session = Depends(get_db), u
         data_inicio=contrato_in.data_inicio,
         data_entrega_final=contrato_in.data_entrega_final,
         dias_campo_total=contrato_in.dias_campo_total,
+        valor_total=contrato_in.valor_total,
+        gasto_total=contrato_in.gasto_total,
         status="no_prazo",
         observacoes=contrato_in.observacoes
     )

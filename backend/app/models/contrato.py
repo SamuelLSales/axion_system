@@ -46,6 +46,9 @@ class Contrato(Base):
     # Valor total do contrato
     valor_total = Column(Float, default=0.0, nullable=False)
     
+    # Gasto total do contrato
+    gasto_total = Column(Float, default=0.0, nullable=False)
+    
     # Status do contrato (no_prazo, atencao, atrasado, concluido)
     status = Column(String(50), default="no_prazo", nullable=False)
     

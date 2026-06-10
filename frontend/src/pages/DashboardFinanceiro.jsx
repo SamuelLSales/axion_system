@@ -18,7 +18,8 @@ import {
   getDashboardFinanceiro,
   updateEtapa,
   exportarCSV,
-  getContratos
+  getContratos,
+  getAreasAtuacao
 } from '../services/api';
 import {
   ResponsiveContainer,
@@ -43,7 +44,7 @@ const DashboardFinanceiro = () => {
     total_a_receber: 0,
     total_atrasado: 0,
     receita_por_area: [],
-    fluxo_caixa: [],
+    rentabilidade_por_area: [],
     marcos: []
   });
   const [loading, setLoading] = useState(true);
@@ -56,10 +57,21 @@ const DashboardFinanceiro = () => {
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos');
 
+  const [areas, setAreas] = useState([]);
+  const [filtroArea, setFiltroArea] = useState('');
+  const [filtroAno, setFiltroAno] = useState('');
+
+  // Anos fixos para o filtro (pode ser dinâmico no futuro)
+  const anosDisponiveis = [2024, 2025, 2026, 2027, 2028, 2029, 2030];
+
   const carregarDados = async () => {
     try {
       setLoading(true);
-      const res = await getDashboardFinanceiro(filtroContrato || undefined);
+      const res = await getDashboardFinanceiro(
+        filtroContrato || undefined, 
+        filtroArea || undefined,
+        filtroAno || undefined
+      );
       setData(res);
       setError(null);
     } catch (err) {
@@ -72,10 +84,11 @@ const DashboardFinanceiro = () => {
 
   useEffect(() => {
     carregarDados();
-  }, [filtroContrato]);
+  }, [filtroContrato, filtroArea, filtroAno]);
 
   useEffect(() => {
     getContratos().then(setContratos).catch(console.error);
+    getAreasAtuacao().then(setAreas).catch(console.error);
   }, []);
 
   // Alteração Snappy do status de faturamento
@@ -161,12 +174,37 @@ const DashboardFinanceiro = () => {
 
         <div className="flex items-center gap-3">
           <select
+            value={filtroArea}
+            onChange={(e) => {
+              setFiltroArea(e.target.value);
+              setFiltroContrato(''); // Reset contract when area changes
+            }}
+            className="p-2 bg-aldebaran-dark border border-aldebaran-border rounded-none text-xs text-theme-strong focus:outline-none focus:border-aldebaran-gold max-w-[150px] truncate"
+          >
+            <option value="">Todas as Áreas</option>
+            {areas.map(a => (
+              <option key={a.id} value={a.id}>{a.nome}</option>
+            ))}
+          </select>
+          <select
+            value={filtroAno}
+            onChange={(e) => setFiltroAno(e.target.value)}
+            className="p-2 bg-aldebaran-dark border border-aldebaran-border rounded-none text-xs text-theme-strong focus:outline-none focus:border-aldebaran-gold max-w-[120px] truncate"
+          >
+            <option value="">Todos os Anos</option>
+            {anosDisponiveis.map(ano => (
+              <option key={ano} value={ano}>{ano}</option>
+            ))}
+          </select>
+          <select
             value={filtroContrato}
             onChange={(e) => setFiltroContrato(e.target.value)}
             className="p-2 bg-aldebaran-dark border border-aldebaran-border rounded-none text-xs text-theme-strong focus:outline-none focus:border-aldebaran-gold max-w-xs truncate"
           >
             <option value="">Todos os Contratos</option>
-            {contratos.map(c => (
+            {contratos
+              .filter(c => !filtroArea || c.area_id === parseInt(filtroArea))
+              .map(c => (
               <option key={c.id} value={c.id}>{c.nome_projeto} - {c.cliente}</option>
             ))}
           </select>
@@ -198,7 +236,7 @@ const DashboardFinanceiro = () => {
       )}
 
       {/* CARDS DE RESUMO FINANCEIRO (KPIs) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         {/* TCV */}
         <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-aldebaran-gold/40 transition-colors">
           <div className="p-3 bg-aldebaran-gold/10 rounded-none text-aldebaran-gold shrink-0">
@@ -220,8 +258,8 @@ const DashboardFinanceiro = () => {
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Margem de Lucro</span>
-            <h3 className="text-xl font-extrabold text-blue-400 font-mono mt-1 truncate" title={data.tcv > 0 ? (((data.tcv - (data.total_despesas || 0)) / data.tcv) * 100).toFixed(1) + '%' : '0%'}>
-              {data.tcv > 0 ? (((data.tcv - (data.total_despesas || 0)) / data.tcv) * 100).toFixed(1) : '0'}%
+            <h3 className="text-xl font-extrabold text-blue-400 font-mono mt-1 truncate" title={data.margem_projetada + '%'}>
+              {data.margem_projetada || '0'}%
             </h3>
             <span className="text-[10px] text-theme-weak lowercase mt-1 block">rentabilidade da operação</span>
           </div>
@@ -248,10 +286,26 @@ const DashboardFinanceiro = () => {
           </div>
           <div className="min-w-0">
             <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Lucro</span>
-            <h3 className="text-xl font-extrabold text-emerald-400 font-mono mt-1 truncate" title={formatarBRL(data.tcv - (data.total_despesas || 0))}>
-              {formatarBRL(data.tcv - (data.total_despesas || 0))}
+            <h3 className="text-xl font-extrabold text-emerald-400 font-mono mt-1 truncate" title={formatarBRL(data.tcv - (data.total_despesas || 0) - (data.imposto_projetado || 0))}>
+              {formatarBRL(data.tcv - (data.total_despesas || 0) - (data.imposto_projetado || 0))}
             </h3>
-            <span className="text-[10px] text-theme-weak lowercase mt-1 block">valor do contrato - gastos</span>
+            <span className="text-[10px] text-theme-weak lowercase mt-1 block">valor - gastos - imposto</span>
+          </div>
+        </div>
+
+        {/* IMPOSTO */}
+        <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-orange-500/30 transition-colors">
+          <div className="p-3 bg-orange-500/10 rounded-none text-orange-500 shrink-0">
+            <TrendingUp className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Imposto (Projetado / Pago)</span>
+            <h3 className="text-xl font-extrabold text-orange-400 font-mono mt-1 truncate" title={formatarBRL(data.imposto_pago || 0)}>
+              {formatarBRL(data.imposto_projetado || 0)} <span className="text-xs text-theme-weak font-normal ml-1">projetado</span>
+            </h3>
+            <span className="text-[10px] text-theme-weak lowercase mt-1 block">
+              pago: {formatarBRL(data.imposto_pago || 0)} ({data.taxa_imposto || 0}%)
+            </span>
           </div>
         </div>
       </div>
@@ -259,30 +313,27 @@ const DashboardFinanceiro = () => {
       {/* GRÁFICOS FINANCEIROS */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
-        {/* Previsão de Fluxo de Caixa (Barras) */}
+        {/* Rentabilidade por Área (Barras Duplas Verticais) */}
         <div className="border border-aldebaran-border p-6 bg-aldebaran-gray rounded-none lg:col-span-2 flex flex-col space-y-4">
           <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Planejamento e Entradas</span>
-            <h4 className="text-base font-bold text-theme-strong lowercase mt-1">projeção de faturamento — 6 meses (R$)</h4>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Rentabilidade</span>
+            <h4 className="text-base font-bold text-theme-strong lowercase mt-1">valor contratado vs gasto por área (R$)</h4>
           </div>
 
           <div className="h-80 w-full text-xs font-mono">
-            {data.fluxo_caixa.length === 0 ? (
+            {!data.rentabilidade_por_area || data.rentabilidade_por_area.length === 0 ? (
               <div className="h-full flex items-center justify-center text-theme-weak italic">
-                Nenhum faturamento previsto nos próximos meses.
+                Nenhuma área de atuação com contratos ativos.
               </div>
             ) : (
               <ResponsiveContainer width="100%" height="100%">
                 <BarChart
-                  data={data.fluxo_caixa}
+                  data={data.rentabilidade_por_area}
                   margin={{ top: 20, right: 10, left: 10, bottom: 5 }}
                 >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#2a2e3d" />
-                  <XAxis dataKey="mes" stroke="#6b7280" />
-                  <YAxis
-                    stroke="#6b7280"
-                    tickFormatter={(tick) => `R$ ${(tick / 1000)}k`}
-                  />
+                  <CartesianGrid strokeDasharray="3 3" stroke="#2a2e3d" vertical={false} />
+                  <XAxis dataKey="name" stroke="#6b7280" tick={{ fontSize: 11, fontWeight: 'bold' }} />
+                  <YAxis stroke="#6b7280" tickFormatter={(tick) => `R$ ${(tick / 1000)}k`} />
                   <Tooltip
                     contentStyle={{
                       backgroundColor: '#161922',
@@ -290,11 +341,11 @@ const DashboardFinanceiro = () => {
                       borderRadius: '0px',
                       color: '#f3f4f6'
                     }}
-                    formatter={(value) => [formatarBRL(value), '']}
+                    formatter={(value, name) => [formatarBRL(value), name === 'faturado' ? 'Valor Contratado' : 'Gasto']}
                   />
                   <Legend verticalAlign="top" height={36} wrapperStyle={{ color: '#d1d5db' }} />
-                  <Bar dataKey="pago" name="Recebido (Pago)" fill="#10B981" stackId="a" />
-                  <Bar dataKey="previsto" name="Previsto (Aberto)" fill="#D9972B" stackId="a" />
+                  <Bar dataKey="faturado" name="Valor Contratado" fill="#10B981" radius={[4, 4, 0, 0]} />
+                  <Bar dataKey="gasto" name="Gasto Total" fill="#EF4444" radius={[4, 4, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
             )}
@@ -368,144 +419,6 @@ const DashboardFinanceiro = () => {
           </div>
         </div>
 
-      </div>
-
-      {/* TABELA DE CONCILIAÇÃO DE MARCOS FINANCEIROS */}
-      <div className="border border-aldebaran-border rounded-none p-6 bg-aldebaran-gray space-y-6">
-
-        {/* Topo da tabela e Filtros */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-          <div>
-            <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Conciliação Financeira</span>
-            <h3 className="text-lg font-bold text-theme-strong lowercase mt-1">todos os marcos de faturamento</h3>
-          </div>
-
-          <div className="flex flex-wrap items-center gap-3">
-            {/* Campo Busca */}
-            <div className="relative">
-              <Search className="w-3.5 h-3.5 text-theme-weak absolute left-3 top-1/2 -translate-y-1/2" />
-              <input
-                type="text"
-                value={busca}
-                onChange={(e) => setBusca(e.target.value)}
-                placeholder="filtrar projeto, parcela..."
-                className="w-[200px] sm:w-[260px] pl-9 pr-4 py-1.5 bg-aldebaran-dark border border-aldebaran-border text-theme-normal text-xs rounded-none placeholder-theme-weak/50 focus:outline-none focus:border-theme-strong transition-colors"
-              />
-            </div>
-
-            {/* Filtro Status */}
-            <select
-              value={filtroStatus}
-              onChange={(e) => setFiltroStatus(e.target.value)}
-              className="px-3 py-1.5 bg-aldebaran-dark border border-aldebaran-border text-theme-normal text-xs rounded-none focus:outline-none focus:border-theme-strong cursor-pointer font-bold uppercase tracking-wider text-theme-weak"
-            >
-              <option value="todos">Todos os Status</option>
-              <option value="pendente">Pendente</option>
-              <option value="faturado">Faturado</option>
-              <option value="pago">Pago</option>
-              <option value="atrasado">Atrasado</option>
-            </select>
-          </div>
-        </div>
-
-        {/* Tabela de Dados */}
-        {marcosFiltrados.length === 0 ? (
-          <div className="text-center py-12 border border-dashed border-aldebaran-border text-theme-weak text-sm lowercase font-mono">
-            nenhum marco de faturamento localizado com os filtros aplicados.
-          </div>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse">
-              <thead>
-                <tr className="border-b border-aldebaran-border text-[10px] uppercase font-bold text-theme-weak tracking-wider">
-                  <th className="pb-3 px-2">projeto / cliente</th>
-                  <th className="pb-3 px-2">parcela / milestone</th>
-                  <th className="pb-3 px-2">responsável</th>
-                  <th className="pb-3 px-2">vencimento</th>
-                  <th className="pb-3 px-2">valor do faturamento</th>
-                  <th className="pb-3 px-2">alterar status do faturamento</th>
-                  <th className="pb-3 px-2 text-right">ações</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-aldebaran-border/50 text-sm">
-                {marcosFiltrados.map((marco) => {
-                  const status = (marco.status_faturamento || 'pendente').toLowerCase();
-
-                  // Classes de cores do badge com base no status de faturamento
-                  let statusStyles = '';
-                  if (status === 'pago') {
-                    statusStyles = 'border-emerald-500/30 text-emerald-500 bg-emerald-500/[0.04] focus:border-emerald-500';
-                  } else if (status === 'faturado') {
-                    statusStyles = 'border-blue-500/30 text-blue-400 bg-blue-500/[0.04] focus:border-blue-500';
-                  } else if (status === 'atrasado') {
-                    statusStyles = 'border-rose-500/30 text-rose-500 bg-rose-500/[0.04] focus:border-rose-500';
-                  } else {
-                    statusStyles = 'border-amber-500/30 text-amber-500 bg-amber-500/[0.04] focus:border-amber-500';
-                  }
-
-                  return (
-                    <tr
-                      key={marco.id}
-                      className={`group transition-colors ${updatingId === marco.id ? 'opacity-50 pointer-events-none' : 'hover:bg-aldebaran-border/10'
-                        }`}
-                    >
-                      {/* Projeto / Cliente */}
-                      <td className="py-4 px-2">
-                        <div className="font-bold text-theme-strong">{marco.nome_projeto}</div>
-                        <div className="text-xs text-theme-weak font-mono lowercase">{marco.cliente}</div>
-                      </td>
-
-                      {/* Parcela / Milestone */}
-                      <td className="py-4 px-2">
-                        <span className="text-theme-normal font-semibold">{marco.nome_tarefa}</span>
-                      </td>
-
-                      {/* Responsável */}
-                      <td className="py-4 px-2 text-xs text-theme-weak">
-                        <span>{marco.responsavel || 'Sem Responsável'}</span>
-                      </td>
-
-                      {/* Vencimento */}
-                      <td className="py-4 px-2 text-xs font-mono text-theme-weak">
-                        {formatarData(marco.data_termino)}
-                      </td>
-
-                      {/* Valor do Faturamento */}
-                      <td className="py-4 px-2 font-bold font-mono text-theme-strong">
-                        {formatarBRL(marco.valor_faturamento)}
-                      </td>
-
-                      {/* Dropdown de conciliação snappier */}
-                      <td className="py-4 px-2">
-                        <select
-                          value={status}
-                          onChange={(e) => handleAlterarStatus(marco.id, e.target.value)}
-                          className={`px-3 py-1.5 border rounded-none text-xs font-bold font-mono uppercase focus:outline-none transition-colors cursor-pointer w-36 ${statusStyles}`}
-                        >
-                          <option value="pendente" className="bg-aldebaran-dark text-amber-500">Pendente</option>
-                          <option value="faturado" className="bg-aldebaran-dark text-blue-400">Faturado</option>
-                          <option value="pago" className="bg-aldebaran-dark text-emerald-500">Pago</option>
-                          <option value="atrasado" className="bg-aldebaran-dark text-rose-500">Atrasado</option>
-                        </select>
-                      </td>
-
-                      {/* Ações */}
-                      <td className="py-4 px-2 text-right">
-                        <button
-                          onClick={() => navigate(`/contratos/${marco.contrato_id}`)}
-                          className="px-3 py-1.5 bg-transparent text-theme-weak border border-aldebaran-border hover:border-theme-strong rounded-none text-xs font-semibold lowercase transition-colors inline-flex items-center gap-1.5"
-                        >
-                          ver cronograma
-                          <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-1" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
       </div>
 
     </div>

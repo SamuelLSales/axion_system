@@ -15,9 +15,6 @@ class Despesa(Base):
     # Relacionamento com o Contrato
     contrato_id = Column(Integer, ForeignKey("contratos.id", ondelete="CASCADE"), nullable=False)
     
-    # Relacionamento com a Etapa
-    etapa_id = Column(Integer, ForeignKey("etapas.id", ondelete="CASCADE"), nullable=False)
-    
     # Categoria de Gasto (logistica, pessoal, terceiros, taxas)
     tipo_despesa = Column(String(100), nullable=False)
     
@@ -42,4 +39,3 @@ class Despesa(Base):
 
     # Relacionamentos
     contrato = relationship("Contrato", back_populates="despesas")
-    etapa = relationship("Etapa", back_populates="despesas")

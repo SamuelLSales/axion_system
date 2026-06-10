@@ -17,6 +17,7 @@ from app.routes.responsaveis import router as responsaveis_router
 from app.routes.auth import router as auth_router
 from app.routes.areas_atuacao import router as areas_atuacao_router
 from app.routes.despesas import router as despesas_router
+from app.routes.empresa import router as empresa_router
 from app.services.auth import get_usuario_atual
 
 from database import Base, engine
@@ -96,6 +97,7 @@ app.include_router(dashboard_router, dependencies=[Depends(get_usuario_atual)])
 app.include_router(exportar_router) # Exportar valida o token internamente via query params
 app.include_router(responsaveis_router, dependencies=[Depends(get_usuario_atual)])
 app.include_router(areas_atuacao_router, dependencies=[Depends(get_usuario_atual)])
+app.include_router(empresa_router, dependencies=[Depends(get_usuario_atual)])
 
 @app.get("/")
 def read_root():

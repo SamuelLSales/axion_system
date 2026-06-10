@@ -38,7 +38,8 @@ const Configuracoes = () => {
   const [companyForm, setCompanyForm] = useState({
     nome_fantasia: '',
     razao_social: '',
-    cnpj: ''
+    cnpj: '',
+    taxa_imposto: 0
   });
   const [companyMessage, setCompanyMessage] = useState({ type: '', text: '' });
   const [companyLoading, setCompanyLoading] = useState(false);
@@ -59,7 +60,8 @@ const Configuracoes = () => {
           setCompanyForm({
             nome_fantasia: data.nome_fantasia || '',
             razao_social: data.razao_social || '',
-            cnpj: data.cnpj || ''
+            cnpj: data.cnpj || '',
+            taxa_imposto: data.taxa_imposto || 0
           });
         } catch (err) {
           console.error("Erro ao buscar dados da empresa:", err);
@@ -149,12 +151,14 @@ const Configuracoes = () => {
       const updated = await updateCompanyDetails({
         nome_fantasia: companyForm.nome_fantasia,
         razao_social: companyForm.razao_social || null,
-        cnpj: companyForm.cnpj || null
+        cnpj: companyForm.cnpj || null,
+        taxa_imposto: parseFloat(companyForm.taxa_imposto) || 0
       });
       setCompanyForm({
         nome_fantasia: updated.nome_fantasia || '',
         razao_social: updated.razao_social || '',
-        cnpj: updated.cnpj || ''
+        cnpj: updated.cnpj || '',
+        taxa_imposto: updated.taxa_imposto || 0
       });
       setCompanyMessage({ type: 'success', text: 'Configurações da empresa atualizadas com sucesso!' });
     } catch (err) {
@@ -402,6 +406,23 @@ const Configuracoes = () => {
                     className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
                     placeholder="Apenas números ou CNPJ formatado"
                   />
+                </div>
+
+                <div className="space-y-1.5 col-span-2">
+                  <label className="text-xs font-bold text-theme-normal uppercase">Taxa de Imposto (%)</label>
+                  <p className="text-theme-weak text-xs mb-2">Descontada automaticamente na Margem de Lucro e Painel Financeiro.</p>
+                  <div className="relative">
+                    <input
+                      type="number"
+                      step="0.01"
+                      min="0"
+                      max="100"
+                      value={companyForm.taxa_imposto}
+                      onChange={(e) => setCompanyForm({ ...companyForm, taxa_imposto: e.target.value })}
+                      className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                      placeholder="Ex: 10.5"
+                    />
+                  </div>
                 </div>
               </div>
 
