@@ -16,6 +16,7 @@ from app.routes.exportar import router as exportar_router
 from app.routes.responsaveis import router as responsaveis_router
 from app.routes.auth import router as auth_router
 from app.routes.areas_atuacao import router as areas_atuacao_router
+from app.routes.despesas import router as despesas_router
 from app.services.auth import get_usuario_atual
 
 from database import Base, engine
@@ -29,6 +30,7 @@ from app.models.usuario import Usuario
 from app.models.sessao import Sessao
 from app.models.empresa import Empresa
 from app.models.area_atuacao import AreaAtuacao
+from app.models.despesa import Despesa
 
 Base.metadata.create_all(bind=engine)
 
@@ -89,6 +91,7 @@ app.include_router(auth_router)
 app.include_router(contratos_router, dependencies=[Depends(get_usuario_atual)])
 app.include_router(fases_router, dependencies=[Depends(get_usuario_atual)])
 app.include_router(etapas_router, dependencies=[Depends(get_usuario_atual)])
+app.include_router(despesas_router, dependencies=[Depends(get_usuario_atual)])
 app.include_router(dashboard_router, dependencies=[Depends(get_usuario_atual)])
 app.include_router(exportar_router) # Exportar valida o token internamente via query params
 app.include_router(responsaveis_router, dependencies=[Depends(get_usuario_atual)])

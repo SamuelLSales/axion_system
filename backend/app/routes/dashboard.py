@@ -1,12 +1,14 @@
 # backend/app/routes/dashboard.py
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends
+from typing import Optional
+from fastapi import APIRouter, Depends, Query
 from sqlalchemy.orm import Session, selectinload, joinedload
 from database import get_db
 from app.models.contrato import Contrato
 from app.models.fase import Fase
 from app.models.etapa import Etapa
 from app.models.area_atuacao import AreaAtuacao
+from app.models.despesa import Despesa
 from app.routes.contratos import calcular_e_atualizar_status
 from app.models.usuario import Usuario
 from app.services.auth import get_usuario_atual
@@ -81,30 +83,52 @@ def obter_dados_dashboard(db: Session = Depends(get_db), usuario_atual: Usuario 
     }
 
 @router.get("/financeiro")
-def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuario = Depends(get_usuario_atual)):
+def obter_dados_financeiros(
+    contrato_id: Optional[int] = Query(None),
+    db: Session = Depends(get_db), 
+    usuario_atual: Usuario = Depends(get_usuario_atual)
+):
     """
     Retorna dados financeiros consolidados, fluxo de caixa e marcos de faturamento.
     """
     tenant_id = usuario_atual.tenant_id
     
     # 1. Obter todos os contratos do tenant
-    contratos = db.query(Contrato).filter(Contrato.tenant_id == tenant_id).all()
+    query_contratos = db.query(Contrato).filter(Contrato.tenant_id == tenant_id)
+    if contrato_id:
+        query_contratos = query_contratos.filter(Contrato.id == contrato_id)
+    contratos = query_contratos.all()
     
     # 2. Obter todas as etapas com faturamento do tenant (valor_faturamento > 0)
     # Usando joinedload para carregar fase e contrato de forma eficiente
-    etapas_financeiras = (
+    query_etapas = (
         db.query(Etapa)
         .join(Fase, Etapa.fase_id == Fase.id)
         .join(Contrato, Fase.contrato_id == Contrato.id)
         .filter(Etapa.tenant_id == tenant_id, Etapa.valor_faturamento > 0)
-        .options(joinedload(Etapa.fase).joinedload(Fase.contrato))
-        .all()
     )
+    if contrato_id:
+        query_etapas = query_etapas.filter(Contrato.id == contrato_id)
+        
+    etapas_financeiras = query_etapas.options(joinedload(Etapa.fase).joinedload(Fase.contrato)).all()
+    
+    # 3. Obter todas as despesas/gastos do tenant
+    query_despesas = (
+        db.query(Despesa)
+        .join(Etapa, Despesa.etapa_id == Etapa.id)
+        .join(Fase, Etapa.fase_id == Fase.id)
+        .join(Contrato, Fase.contrato_id == Contrato.id)
+        .filter(Despesa.tenant_id == tenant_id)
+    )
+    if contrato_id:
+        query_despesas = query_despesas.filter(Contrato.id == contrato_id)
+        
+    despesas = query_despesas.options(joinedload(Despesa.etapa)).all()
     
     # TCV: Total Contract Value
     tcv = sum(c.valor_total for c in contratos)
     
-    # KPI Totals
+    # KPI Totals — Receitas
     total_recebido = 0.0   # pago
     total_faturado = 0.0   # faturado
     total_a_receber = 0.0  # pendente
@@ -125,7 +149,6 @@ def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuari
             total_recebido += val
         elif status == "atrasado" or (status in ("pendente", "faturado") and prazo_vencido):
             total_atrasado += val
-            # For KPIs, also increment faturado/pendente according to actual status
             if status == "faturado":
                 total_faturado += val
             elif status == "pendente":
@@ -136,7 +159,21 @@ def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuari
             elif status == "pendente":
                 total_a_receber += val
                 
-    # 3. Receita por Área de Atuação (agrupada pelo valor total do contrato)
+    # KPI Totals — Gastos/Despesas
+    total_despesas = sum(d.valor_custo for d in despesas)
+    despesas_pagas = sum(d.valor_custo for d in despesas if d.status_pagamento == "pago")
+    despesas_pendentes = sum(d.valor_custo for d in despesas if d.status_pagamento == "pendente")
+    
+    # Cálculo de Margens
+    margem_real = 0.0
+    if total_recebido > 0:
+        margem_real = ((total_recebido - despesas_pagas) / total_recebido) * 100
+        
+    margem_projetada = 0.0
+    if tcv > 0:
+        margem_projetada = ((tcv - total_despesas) / tcv) * 100
+        
+    # 4. Receita por Área de Atuação (agrupada pelo valor total do contrato)
     areas = db.query(AreaAtuacao).filter(AreaAtuacao.tenant_id == tenant_id).all()
     areas_map = {a.id: a.nome for a in areas}
     
@@ -147,7 +184,27 @@ def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuari
         
     receita_por_area = [{"name": area, "value": val} for area, val in receita_por_area_dict.items()]
     
-    # 4. Projeção de Fluxo de Caixa (6 meses a partir do mês atual)
+    # 5. Gastos por Categoria
+    categorias_map = {
+        "logistica": "Logística",
+        "pessoal": "Mão de Obra",
+        "terceiros": "Serviços Terceiros",
+        "taxas": "Taxas e Licenças"
+    }
+    despesas_por_categoria_dict = {cat: 0.0 for cat in categorias_map.values()}
+    despesas_por_categoria_dict["Outros"] = 0.0
+    
+    for d in despesas:
+        cat_nome = categorias_map.get(d.tipo_despesa.lower(), "Outros")
+        despesas_por_categoria_dict[cat_nome] = despesas_por_categoria_dict.get(cat_nome, 0.0) + d.valor_custo
+        
+    despesas_por_categoria = [
+        {"name": cat, "value": val} 
+        for cat, val in despesas_por_categoria_dict.items() 
+        if val > 0 or cat in categorias_map.values()
+    ]
+    
+    # 6. Projeção de Fluxo de Caixa (6 meses a partir do mês atual)
     nomes_meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"]
     ano_atual = hoje.year
     mes_atual = hoje.month
@@ -163,12 +220,20 @@ def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuari
         nome_mes = f"{nomes_meses[m-1]}/{str(y)[2:]}" # Ex: Jan/26
         meses_lista.append((chave_mes, nome_mes))
         
-    dados_fluxo = {chave: {"mes": nome, "pago": 0.0, "previsto": 0.0} for chave, nome in meses_lista}
+    dados_fluxo = {
+        chave: {
+            "mes": nome,
+            "pago": 0.0, 
+            "previsto": 0.0,
+            "despesa_paga": 0.0,
+            "despesa_prevista": 0.0
+        } for chave, nome in meses_lista
+    }
     
+    # Fluxo Receitas
     for etapa in etapas_financeiras:
         if not etapa.data_termino:
             continue
-        
         y_etapa = etapa.data_termino.year
         m_etapa = etapa.data_termino.month
         chave_etapa = f"{y_etapa}-{m_etapa:02d}"
@@ -181,9 +246,26 @@ def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuari
             else:
                 dados_fluxo[chave_etapa]["previsto"] += val
                 
+    # Fluxo Despesas
+    for d in despesas:
+        data_ref = d.etapa.data_termino if d.etapa and d.etapa.data_termino else d.criado_em
+        if not data_ref:
+            continue
+        y_d = data_ref.year
+        m_d = data_ref.month
+        chave_d = f"{y_d}-{m_d:02d}"
+        
+        if chave_d in dados_fluxo:
+            val = d.valor_custo
+            status = (d.status_pagamento or "pendente").lower()
+            if status == "pago":
+                dados_fluxo[chave_d]["despesa_paga"] += val
+            else:
+                dados_fluxo[chave_d]["despesa_prevista"] += val
+                
     fluxo_caixa = [dados_fluxo[chave] for chave, _ in meses_lista]
     
-    # 5. Listagem de Marcos (Milestones)
+    # 7. Listagem de Marcos (Milestones)
     marcos = []
     for etapa in etapas_financeiras:
         nome_projeto = "N/A"
@@ -215,7 +297,13 @@ def obter_dados_financeiros(db: Session = Depends(get_db), usuario_atual: Usuari
         "total_faturado": total_faturado,
         "total_a_receber": total_a_receber,
         "total_atrasado": total_atrasado,
+        "total_despesas": total_despesas,
+        "despesas_pagas": despesas_pagas,
+        "despesas_pendentes": despesas_pendentes,
+        "margem_real": round(margem_real, 1),
+        "margem_projetada": round(margem_projetada, 1),
         "receita_por_area": receita_por_area,
+        "despesas_por_categoria": despesas_por_categoria,
         "fluxo_caixa": fluxo_caixa,
         "marcos": marcos
     }

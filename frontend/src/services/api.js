@@ -79,14 +79,43 @@ export const deleteEtapa = async (id) => {
   return response.data;
 };
 
+// === DESPESAS ===
+export const getDespesas = async (contratoId = null, etapaId = null) => {
+  let url = '/despesas';
+  const params = [];
+  if (contratoId) params.push(`contrato_id=${contratoId}`);
+  if (etapaId) params.push(`etapa_id=${etapaId}`);
+  if (params.length > 0) {
+    url += `?${params.join('&')}`;
+  }
+  const response = await api.get(url);
+  return response.data;
+};
+
+export const createDespesa = async (despesaData) => {
+  const response = await api.post('/despesas', despesaData);
+  return response.data;
+};
+
+export const updateDespesa = async (id, despesaData) => {
+  const response = await api.put(`/despesas/${id}`, despesaData);
+  return response.data;
+};
+
+export const deleteDespesa = async (id) => {
+  const response = await api.delete(`/despesas/${id}`);
+  return response.data;
+};
+
 // === DASHBOARD ===
 export const getDashboardData = async () => {
   const response = await api.get('/dashboard');
   return response.data;
 };
 
-export const getDashboardFinanceiro = async () => {
-  const response = await api.get('/dashboard/financeiro');
+export const getDashboardFinanceiro = async (contratoId) => {
+  const url = contratoId ? `/dashboard/financeiro?contrato_id=${contratoId}` : '/dashboard/financeiro';
+  const response = await api.get(url);
   return response.data;
 };
 

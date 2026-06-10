@@ -1,6 +1,6 @@
 # backend/app/schemas/etapa.py
 from datetime import datetime
-from typing import Optional
+from typing import List, Optional
 from pydantic import BaseModel, ConfigDict, Field
 
 class EtapaBase(BaseModel):
@@ -30,8 +30,11 @@ class EtapaUpdate(BaseModel):
     valor_faturamento: Optional[float] = None
     status_faturamento: Optional[str] = None
 
+from app.schemas.despesa import DespesaResponse
+
 class EtapaResponse(EtapaBase):
     id: int
     fase_id: int
+    despesas: List[DespesaResponse] = []
 
     model_config = ConfigDict(from_attributes=True)

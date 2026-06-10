@@ -11,12 +11,14 @@ import {
   ArrowRight,
   CheckCircle,
   Coins,
-  ArrowLeft
+  ArrowLeft,
+  Receipt
 } from 'lucide-react';
 import {
   getDashboardFinanceiro,
   updateEtapa,
-  exportarCSV
+  exportarCSV,
+  getContratos
 } from '../services/api';
 import {
   ResponsiveContainer,
@@ -48,14 +50,16 @@ const DashboardFinanceiro = () => {
   const [error, setError] = useState(null);
   const [updatingId, setUpdatingId] = useState(null);
 
-  // Filtros da tabela de marcos
+  // Filtros
+  const [contratos, setContratos] = useState([]);
+  const [filtroContrato, setFiltroContrato] = useState('');
   const [busca, setBusca] = useState('');
   const [filtroStatus, setFiltroStatus] = useState('todos');
 
   const carregarDados = async () => {
     try {
       setLoading(true);
-      const res = await getDashboardFinanceiro();
+      const res = await getDashboardFinanceiro(filtroContrato || undefined);
       setData(res);
       setError(null);
     } catch (err) {
@@ -68,6 +72,10 @@ const DashboardFinanceiro = () => {
 
   useEffect(() => {
     carregarDados();
+  }, [filtroContrato]);
+
+  useEffect(() => {
+    getContratos().then(setContratos).catch(console.error);
   }, []);
 
   // Alteração Snappy do status de faturamento
@@ -152,8 +160,18 @@ const DashboardFinanceiro = () => {
         </div>
 
         <div className="flex items-center gap-3">
+          <select
+            value={filtroContrato}
+            onChange={(e) => setFiltroContrato(e.target.value)}
+            className="p-2 bg-aldebaran-dark border border-aldebaran-border rounded-none text-xs text-theme-strong focus:outline-none focus:border-aldebaran-gold max-w-xs truncate"
+          >
+            <option value="">Todos os Contratos</option>
+            {contratos.map(c => (
+              <option key={c.id} value={c.id}>{c.nome_projeto} - {c.cliente}</option>
+            ))}
+          </select>
           <button
-            onClick={carregarDados}
+            onClick={() => carregarDados()}
             className="p-2 bg-transparent text-theme-weak hover:text-theme-strong border border-aldebaran-border hover:border-theme-strong rounded-none transition"
             title="Recarregar Dados"
           >
@@ -180,14 +198,14 @@ const DashboardFinanceiro = () => {
       )}
 
       {/* CARDS DE RESUMO FINANCEIRO (KPIs) */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         {/* TCV */}
         <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-aldebaran-gold/40 transition-colors">
           <div className="p-3 bg-aldebaran-gold/10 rounded-none text-aldebaran-gold shrink-0">
             <Coins className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">TCV (Carteira Ativa)</span>
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Valor Global (TCV)</span>
             <h3 className="text-xl font-extrabold text-theme-strong font-mono mt-1 truncate" title={formatarBRL(data.tcv)}>
               {formatarBRL(data.tcv)}
             </h3>
@@ -195,59 +213,45 @@ const DashboardFinanceiro = () => {
           </div>
         </div>
 
-        {/* RECEBIDO */}
-        <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-emerald-500/30 transition-colors">
-          <div className="p-3 bg-emerald-500/10 rounded-none text-emerald-500 shrink-0">
-            <CheckCircle className="w-5 h-5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Total Pago / Liquidado</span>
-            <h3 className="text-xl font-extrabold text-emerald-400 font-mono mt-1 truncate" title={formatarBRL(data.total_recebido)}>
-              {formatarBRL(data.total_recebido)}
-            </h3>
-            <span className="text-[10px] text-theme-weak lowercase mt-1 block">recurso em caixa</span>
-          </div>
-        </div>
-
-        {/* FATURADO */}
+        {/* MARGEM DE LUCRO */}
         <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-blue-500/30 transition-colors">
           <div className="p-3 bg-blue-500/10 rounded-none text-blue-400 shrink-0">
             <TrendingUp className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Total Faturado</span>
-            <h3 className="text-xl font-extrabold text-blue-400 font-mono mt-1 truncate" title={formatarBRL(data.total_faturado)}>
-              {formatarBRL(data.total_faturado)}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Margem de Lucro</span>
+            <h3 className="text-xl font-extrabold text-blue-400 font-mono mt-1 truncate" title={data.tcv > 0 ? (((data.tcv - (data.total_despesas || 0)) / data.tcv) * 100).toFixed(1) + '%' : '0%'}>
+              {data.tcv > 0 ? (((data.tcv - (data.total_despesas || 0)) / data.tcv) * 100).toFixed(1) : '0'}%
             </h3>
-            <span className="text-[10px] text-theme-weak lowercase mt-1 block">nota emitida / em cobrança</span>
+            <span className="text-[10px] text-theme-weak lowercase mt-1 block">rentabilidade da operação</span>
           </div>
         </div>
 
-        {/* A FATURAR / PENDENTE */}
-        <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-amber-500/30 transition-colors">
-          <div className="p-3 bg-amber-500/10 rounded-none text-amber-500 shrink-0">
-            <Clock className="w-5 h-5" />
-          </div>
-          <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Total A Receber</span>
-            <h3 className="text-xl font-extrabold text-amber-400 font-mono mt-1 truncate" title={formatarBRL(data.total_a_receber)}>
-              {formatarBRL(data.total_a_receber)}
-            </h3>
-            <span className="text-[10px] text-theme-weak lowercase mt-1 block">agendado / pendente</span>
-          </div>
-        </div>
-
-        {/* ATRASADO */}
-        <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-rose-500/40 transition-colors">
+        {/* GASTOS / DESPESAS */}
+        <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-rose-500/30 transition-colors">
           <div className="p-3 bg-rose-500/10 rounded-none text-rose-500 shrink-0">
-            <AlertTriangle className="w-5 h-5 animate-pulse" />
+            <Receipt className="w-5 h-5" />
           </div>
           <div className="min-w-0">
-            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Inadimplência / Atrasado</span>
-            <h3 className="text-xl font-extrabold text-rose-500 font-mono mt-1 truncate" title={formatarBRL(data.total_atrasado)}>
-              {formatarBRL(data.total_atrasado)}
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Total de Gastos</span>
+            <h3 className="text-xl font-extrabold text-rose-500 font-mono mt-1 truncate" title={formatarBRL(data.total_despesas || 0)}>
+              {formatarBRL(data.total_despesas || 0)}
             </h3>
-            <span className="text-[10px] text-rose-400 lowercase mt-1 block">prazos vencidos não pagos</span>
+            <span className="text-[10px] text-theme-weak lowercase mt-1 block">despesas e custos operacionais</span>
+          </div>
+        </div>
+
+        {/* LUCRO */}
+        <div className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-4 shadow-sm hover:border-emerald-500/30 transition-colors">
+          <div className="p-3 bg-emerald-500/10 rounded-none text-emerald-500 shrink-0">
+            <DollarSign className="w-5 h-5" />
+          </div>
+          <div className="min-w-0">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Lucro</span>
+            <h3 className="text-xl font-extrabold text-emerald-400 font-mono mt-1 truncate" title={formatarBRL(data.tcv - (data.total_despesas || 0))}>
+              {formatarBRL(data.tcv - (data.total_despesas || 0))}
+            </h3>
+            <span className="text-[10px] text-theme-weak lowercase mt-1 block">valor do contrato - gastos</span>
           </div>
         </div>
       </div>

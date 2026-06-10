@@ -62,6 +62,9 @@ class Contrato(Base):
     # Relacionamento reverso com o histórico de alterações
     historicos = relationship("HistoricoAlteracao", back_populates="contrato", cascade="all, delete-orphan")
 
+    # Relacionamento com despesas
+    despesas = relationship("Despesa", back_populates="contrato", cascade="all, delete-orphan")
+
     # Relacionamentos de SaaS
     empresa_rel = relationship("Empresa", back_populates="contratos")
     area_atuacao = relationship("AreaAtuacao", back_populates="contratos")

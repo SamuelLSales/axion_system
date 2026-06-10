@@ -28,7 +28,10 @@ import {
   createEtapa,
   updateEtapa,
   deleteEtapa,
-
+  getDespesas,
+  createDespesa,
+  updateDespesa,
+  deleteDespesa,
   getResponsaveis,
   getAreasAtuacao,
   exportarCSV
@@ -40,6 +43,16 @@ import { useAuth } from '../context/AuthContext';
 const formatArea = (nome) => {
   if (!nome) return '';
   return nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+};
+
+const formatarCategoria = (cat) => {
+  const cats = {
+    logistica: 'Logística',
+    pessoal: 'Mão de Obra',
+    terceiros: 'Serviços Terceiros',
+    taxas: 'Taxas e Licenças'
+  };
+  return cats[cat] || cat;
 };
 
 
@@ -60,6 +73,7 @@ const DetalheContrato = () => {
   const [fasesExpandidas, setFasesExpandidas] = useState({});
   const [modalEtapaAberto, setModalEtapaAberto] = useState(false);
   const [modalExcluirAberto, setModalExcluirAberto] = useState(false);
+  const [modalDespesaAberto, setModalDespesaAberto] = useState(false);
 
   // Estados dos Formulários
   const [editContratoForm, setEditContratoForm] = useState({});
@@ -77,6 +91,15 @@ const DetalheContrato = () => {
     observacoes: '',
     valor_faturamento: 0.0,
     status_faturamento: 'pendente'
+  });
+  const [despesaForm, setDespesaForm] = useState({
+    id: null,
+    etapa_id: null,
+    descricao: '',
+    valor_costo: 0.0,
+    tipo_despesa: 'logistica',
+    status_pagamento: 'pendente',
+    reembolsavel: false
   });
 
   const carregarDados = async () => {
@@ -315,6 +338,71 @@ const DetalheContrato = () => {
     }
   };
 
+  // === FUNÇÕES DE DESPESA (GASTOS DA ETAPA) ===
+  const abrirModalCriarDespesa = (etapaId) => {
+    setDespesaForm({
+      id: null,
+      etapa_id: etapaId,
+      descricao: '',
+      valor_custo: 0.0,
+      tipo_despesa: 'logistica',
+      status_pagamento: 'pendente',
+      reembolsavel: false
+    });
+    setModalDespesaAberto(true);
+  };
+
+  const abrirModalEditarDespesa = (despesa) => {
+    setDespesaForm({
+      id: despesa.id,
+      etapa_id: despesa.etapa_id,
+      descricao: despesa.descricao,
+      valor_custo: despesa.valor_custo,
+      tipo_despesa: despesa.tipo_despesa,
+      status_pagamento: despesa.status_pagamento,
+      reembolsavel: despesa.reembolsavel
+    });
+    setModalDespesaAberto(true);
+  };
+
+  const handleSalvarDespesa = async (e) => {
+    e.preventDefault();
+    try {
+      const payload = {
+        descricao: despesaForm.descricao,
+        valor_custo: parseFloat(despesaForm.valor_custo) || 0.0,
+        tipo_despesa: despesaForm.tipo_despesa,
+        status_pagamento: despesaForm.status_pagamento,
+        reembolsavel: despesaForm.reembolsavel,
+        etapa_id: despesaForm.etapa_id,
+        contrato_id: contrato.id
+      };
+
+      if (despesaForm.id) {
+        await updateDespesa(despesaForm.id, payload);
+      } else {
+        await createDespesa(payload);
+      }
+      setModalDespesaAberto(false);
+      carregarDados();
+    } catch (err) {
+      console.error('Erro ao salvar despesa:', err);
+      alert('Erro ao salvar os dados do gasto.');
+    }
+  };
+
+  const handleExcluirDespesa = async (despesaId, descricao) => {
+    if (window.confirm(`Deseja realmente excluir o gasto "${descricao}"?`)) {
+      try {
+        await deleteDespesa(despesaId);
+        carregarDados();
+      } catch (err) {
+        console.error('Erro ao excluir despesa:', err);
+        alert('Erro ao excluir despesa.');
+      }
+    }
+  };
+
   // Slider de alteração direta de progresso no card
   const handleProgressoSlider = async (etapa, novoValorDecimal) => {
     try {
@@ -379,6 +467,20 @@ const DetalheContrato = () => {
   }
 
   const progressoGeral = calcularProgressoGeral();
+
+  const calcularTotalGastos = () => {
+    if (!contrato || !contrato.fases) return 0;
+    return contrato.fases.reduce((acc, fase) => {
+      if (!fase.etapas) return acc;
+      const somaFase = fase.etapas.reduce((accFase, etapa) => {
+        if (!etapa.despesas) return accFase;
+        const somaEtapa = etapa.despesas.reduce((accDesp, desp) => accDesp + (desp.valor_custo || 0), 0);
+        return accFase + somaEtapa;
+      }, 0);
+      return acc + somaFase;
+    }, 0);
+  };
+  const totalGastos = calcularTotalGastos();
 
   // Cores das Fases na Timeline
   const faseColors = {
@@ -499,9 +601,9 @@ const DetalheContrato = () => {
             <span className="text-theme-normal font-semibold mt-0.5 block">{contrato.diretor_projeto}</span>
           </div>
           <div>
-            <span className="text-theme-weak text-xs block">Valor Total do Contrato</span>
-            <span className="text-theme-normal font-semibold mt-0.5 block text-aldebaran-gold">
-              {contrato.valor_total ? contrato.valor_total.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' }) : 'R$ 0,00'}
+            <span className="text-theme-weak text-xs block">Total de Gastos (Custos)</span>
+            <span className="text-theme-normal font-semibold mt-0.5 block text-rose-500">
+              {totalGastos.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
             </span>
           </div>
           <div>
@@ -604,121 +706,186 @@ const DetalheContrato = () => {
                             return (
                               <div
                                 key={etapa.id}
-                                className={`bg-aldebaran-dark0 border border-aldebaran-border rounded-none p-3 flex flex-col xl:flex-row xl:items-center justify-between gap-4 hover:border-aldebaran-gold/50 transition-all ${progressoCem === 100 ? 'border-emerald-500/20 bg-emerald-500/[0.02]' : ''
+                                className={`bg-aldebaran-dark0 border border-aldebaran-border rounded-none p-3 flex flex-col gap-3 hover:border-aldebaran-gold/50 transition-all ${progressoCem === 100 ? 'border-emerald-500/20 bg-emerald-500/[0.02]' : ''
                                   }`}
                               >
-                                {/* Lado Esquerdo: Nome, Observação, Responsável, Datas */}
-                                <div className="flex-1 flex flex-col gap-1 min-w-0">
-                                  <div className="flex items-center gap-2">
-                                    <h4 className={`text-sm font-bold text-theme-strong truncate ${progressoCem === 100 ? 'text-theme-normal' : ''}`}>
-                                      {etapa.nome_tarefa}
-                                    </h4>
-                                    {etapa.valor_faturamento > 0 && (
-                                      <span className={`px-2 py-0.5 rounded-none text-[10px] font-bold border flex items-center gap-1 shrink-0 ${etapa.status_faturamento === 'pago'
-                                          ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-500'
-                                          : etapa.status_faturamento === 'faturado'
-                                            ? 'bg-blue-500/10 border-blue-500/30 text-blue-500'
-                                            : etapa.status_faturamento === 'atrasado'
-                                              ? 'bg-rose-500/10 border-rose-500/30 text-rose-500'
-                                              : 'bg-amber-500/10 border-amber-500/30 text-amber-500'
-                                        }`}>
-                                        <span>💲</span>
-                                        <span>{etapa.valor_faturamento.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}</span>
-                                        <span className="uppercase text-[9px] font-extrabold opacity-90">({etapa.status_faturamento || 'pendente'})</span>
-                                      </span>
-                                    )}
-                                    {etapa.observacoes && (
-                                      <span className="text-[10px] text-theme-weak italic truncate hidden sm:block">
-                                        - {etapa.observacoes}
-                                      </span>
-                                    )}
+                                <div className="flex flex-col xl:flex-row xl:items-center justify-between gap-4">
+                                  {/* Lado Esquerdo: Nome, Observação, Responsável, Datas */}
+                                  <div className="flex-1 flex flex-col gap-1 min-w-0">
+                                    <div className="flex items-center gap-2">
+                                      <h4 className={`text-sm font-bold text-theme-strong truncate ${progressoCem === 100 ? 'text-theme-normal' : ''}`}>
+                                        {etapa.nome_tarefa}
+                                      </h4>
+
+                                      {etapa.observacoes && (
+                                        <span className="text-[10px] text-theme-weak italic truncate hidden sm:block">
+                                          - {etapa.observacoes}
+                                        </span>
+                                      )}
+                                    </div>
+
+                                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-theme-weak w-full">
+                                      <div className="flex items-center gap-1 font-semibold">
+                                        <div className="w-4 h-4 rounded-none bg-aldebaran-gold flex items-center justify-center text-white font-bold text-[8px]">
+                                          {obterIniciais(etapa.responsavel)}
+                                        </div>
+                                        <span className="text-theme-normal">{etapa.responsavel}</span>
+                                      </div>
+
+                                      <div className="flex items-center gap-1 text-theme-weak">
+                                        <Calendar className="w-3.5 h-3.5" />
+                                        <span>Início: <span className="font-semibold text-theme-normal">{formatarData(etapa.data_inicio)}</span></span>
+                                      </div>
+                                      <div className="flex items-center gap-1 text-theme-weak">
+                                        <Clock className="w-3.5 h-3.5" />
+                                        <span>Prazo: <span className="font-semibold text-theme-normal">{formatarData(etapa.data_termino)}</span></span>
+                                      </div>
+                                      {etapa.data_conclusao && (
+                                        <div className="flex items-center gap-1 text-emerald-500">
+                                          <Check className="w-3.5 h-3.5" />
+                                          <span>Término Real: <span className="font-semibold">{formatarData(etapa.data_conclusao)}</span></span>
+                                        </div>
+                                      )}
+                                      <div className="ml-auto">
+                                        {calcularBadgeAtraso(etapa)}
+                                      </div>
+                                    </div>
                                   </div>
 
-                                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-theme-weak w-full">
-                                    <div className="flex items-center gap-1 font-semibold">
-                                      <div className="w-4 h-4 rounded-none bg-aldebaran-gold flex items-center justify-center text-white font-bold text-[8px]">
-                                        {obterIniciais(etapa.responsavel)}
-                                      </div>
-                                      <span className="text-theme-normal">{etapa.responsavel}</span>
+                                  {/* Lado Direito: Progresso e Ações */}
+                                  <div className="flex items-center justify-between xl:justify-end gap-4 shrink-0 border-t xl:border-t-0 border-aldebaran-border pt-3 xl:pt-0">
+                                    {/* Botão de Concluir / Desfazer */}
+                                    <div className="flex items-center gap-3 w-32 sm:w-48 justify-end">
+                                      {progressoCem === 100 ? (
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
+                                            <Check className="w-4 h-4" /> Finalizado
+                                          </span>
+                                          {user?.role === 'admin' && (
+                                            <button
+                                              onClick={() => handleProgressoSlider(etapa, 0)}
+                                              className="text-[10px] text-theme-weak hover:text-rose-400 underline transition"
+                                              title="Desfazer e marcar como Pendente"
+                                            >
+                                              Desfazer
+                                            </button>
+                                          )}
+                                        </div>
+                                      ) : (
+                                        <div className="flex items-center gap-2">
+                                          <span className="text-xs font-bold text-theme-weak">Pendente</span>
+                                          {user?.role === 'admin' && (
+                                            <button
+                                              onClick={() => handleConcluirEtapa(etapa)}
+                                              className="px-3 py-1.5 bg-transparent border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 rounded-none text-[11px] font-bold transition flex items-center gap-1"
+                                              title="Marcar tarefa como Concluída"
+                                            >
+                                              <Check className="w-3.5 h-3.5" />
+                                              Concluir
+                                            </button>
+                                          )}
+                                        </div>
+                                      )}
                                     </div>
 
-                                    <div className="flex items-center gap-1 text-theme-weak">
-                                      <Calendar className="w-3.5 h-3.5" />
-                                      <span>Início: <span className="font-semibold text-theme-normal">{formatarData(etapa.data_inicio)}</span></span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-theme-weak">
-                                      <Clock className="w-3.5 h-3.5" />
-                                      <span>Prazo: <span className="font-semibold text-theme-normal">{formatarData(etapa.data_termino)}</span></span>
-                                    </div>
-                                    {etapa.data_conclusao && (
-                                      <div className="flex items-center gap-1 text-emerald-500">
-                                        <Check className="w-3.5 h-3.5" />
-                                        <span>Término Real: <span className="font-semibold">{formatarData(etapa.data_conclusao)}</span></span>
+                                    {/* Ações */}
+                                    {user?.role === 'admin' && (
+                                      <div className="flex items-center gap-1 pl-3 border-l border-aldebaran-border">
+                                        <button
+                                          onClick={() => abrirModalEditarEtapa(etapa)}
+                                          className="p-1 hover:bg-aldebaran-gray text-theme-weak hover:text-theme-normal rounded-none transition"
+                                          title="Editar"
+                                        >
+                                          <Edit3 className="w-4 h-4" />
+                                        </button>
+                                        <button
+                                          onClick={() => handleExcluirEtapa(etapa.id, etapa.nome_tarefa)}
+                                          className="p-1 hover:bg-transparent text-theme-weak hover:text-rose-500 rounded-none transition"
+                                          title="Remover"
+                                        >
+                                          <Trash2 className="w-4 h-4" />
+                                        </button>
                                       </div>
                                     )}
-                                    <div className="ml-auto">
-                                      {calcularBadgeAtraso(etapa)}
-                                    </div>
                                   </div>
                                 </div>
 
-                                {/* Lado Direito: Progresso e Ações */}
-                                <div className="flex items-center justify-between xl:justify-end gap-4 shrink-0 border-t xl:border-t-0 border-aldebaran-border pt-3 xl:pt-0">
-
-                                  {/* Botão de Concluir / Desfazer */}
-                                  <div className="flex items-center gap-3 w-32 sm:w-48 justify-end">
-                                    {progressoCem === 100 ? (
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xs font-bold text-emerald-500 flex items-center gap-1">
-                                          <Check className="w-4 h-4" /> Finalizado
-                                        </span>
-                                        {user?.role === 'admin' && (
-                                          <button
-                                            onClick={() => handleProgressoSlider(etapa, 0)}
-                                            className="text-[10px] text-theme-weak hover:text-rose-400 underline transition"
-                                            title="Desfazer e marcar como Pendente"
-                                          >
-                                            Desfazer
-                                          </button>
-                                        )}
-                                      </div>
-                                    ) : (
-                                      <div className="flex items-center gap-2">
-                                        <span className="text-xs font-bold text-theme-weak">Pendente</span>
-                                        {user?.role === 'admin' && (
-                                          <button
-                                            onClick={() => handleConcluirEtapa(etapa)}
-                                            className="px-3 py-1.5 bg-transparent border border-emerald-500/30 text-emerald-500 hover:bg-emerald-500/10 rounded-none text-[11px] font-bold transition flex items-center gap-1"
-                                            title="Marcar tarefa como Concluída"
-                                          >
-                                            <Check className="w-3.5 h-3.5" />
-                                            Concluir
-                                          </button>
-                                        )}
-                                      </div>
+                                {/* GASTOS E DESPESAS DA ETAPA */}
+                                <div className="border-t border-aldebaran-border/30 pt-2.5">
+                                  <div className="flex items-center justify-between mb-2">
+                                    <span className="text-[11px] uppercase font-bold text-theme-weak tracking-wider flex items-center gap-1">
+                                      💸 Gastos da Etapa
+                                    </span>
+                                    {user?.role === 'admin' && (
+                                      <button
+                                        onClick={() => abrirModalCriarDespesa(etapa.id)}
+                                        className="text-[10px] font-bold text-aldebaran-gold hover:underline flex items-center gap-1 transition"
+                                      >
+                                        <Plus className="w-3.5 h-3.5" /> Registrar Gasto
+                                      </button>
                                     )}
                                   </div>
 
-                                  {/* Ações */}
-                                  {user?.role === 'admin' && (
-                                    <div className="flex items-center gap-1 pl-3 border-l border-aldebaran-border">
-                                      <button
-                                        onClick={() => abrirModalEditarEtapa(etapa)}
-                                        className="p-1 hover:bg-aldebaran-gray text-theme-weak hover:text-theme-normal rounded-none transition"
-                                        title="Editar"
-                                      >
-                                        <Edit3 className="w-4 h-4" />
-                                      </button>
-                                      <button
-                                        onClick={() => handleExcluirEtapa(etapa.id, etapa.nome_tarefa)}
-                                        className="p-1 hover:bg-transparent text-theme-weak hover:text-rose-500 rounded-none transition"
-                                        title="Remover"
-                                      >
-                                        <Trash2 className="w-4 h-4" />
-                                      </button>
+                                  {etapa.despesas && etapa.despesas.length > 0 ? (
+                                    <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-2">
+                                      {etapa.despesas.map((desp) => (
+                                        <div
+                                          key={desp.id}
+                                          className="bg-aldebaran-dark/40 border border-aldebaran-border/60 p-2 flex items-center justify-between gap-2 text-xs"
+                                        >
+                                          <div className="min-w-0">
+                                            <div className="flex items-center gap-1.5 flex-wrap">
+                                              <span className="font-bold text-theme-strong truncate" title={desp.descricao}>
+                                                {desp.descricao}
+                                              </span>
+                                              <span className="px-1.5 py-0.2 bg-aldebaran-dark text-[9px] border border-aldebaran-border text-theme-weak font-semibold uppercase rounded-none">
+                                                {formatarCategoria(desp.tipo_despesa)}
+                                              </span>
+                                            </div>
+                                            <div className="text-[10px] text-theme-weak mt-0.5 flex items-center gap-2">
+                                              <span className="font-bold text-aldebaran-gold">
+                                                {desp.valor_custo?.toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' })}
+                                              </span>
+                                              <span className={`capitalize font-semibold ${
+                                                desp.status_pagamento === 'pago' ? 'text-emerald-500' :
+                                                desp.status_pagamento === 'atrasado' ? 'text-rose-500' : 'text-amber-500'
+                                              }`}>
+                                                ({desp.status_pagamento})
+                                              </span>
+                                              {desp.reembolsavel && (
+                                                <span className="text-blue-400 font-semibold" title="Reembolsável">
+                                                  [Reembolsável]
+                                                </span>
+                                              )}
+                                            </div>
+                                          </div>
+
+                                          {user?.role === 'admin' && (
+                                            <div className="flex items-center gap-1 shrink-0">
+                                              <button
+                                                onClick={() => abrirModalEditarDespesa(desp)}
+                                                className="p-1 text-theme-weak hover:text-aldebaran-gold transition"
+                                                title="Editar Gasto"
+                                              >
+                                                <Edit3 className="w-3.5 h-3.5" />
+                                              </button>
+                                              <button
+                                                onClick={() => handleExcluirDespesa(desp.id, desp.descricao)}
+                                                className="p-1 text-theme-weak hover:text-rose-500 transition"
+                                                title="Remover Gasto"
+                                              >
+                                                <Trash2 className="w-3.5 h-3.5" />
+                                              </button>
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  ) : (
+                                    <div className="text-[10px] text-theme-weak italic">
+                                      Nenhum gasto registrado para esta etapa.
                                     </div>
                                   )}
-
                                 </div>
                               </div>
                             );
@@ -1090,38 +1257,7 @@ const DetalheContrato = () => {
                   />
                 </div>
 
-                {/* Campos Financeiros */}
-                <div className="grid grid-cols-2 gap-4 border-t border-aldebaran-border/40 pt-4 col-span-2">
-                  <div>
-                    <label className="text-xs font-semibold text-theme-weak block mb-1">Valor do Faturamento / Parcela (R$)</label>
-                    <input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={etapaForm.valor_faturamento}
-                      onChange={(e) => setEtapaForm({ ...etapaForm, valor_faturamento: parseFloat(e.target.value) || 0.0 })}
-                      className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
-                      placeholder="ex: 1500.00"
-                    />
-                    <span className="text-[10px] text-theme-weak mt-1 block">Insira um valor maior que zero para criar um Marco de Faturamento.</span>
-                  </div>
 
-                  <div>
-                    <label className="text-xs font-semibold text-theme-weak block mb-1">Status do Faturamento</label>
-                    <select
-                      value={etapaForm.status_faturamento}
-                      onChange={(e) => setEtapaForm({ ...etapaForm, status_faturamento: e.target.value })}
-                      className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
-                      disabled={!(etapaForm.valor_faturamento > 0)}
-                    >
-                      <option value="pendente">Pendente</option>
-                      <option value="faturado">Faturado</option>
-                      <option value="pago">Pago</option>
-                      <option value="atrasado">Atrasado</option>
-                    </select>
-                    <span className="text-[10px] text-theme-weak mt-1 block">Habilitado apenas se houver valor de faturamento.</span>
-                  </div>
-                </div>
               </div>
 
               <div>
@@ -1148,6 +1284,116 @@ const DetalheContrato = () => {
                   className="px-4 py-2 bg-aldebaran-gold hover:opacity-90 text-white font-bold rounded-none text-xs transition flex items-center gap-1.5"
                 >
                   {etapaForm.id ? 'Salvar Alterações' : 'Criar Tarefa'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* 4. MODAL ADICIONAR / EDITAR DESPESA */}
+      {modalDespesaAberto && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
+          <div className="bg-aldebaran-gray border border-aldebaran-border rounded-none w-full max-w-md overflow-hidden shadow-md">
+            <div className="p-5 border-b border-aldebaran-border flex justify-between items-center bg-aldebaran-dark/40">
+              <h3 className="text-base font-bold text-theme-strong flex items-center gap-2">
+                {despesaForm.id ? <Edit3 className="w-5 h-5 text-aldebaran-goldDark" /> : <Plus className="w-5 h-5 text-aldebaran-goldDark" />}
+                {despesaForm.id ? 'Editar Gasto' : 'Registrar Gasto da Etapa'}
+              </h3>
+              <button
+                onClick={() => setModalDespesaAberto(false)}
+                className="text-theme-weak hover:text-theme-strong transition"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <form onSubmit={handleSalvarDespesa} className="p-5 space-y-4">
+              <div>
+                <label className="text-xs font-semibold text-theme-weak block mb-1">Descrição do Gasto *</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="ex: Combustível para viagem a campo"
+                  value={despesaForm.descricao}
+                  onChange={(e) => setDespesaForm({ ...despesaForm, descricao: e.target.value })}
+                  className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-semibold text-theme-weak block mb-1">Valor do Gasto (R$) *</label>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0.01"
+                    required
+                    placeholder="ex: 350.00"
+                    value={despesaForm.valor_custo || ''}
+                    onChange={(e) => setDespesaForm({ ...despesaForm, valor_custo: parseFloat(e.target.value) || 0.0 })}
+                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+                  />
+                </div>
+
+                <div>
+                  <label className="text-xs font-semibold text-theme-weak block mb-1">Categoria *</label>
+                  <select
+                    required
+                    value={despesaForm.tipo_despesa}
+                    onChange={(e) => setDespesaForm({ ...despesaForm, tipo_despesa: e.target.value })}
+                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+                  >
+                    <option value="logistica">Logística</option>
+                    <option value="pessoal">Mão de Obra</option>
+                    <option value="terceiros">Serviços Terceiros</option>
+                    <option value="taxas">Taxas e Licenças</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4 items-center">
+                <div>
+                  <label className="text-xs font-semibold text-theme-weak block mb-1">Status Pagamento *</label>
+                  <select
+                    required
+                    value={despesaForm.status_pagamento}
+                    onChange={(e) => setDespesaForm({ ...despesaForm, status_pagamento: e.target.value })}
+                    className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+                  >
+                    <option value="pendente">Pendente</option>
+                    <option value="pago">Pago</option>
+                    <option value="atrasado">Atrasado</option>
+                  </select>
+                </div>
+
+                <div className="flex items-center gap-2 mt-4">
+                  <input
+                    type="checkbox"
+                    id="reembolsavel"
+                    checked={despesaForm.reembolsavel}
+                    onChange={(e) => setDespesaForm({ ...despesaForm, reembolsavel: e.target.checked })}
+                    className="w-4 h-4 text-aldebaran-gold bg-aldebaran-dark border-aldebaran-border rounded-none focus:ring-0 focus:ring-offset-0"
+                  />
+                  <label htmlFor="reembolsavel" className="text-xs font-semibold text-theme-normal cursor-pointer select-none">
+                    Reembolsável pelo cliente
+                  </label>
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-3 border-t border-aldebaran-border">
+                <button
+                  type="button"
+                  onClick={() => setModalDespesaAberto(false)}
+                  className="px-4 py-2 bg-transparent border border-aldebaran-border hover:bg-aldebaran-dark text-theme-normal rounded-none text-xs font-bold transition"
+                >
+                  Cancelar
+                </button>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-aldebaran-gold hover:opacity-90 text-white font-bold rounded-none text-xs transition flex items-center gap-1.5"
+                >
+                  {despesaForm.id ? 'Salvar Alterações' : 'Registrar Gasto'}
                 </button>
               </div>
             </form>
