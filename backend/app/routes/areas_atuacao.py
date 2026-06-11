@@ -10,12 +10,12 @@ from app.services.auth import get_usuario_atual
 
 router = APIRouter(prefix="/areas", tags=["Áreas de Atuação"])
 
-@router.get("/", response_model=List[AreaAtuacaoResponse])
+@router.get("", response_model=List[AreaAtuacaoResponse])
 def listar_areas(db: Session = Depends(get_db), current_user: Usuario = Depends(get_usuario_atual)):
     # Isolar por tenant
     return db.query(AreaAtuacao).filter(AreaAtuacao.tenant_id == current_user.tenant_id).all()
 
-@router.post("/", response_model=AreaAtuacaoResponse)
+@router.post("", response_model=AreaAtuacaoResponse)
 def criar_area(area: AreaAtuacaoCreate, db: Session = Depends(get_db), current_user: Usuario = Depends(get_usuario_atual)):
     nova_area = AreaAtuacao(
         nome=area.nome,
