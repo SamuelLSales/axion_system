@@ -34,6 +34,13 @@ def run_migration():
             else:
                 print(f"Aviso ao adicionar 'gasto_total' (pode já existir): {e}")
                 
+        # 3. Ativar todos os usuários existentes para evitar bloqueio por confirmação de e-mail
+        try:
+            connection.execute(text("UPDATE usuarios SET is_active = :val;"), {"val": True})
+            print("Ativação automática executada para todos os usuários cadastrados.")
+        except Exception as e:
+            print(f"Aviso ao ativar usuários: {e}")
+                
     print("======================================================")
     print("Verificação/Migração concluída com sucesso!")
     print("======================================================")

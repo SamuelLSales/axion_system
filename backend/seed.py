@@ -39,10 +39,10 @@ def seed_database():
         if db.query(Usuario).first() is None:
             print("Semeando Usuários...")
             hash_admin, salt_admin = gerar_hash_senha("admin")
-            admin = Usuario(username="admin", password_hash=hash_admin, salt=salt_admin, nome="Administrador", role="admin")
+            admin = Usuario(username="admin", password_hash=hash_admin, salt=salt_admin, nome="Administrador", role="admin", is_active=True)
             
             hash_visita, salt_visita = gerar_hash_senha("visita")
-            visita = Usuario(username="visita", password_hash=hash_visita, salt=salt_visita, nome="Visitante", role="viewer")
+            visita = Usuario(username="visita", password_hash=hash_visita, salt=salt_visita, nome="Visitante", role="viewer", is_active=True)
             
             db.add_all([admin, visita])
             db.commit()

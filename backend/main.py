@@ -64,6 +64,7 @@ def inicializar_admin_se_necessario():
                 password_hash=hash_senha,
                 salt=salt,
                 role="admin",
+                is_active=True,
                 tenant_id=empresa_padrao.id
             )
             db.add(admin_user)
