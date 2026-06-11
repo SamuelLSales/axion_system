@@ -48,7 +48,7 @@ services:
     command:
       - "http"
       - "frontend:80"
-      - "--domain=antsy-sprang-harness.ngrok-free.dev"
+      - "--domain=kudos-commerce-legwarmer.ngrok-free.dev"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:

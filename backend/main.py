@@ -35,6 +35,13 @@ from app.models.despesa import Despesa
 
 Base.metadata.create_all(bind=engine)
 
+# Executar migrações automáticas de colunas ausentes (compatível com SQLite e PostgreSQL)
+try:
+    from migrate_db import run_migration
+    run_migration()
+except Exception as e:
+    print(f"Erro ao executar migrações automáticas no startup: {e}")
+
 from database import SessionLocal
 from app.services.auth import gerar_hash_senha
 
