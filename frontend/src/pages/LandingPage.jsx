@@ -19,6 +19,44 @@ import {
   FileSpreadsheet
 } from 'lucide-react';
 
+// ============================================================
+// 📱 WHATSAPP — Altere o número abaixo para o seu
+// Formato: código do país + DDD + número (só dígitos)
+// Ex: '5531999999999'
+// ============================================================
+const WPP_PHONE = '5531999999999';
+const WPP_MSG = encodeURIComponent('Olá! Gostaria de saber mais sobre o AXION, o sistema de gestão de contratos.');
+
+const WhatsAppButton = () => {
+  const [hovered, setHovered] = React.useState(false);
+  return (
+    <div className="fixed bottom-6 right-6 z-50 flex items-center gap-3">
+      {/* Tooltip */}
+      <div className={`bg-white text-slate-800 text-sm font-semibold px-4 py-2.5 shadow-xl rounded-lg border border-slate-100 whitespace-nowrap transition-all duration-300 ${
+        hovered ? 'opacity-100 translate-x-0 pointer-events-auto' : 'opacity-0 translate-x-3 pointer-events-none'
+      }`}>
+        💬 Fale conosco pelo WhatsApp
+        <div className="absolute right-[-5px] top-1/2 -translate-y-1/2 w-3 h-3 bg-white border-r border-t border-slate-100 rotate-45" />
+      </div>
+      {/* Botão */}
+      <a
+        href={`https://wa.me/${WPP_PHONE}?text=${WPP_MSG}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        aria-label="Fale conosco pelo WhatsApp"
+        className="relative w-14 h-14 flex items-center justify-center rounded-full shadow-lg shadow-[#25D366]/30 transition-transform duration-200 hover:scale-110 active:scale-95"
+        style={{ backgroundColor: '#25D366' }}
+      >
+        <span className="absolute inset-0 rounded-full animate-ping" style={{ backgroundColor: '#25D366', opacity: 0.35 }} />
+        <svg viewBox="0 0 32 32" className="w-8 h-8 relative z-10" fill="white" xmlns="http://www.w3.org/2000/svg">
+          <path d="M16.003 2.667C8.64 2.667 2.667 8.64 2.667 16c0 2.347.618 4.64 1.791 6.664L2.667 29.333l6.883-1.755A13.258 13.258 0 0 0 16.003 29.333C23.36 29.333 29.333 23.36 29.333 16S23.36 2.667 16.003 2.667Zm0 2.4c5.893 0 10.933 4.88 10.933 10.933 0 6.053-4.88 10.933-10.933 10.933a10.886 10.886 0 0 1-5.6-1.547l-.4-.24-4.08 1.04 1.08-3.947-.267-.413A10.886 10.886 0 0 1 5.07 16c0-6.053 5.04-10.933 10.933-10.933Zm-3.307 5.28c-.267 0-.693.1-.96.373-.267.28-1.013 1.013-1.013 2.427 0 1.413 1.04 2.773 1.187 2.96.146.187 2.026 3.2 5 4.36.693.293 1.227.453 1.653.573.693.2 1.32.173 1.813.107.56-.08 1.707-.68 1.947-1.333.24-.653.24-1.227.167-1.333-.08-.107-.28-.187-.587-.333-.307-.147-1.707-.853-1.973-.947-.267-.093-.453-.147-.653.147-.2.293-.773.947-.947 1.147-.173.2-.347.213-.653.067-.307-.147-1.293-.48-2.467-1.52-.907-.8-1.52-1.787-1.707-2.093-.187-.307-.02-.48.14-.627.147-.133.307-.347.467-.52.16-.173.213-.293.32-.493.107-.2.053-.373-.027-.52-.08-.147-.653-1.6-.907-2.187-.24-.56-.48-.48-.653-.48h-.547Z" />
+        </svg>
+      </a>
+    </div>
+  );
+};
 
 const PLANOS = [
   {
@@ -583,6 +621,9 @@ const LandingPage = () => {
           </p>
         </div>
       </footer>
+
+      {/* Botão flutuante WhatsApp */}
+      <WhatsAppButton />
 
     </div>
   );
