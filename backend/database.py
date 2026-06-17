@@ -6,8 +6,10 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# Caminho do banco de dados (padrão é SQLite local, mas agora podemos usar PostgreSQL via .env)
-DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///aldebaran.db")
+# Caminho do banco de dados absoluto para evitar múltiplos arquivos dependendo de onde o script é rodado
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+db_path = os.path.join(BASE_DIR, 'aldebaran.db').replace('\\', '/')
+DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{db_path}")
 
 # Criação do engine de conexão
 # 'check_same_thread' é necessário apenas para o SQLite

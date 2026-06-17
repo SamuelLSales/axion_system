@@ -180,12 +180,12 @@ export const deleteAreaAtuacao = async (id) => {
 };
 
 // === EXPORTAR CSV ===
-export const exportarCSV = () => {
+export const exportarCSV = (contratoId = null) => {
   // Dispara o download nativo abrindo a rota de exportação no navegador
   const token = localStorage.getItem('aldebaran_token');
-  const url = token
-    ? `${API_BASE_URL}/exportar/csv?token=${token}`
-    : `${API_BASE_URL}/exportar/csv`;
+  let url = `${API_BASE_URL}/exportar/csv?`;
+  if (token) url += `token=${token}&`;
+  if (contratoId) url += `contrato_id=${contratoId}`;
   window.open(url, '_blank');
 };
 

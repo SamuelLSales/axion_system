@@ -449,7 +449,7 @@ const DetalheContrato = () => {
 
         <div className="flex gap-3">
           <button
-            onClick={exportarCSV}
+            onClick={() => exportarCSV(id)}
             className="px-4 py-2 bg-transparent hover:bg-aldebaran-gray text-theme-weak hover:text-theme-strong border border-aldebaran-border rounded-none text-sm font-semibold transition flex items-center gap-2 hover:scale-[1.02]"
           >
             <FileSpreadsheet className="w-4 h-4 text-emerald-400" />
