@@ -1,8 +1,7 @@
-// frontend/src/pages/Login.jsx
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Lock, User, Shield, AlertCircle, ArrowRight, Eye, EyeOff } from 'lucide-react';
+import { Lock, User, AlertCircle, ArrowRight, Eye, EyeOff, ArrowLeft } from 'lucide-react';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -38,7 +37,19 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-aldebaran-dark0 flex items-center justify-center p-4 selection:bg-[#0D9488]/20 selection:text-[#0D9488]">
+    <div className="min-h-screen bg-aldebaran-dark0 flex flex-col items-center justify-center p-4 selection:bg-[#0D9488]/20 selection:text-[#0D9488]">
+
+      {/* Link voltar para Home */}
+      <div className="w-full max-w-[420px] mb-4">
+        <Link
+          to="/"
+          className="inline-flex items-center gap-1.5 text-theme-weak hover:text-white text-xs font-semibold transition-colors group"
+        >
+          <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+          Voltar para a Home
+        </Link>
+      </div>
+
       <div className="w-full max-w-[420px] bg-[#111317] border border-aldebaran-border p-8 md:p-10 relative overflow-hidden">
         {/* Glow decorativo no fundo */}
         <div className="absolute -top-40 -right-40 w-80 h-80 bg-[#0D9488]/5 rounded-full blur-[100px] pointer-events-none"></div>

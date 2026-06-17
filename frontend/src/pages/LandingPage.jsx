@@ -10,7 +10,13 @@ import {
   Zap,
   Target,
   Compass,
-  Award
+  Award,
+  DollarSign,
+  TrendingUp,
+  PieChart,
+  Receipt,
+  Coins,
+  FileSpreadsheet
 } from 'lucide-react';
 
 const LandingPage = () => {
@@ -79,13 +85,13 @@ const LandingPage = () => {
           </div>
           <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-blue-500/10 text-blue-400 text-xs font-bold font-mono mb-8 border border-blue-500/20">
             <Zap className="w-3 h-3" />
-            Nova versão 2.0 disponível
+            Nova versão 2.0 disponível — com Painel Financeiro
           </div>
           <h1 className="text-4xl sm:text-5xl md:text-6xl font-extrabold font-title text-white tracking-tight mb-6 max-w-4xl mx-auto leading-tight">
-            Gestão Inteligente de <span className="text-transparent bg-clip-text bg-gradient-to-r from-aldebaran-orange to-blue-400">Contratos e Prazos</span>
+            Gestão Inteligente de <span className="text-transparent bg-clip-text bg-gradient-to-r from-aldebaran-orange to-blue-400">Contratos e Finanças</span>
           </h1>
           <p className="text-lg sm:text-xl text-slate-400 max-w-2xl mx-auto mb-10 font-medium">
-            Sistema corporativo para controle absoluto sobre fases, etapas e alertas de vencimento. Ideal para consultorias de engenharia, geologia e meio ambiente.
+            Sistema corporativo para controle absoluto sobre fases, etapas, prazos e resultado financeiro. Ideal para consultorias de engenharia, geologia e meio ambiente.
           </p>
           <div className="flex flex-col sm:flex-row justify-center items-center gap-4">
             <Link 
@@ -117,7 +123,7 @@ const LandingPage = () => {
             </p>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1 */}
             <div className="bg-aldebaran-dark border border-aldebaran-border p-8 hover:border-aldebaran-orange/50 transition-colors shadow-sm">
               <div className="w-12 h-12 bg-blue-500/10 flex items-center justify-center mb-6">
@@ -145,17 +151,118 @@ const LandingPage = () => {
               <div className="w-12 h-12 bg-teal-500/10 flex items-center justify-center mb-6">
                 <BarChart2 className="w-6 h-6 text-teal-500" />
               </div>
-              <h3 className="text-xl font-bold text-theme-strong mb-3">Dashboard Interativo</h3>
+              <h3 className="text-xl font-bold text-theme-strong mb-3">Dashboard de Projetos</h3>
               <p className="text-theme-weak leading-relaxed text-sm">
-                Acompanhe o progresso de fases e etapas com indicadores visuais precisos. Tenha a visão do todo em tempo real.
+                Acompanhe o progresso de fases e etapas com indicadores visuais precisos. Tenha a visão do todo em tempo real com alertas automáticos.
+              </p>
+            </div>
+
+            {/* Feature 4 — Painel Financeiro */}
+            <div className="bg-aldebaran-dark border border-emerald-500/30 p-8 hover:border-emerald-500/60 transition-colors shadow-sm relative overflow-hidden">
+              <div className="w-12 h-12 bg-emerald-500/10 flex items-center justify-center mb-6">
+                <DollarSign className="w-6 h-6 text-emerald-500" />
+              </div>
+              <h3 className="text-xl font-bold text-theme-strong mb-3">Painel Financeiro</h3>
+              <p className="text-theme-weak leading-relaxed text-sm">
+                Controle de TCV, despesas, margem de lucro e impostos por contrato. Visualize a rentabilidade real da sua operação com gráficos interativos.
               </p>
             </div>
           </div>
         </div>
       </section>
 
+      {/* Painel Financeiro Deep Dive Section */}
+      <section id="financeiro" className="py-24 bg-aldebaran-dark border-t border-aldebaran-border">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          <div className="text-center max-w-3xl mx-auto mb-16">
+            <span className="text-xs font-bold tracking-widest uppercase text-emerald-400 block mb-3">
+              Novidade — Painel Financeiro
+            </span>
+            <h2 className="text-3xl sm:text-4xl font-extrabold font-title text-theme-strong mb-4">
+              Inteligência financeira integrada aos seus contratos
+            </h2>
+            <p className="text-theme-weak text-lg">
+              Visualize receita, despesas, margem de lucro e impostos em um único painel. 
+              Tome decisões baseadas em dados reais, não em estimativas.
+            </p>
+          </div>
+
+          {/* KPI Cards mockup */}
+          <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-12">
+            {[
+              { label: 'Valor Global (TCV)', value: 'R$ 1,2M', icon: Coins, color: 'text-aldebaran-gold', bg: 'bg-aldebaran-gold/10' },
+              { label: 'Margem de Lucro', value: '38%', icon: TrendingUp, color: 'text-blue-400', bg: 'bg-blue-500/10' },
+              { label: 'Total de Gastos', value: 'R$ 342K', icon: Receipt, color: 'text-rose-500', bg: 'bg-rose-500/10' },
+              { label: 'Lucro Líquido', value: 'R$ 428K', icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-500/10' },
+              { label: 'Imposto Projetado', value: 'R$ 84K', icon: FileSpreadsheet, color: 'text-orange-400', bg: 'bg-orange-500/10' },
+            ].map((kpi, i) => (
+              <div key={i} className="border border-aldebaran-border p-5 bg-aldebaran-gray flex items-start gap-3 shadow-sm">
+                <div className={`p-2.5 ${kpi.bg} rounded-none ${kpi.color} shrink-0`}>
+                  <kpi.icon className="w-4 h-4" />
+                </div>
+                <div className="min-w-0">
+                  <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">{kpi.label}</span>
+                  <span className={`text-lg font-extrabold font-mono mt-1 block ${kpi.color}`}>{kpi.value}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Features do painel financeiro */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div className="flex gap-4">
+              <div className="w-10 h-10 bg-emerald-500/10 flex items-center justify-center shrink-0">
+                <PieChart className="w-5 h-5 text-emerald-500" />
+              </div>
+              <div>
+                <h4 className="font-bold text-theme-strong mb-2">Rentabilidade por Área</h4>
+                <p className="text-theme-weak text-sm leading-relaxed">
+                  Gráficos de barras comparando valor contratado vs. gastos reais por área de atuação (Topografia, Geologia, etc.).
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="w-10 h-10 bg-blue-500/10 flex items-center justify-center shrink-0">
+                <TrendingUp className="w-5 h-5 text-blue-500" />
+              </div>
+              <div>
+                <h4 className="font-bold text-theme-strong mb-2">Composição de Carteira</h4>
+                <p className="text-theme-weak text-sm leading-relaxed">
+                  Gráfico de donut mostrando a distribuição percentual de receita por área. Identifique de onde vem seu faturamento.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex gap-4">
+              <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center shrink-0">
+                <FileSpreadsheet className="w-5 h-5 text-amber-500" />
+              </div>
+              <div>
+                <h4 className="font-bold text-theme-strong mb-2">Exportação Inteligente</h4>
+                <p className="text-theme-weak text-sm leading-relaxed">
+                  Baixe o histórico de alterações filtrado por contrato específico. Dados prontos para auditoria ou apresentação ao cliente.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div className="mt-12 text-center">
+            <Link 
+              to="/cadastro"
+              className="inline-flex items-center gap-2 px-8 py-4 bg-emerald-600 hover:bg-emerald-500 text-white font-bold transition-all shadow-lg shadow-emerald-500/20"
+            >
+              Experimente o Painel Financeiro
+              <ArrowRight className="w-5 h-5" />
+            </Link>
+          </div>
+
+        </div>
+      </section>
+
       {/* Sobre a AXION Section */}
-      <section id="sobre" className="py-24 bg-aldebaran-dark border-t border-b border-aldebaran-border">
+      <section id="sobre" className="py-24 bg-aldebaran-gray border-t border-b border-aldebaran-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-start">
             
@@ -179,11 +286,11 @@ const LandingPage = () => {
                   Desenvolvida para empresas que trabalham com projetos complexos, a AXION permite acompanhar cada etapa do processo em tempo real, monitorando responsabilidades, vencimentos e entregas com total transparência.
                 </p>
                 <p>
-                  Com dashboards inteligentes, alertas automáticos e indicadores estratégicos, sua equipe ganha visibilidade completa sobre o andamento dos contratos, reduzindo riscos, atrasos e retrabalho.
+                  Com dashboards inteligentes, alertas automáticos e indicadores estratégicos — incluindo o novo <strong className="text-emerald-400">Painel Financeiro</strong> com controle de TCV, despesas e margem de lucro —, sua equipe ganha visibilidade completa sobre o andamento e a saúde financeira dos contratos.
                 </p>
               </div>
               
-              <div className="p-4 border-l-4 border-aldebaran-orange bg-aldebaran-gray/50 text-theme-strong font-medium text-sm italic">
+              <div className="p-4 border-l-4 border-aldebaran-orange bg-aldebaran-dark/50 text-theme-strong font-medium text-sm italic">
                 "Mais do que um sistema de gestão, a AXION é uma plataforma criada para transformar controle em resultado."
               </div>
             </div>
@@ -192,7 +299,7 @@ const LandingPage = () => {
             <div className="lg:col-span-5 space-y-6">
               
               {/* Missão Card */}
-              <div className="bg-aldebaran-gray border border-aldebaran-border p-6 shadow-sm hover:border-aldebaran-orange/30 transition-colors">
+              <div className="bg-aldebaran-dark border border-aldebaran-border p-6 shadow-sm hover:border-aldebaran-orange/30 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-aldebaran-orange/10 flex items-center justify-center text-aldebaran-orange">
                     <Target className="w-5 h-5" />
@@ -205,7 +312,7 @@ const LandingPage = () => {
               </div>
               
               {/* Visão Card */}
-              <div className="bg-aldebaran-gray border border-aldebaran-border p-6 shadow-sm hover:border-aldebaran-gold/30 transition-colors">
+              <div className="bg-aldebaran-dark border border-aldebaran-border p-6 shadow-sm hover:border-aldebaran-gold/30 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
                   <div className="w-10 h-10 bg-aldebaran-gold/10 flex items-center justify-center text-aldebaran-gold">
                     <Compass className="w-5 h-5" />
@@ -218,7 +325,7 @@ const LandingPage = () => {
               </div>
               
               {/* Valores Card */}
-              <div className="bg-aldebaran-gray border border-aldebaran-border p-6 shadow-sm hover:border-amber-500/30 transition-colors">
+              <div className="bg-aldebaran-dark border border-aldebaran-border p-6 shadow-sm hover:border-amber-500/30 transition-colors">
                 <div className="flex items-center gap-3 mb-4">
                   <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center text-amber-500">
                     <Award className="w-5 h-5" />
@@ -248,12 +355,12 @@ const LandingPage = () => {
       </section>
 
       {/* Trust Section */}
-      <section className="py-20 border-t border-aldebaran-border bg-aldebaran-gray">
+      <section className="py-20 border-t border-aldebaran-border bg-aldebaran-dark">
         <div className="max-w-4xl mx-auto px-4 text-center">
           <ShieldCheck className="w-12 h-12 text-aldebaran-gold mx-auto mb-6 opacity-80" />
           <h2 className="text-2xl font-bold text-theme-strong mb-4">Segurança e Isolamento Total</h2>
-          <p className="text-theme-weak text-sm leading-relaxed">
-            Nossa arquitetura SaaS Multi-Tenant garante que os dados, responsáveis e contratos da sua empresa fiquem estritamente isolados em banco de dados criptografado. Total confidencialidade dos seus processos.
+          <p className="text-theme-weak text-sm leading-relaxed max-w-2xl mx-auto">
+            Nossa arquitetura SaaS Multi-Tenant garante que os dados, responsáveis e contratos da sua empresa fiquem estritamente isolados em banco de dados criptografado. Total confidencialidade dos seus processos e informações financeiras.
           </p>
         </div>
       </section>

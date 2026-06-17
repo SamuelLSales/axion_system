@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { registerUser } from '../services/api';
-import { Shield, AlertCircle, ArrowRight, User, Briefcase, Phone, Mail, Lock } from 'lucide-react';
+import { AlertCircle, ArrowRight, User, Briefcase, Phone, Mail, Lock, ArrowLeft } from 'lucide-react';
 
 export default function Cadastro() {
   const navigate = useNavigate();
@@ -46,15 +46,26 @@ export default function Cadastro() {
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-aldebaran-gray selection:bg-amber-500/20 selection:text-amber-500">
-      
+
       {/* Lado Esquerdo - Branding */}
-      <div className="w-full md:w-[45%] bg-[#0B0F19] relative overflow-hidden flex flex-col items-center justify-center p-8 border-r border-aldebaran-border/50">
+      <div className="w-full md:w-[45%] bg-[#0B0F19] relative overflow-hidden flex flex-col p-8 border-r border-aldebaran-border/50">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
         {/* Glow decorativo */}
         <div className="absolute -top-40 -left-40 w-96 h-96 bg-aldebaran-orange/10 rounded-full blur-[100px] pointer-events-none"></div>
         <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-aldebaran-gold/10 rounded-full blur-[100px] pointer-events-none"></div>
+
+        {/* Link voltar para Home — topo do painel escuro */}
+        <div className="relative z-10 mb-auto">
+          <Link
+            to="/"
+            className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-200 text-xs font-semibold transition-colors group"
+          >
+            <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
+            Voltar para a Home
+          </Link>
+        </div>
         
-        <div className="relative z-10 text-center flex flex-col items-center">
+        <div className="relative z-10 text-center flex flex-col items-center flex-1 justify-center">
           <div className="w-[70px] h-[65px] relative overflow-hidden mb-3">
             <img 
               src="/axion_icon.png" 
