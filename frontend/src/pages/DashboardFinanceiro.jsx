@@ -164,11 +164,11 @@ const DashboardFinanceiro = () => {
             <ArrowLeft className="w-4 h-4 group-hover:-translate-x-1 transition-transform" />
             Voltar ao Dashboard
           </button>
-          <h1 className="text-2xl font-bold text-theme-strong lowercase tracking-tight">
-            painel financeiro dos contratos
+          <h1 className="text-2xl font-bold text-theme-strong tracking-tight">
+            Painel Financeiro dos Contratos
           </h1>
-          <p className="text-theme-weak text-sm mt-1 lowercase font-mono">
-            gestão inteligente de faturamento e fluxo de caixa
+          <p className="text-theme-weak text-sm mt-1 font-mono">
+            Gestão de faturamento e fluxo de caixa
           </p>
         </div>
 
@@ -317,7 +317,7 @@ const DashboardFinanceiro = () => {
         <div className="border border-aldebaran-border p-6 bg-aldebaran-gray rounded-none lg:col-span-2 flex flex-col space-y-4">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Rentabilidade</span>
-            <h4 className="text-base font-bold text-theme-strong lowercase mt-1">valor contratado vs gasto por área (R$)</h4>
+            <h4 className="text-base font-bold text-theme-strong mt-1">Valor Contratado vs Gasto por Área (R$)</h4>
           </div>
 
           <div className="h-80 w-full text-xs font-mono">
@@ -356,7 +356,7 @@ const DashboardFinanceiro = () => {
         <div className="border border-aldebaran-border p-6 bg-aldebaran-gray rounded-none flex flex-col space-y-4">
           <div>
             <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Composição de Carteira</span>
-            <h4 className="text-base font-bold text-theme-strong lowercase mt-1">distribuição de receita por área (TCV)</h4>
+            <h4 className="text-base font-bold text-theme-strong mt-1">Distribuição de Receita por Área (TCV)</h4>
           </div>
 
           <div className="h-64 w-full relative flex items-center justify-center text-xs">

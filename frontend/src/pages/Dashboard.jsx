@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import { getDashboardData, getContratos, exportarCSV, getAreasAtuacao } from '../services/api';
 import StatusBadge from '../components/StatusBadge';
+import { useAuth } from '../context/AuthContext';
 
 const formatArea = (nome) => {
   if (!nome) return '';
@@ -24,6 +25,7 @@ const formatArea = (nome) => {
 
 const Dashboard = () => {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [stats, setStats] = useState({
     total_contratos: 0,
     contratos_no_prazo: 0,
@@ -245,11 +247,13 @@ const Dashboard = () => {
       {/* CADASTRAR/EXPORTAR CABEÇALHO */}
       <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-aldebaran-border pb-6">
         <div>
-          <h1 className="text-2xl font-bold text-theme-strong lowercase tracking-tight">
-            controle de contratos
+          <h1 className="text-2xl font-bold text-theme-strong tracking-tight">
+            Controle de Contratos
           </h1>
-          <p className="text-theme-weak text-sm mt-1 lowercase font-mono">
-            topografia geologia — belo horizonte, mg
+          <p className="text-theme-weak text-sm mt-1 font-mono">
+            {user?.empresa?.nome_fantasia
+              ? `Painel de ${user.empresa.nome_fantasia}`
+              : 'Painel de Gestão de Contratos'}
           </p>
         </div>
 
