@@ -1,32 +1,41 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
-import { useAuth } from '../context/AuthContext';
+import { Link } from 'react-router-dom';
 import { registerUser } from '../services/api';
-import { AlertCircle, ArrowRight, User, Briefcase, Phone, Mail, Lock, ArrowLeft } from 'lucide-react';
+import {
+  AlertCircle, User, Briefcase, Phone, Mail, Lock,
+  ArrowLeft, ArrowRight, Building2, FileText, Check, Eye, EyeOff
+} from 'lucide-react';
+
+const inputClass = "w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] transition-all outline-none placeholder:text-slate-400";
+const labelClass = "block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5";
 
 export default function Cadastro() {
-  const navigate = useNavigate();
-  const { loginUser } = useAuth(); // context expects user and token or we can just use setAuth
-  
-  // Custom auth injection since useAuth's loginUser might be strictly expecting username/pass
-  // The context's loginUser usually updates state. Wait, the context's loginUser expects (userData, token).
-  // Let's assume the context exposes what we need, but looking at Login.jsx: `loginUser(userData, token)`
-  
+  const [step, setStep] = useState(1);
+  const [showPassword, setShowPassword] = useState(false);
   const [formData, setFormData] = useState({
     nome: '',
     sobrenome: '',
-    empresa: '',
+    cargo: '',
     telefone: '',
     email: '',
-    senha: ''
+    senha: '',
+    empresa: '',
+    razao_social: '',
+    cnpj: '',
   });
-  
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isRegistered, setIsRegistered] = useState(false);
 
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleNextStep = (e) => {
+    e.preventDefault();
+    setError(null);
+    setStep(2);
   };
 
   const handleRegister = async (e) => {
@@ -45,17 +54,16 @@ export default function Cadastro() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col md:flex-row bg-aldebaran-gray selection:bg-amber-500/20 selection:text-amber-500">
+    <div className="min-h-screen flex flex-col md:flex-row bg-[#f4f5f7] selection:bg-emerald-500/20 selection:text-emerald-600">
 
-      {/* Lado Esquerdo - Branding */}
-      <div className="w-full md:w-[45%] bg-[#0B0F19] relative overflow-hidden flex flex-col p-8 border-r border-aldebaran-border/50">
+      {/* Painel Esquerdo — Branding */}
+      <div className="w-full md:w-[42%] bg-[#0B0F19] relative overflow-hidden flex flex-col p-8 border-r border-aldebaran-border/50 min-h-[260px] md:min-h-screen">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        {/* Glow decorativo */}
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-aldebaran-orange/10 rounded-full blur-[100px] pointer-events-none"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-aldebaran-gold/10 rounded-full blur-[100px] pointer-events-none"></div>
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-aldebaran-gold/10 rounded-full blur-[120px] pointer-events-none"></div>
 
-        {/* Link voltar para Home — topo do painel escuro */}
-        <div className="relative z-10 mb-auto">
+        {/* Voltar */}
+        <div className="relative z-10">
           <Link
             to="/"
             className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-200 text-xs font-semibold transition-colors group"
@@ -64,187 +72,248 @@ export default function Cadastro() {
             Voltar para a Home
           </Link>
         </div>
-        
-        <div className="relative z-10 text-center flex flex-col items-center flex-1 justify-center">
-          <div className="w-[70px] h-[65px] relative overflow-hidden mb-3">
-            <img 
-              src="/axion_icon.png" 
-              alt="AXION" 
-              style={{
-                position: 'absolute',
-                width: '180px',
-                height: 'auto',
-                maxWidth: 'none',
-                top: '-26px',
-                left: '-51.5px'
-              }}
-              className="drop-shadow-lg" 
-            />
+
+        {/* Conteúdo centralizado */}
+        <div className="relative z-10 flex flex-col flex-1 justify-center mt-8 md:mt-0">
+          <div className="mb-8 flex flex-col items-start">
+            <div className="w-[56px] h-[52px] relative overflow-hidden mb-4">
+              <img
+                src="/axion_icon.png"
+                alt="AXION"
+                style={{ position: 'absolute', width: '145px', height: 'auto', maxWidth: 'none', top: '-21px', left: '-41px' }}
+              />
+            </div>
+            <h1 className="text-2xl font-extrabold tracking-widest text-white uppercase mb-1">AXION</h1>
+            <span className="text-[11px] font-bold tracking-[0.2em] text-emerald-400 uppercase">Contratos & Prazos</span>
           </div>
-          <h1 className="text-3xl font-bold tracking-widest text-white uppercase mb-2">
-            AXION
-          </h1>
-          <p className="text-theme-weak text-sm max-w-sm mt-4 leading-relaxed">
-            Centralize seus contratos, acompanhe prazos, licenças e gerencie múltiplas áreas da sua empresa em um único lugar seguro.
+
+          <h2 className="text-xl font-bold text-white mb-3 leading-snug">
+            Cadastre sua empresa e comece agora
+          </h2>
+          <p className="text-slate-400 text-sm leading-relaxed mb-8">
+            Centralize contratos, equipes e prazos. Tenha o controle total da sua operação em um único sistema.
           </p>
+
+          {/* O que você ganha */}
+          <ul className="space-y-3">
+            {[
+              'Gestão completa de contratos e fases',
+              'Painel financeiro com TCV e margem de lucro',
+              'Alertas automáticos de prazo',
+              'Multi-usuário com controle de acesso',
+              'Exportação de relatórios em CSV',
+            ].map((item, i) => (
+              <li key={i} className="flex items-center gap-2.5 text-slate-300 text-sm">
+                <div className="w-4 h-4 rounded-full bg-emerald-500/20 flex items-center justify-center shrink-0">
+                  <Check className="w-2.5 h-2.5 text-emerald-400" />
+                </div>
+                {item}
+              </li>
+            ))}
+          </ul>
         </div>
       </div>
 
-      {/* Lado Direito - Formulário */}
-      <div className="w-full md:w-[55%] bg-white flex flex-col items-center justify-center p-6 sm:p-12">
-        <div className="w-full max-w-md">
+      {/* Painel Direito — Formulário */}
+      <div className="w-full md:w-[58%] flex flex-col items-center justify-center p-6 sm:p-12 bg-white">
+        <div className="w-full max-w-lg">
+
+          {/* Sucesso */}
           {isRegistered ? (
             <div className="text-center animate-fade-in flex flex-col items-center">
-              <div className="w-16 h-16 bg-[#0D9488]/10 rounded-full flex items-center justify-center text-[#0D9488] mb-6">
-                <Mail className="w-8 h-8" />
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-6 border border-emerald-100">
+                <Check className="w-8 h-8" />
               </div>
-              <h2 className="text-2xl font-title font-extrabold text-theme-strong mb-4">
-                Ative sua conta!
-              </h2>
-              <p className="text-theme-normal text-sm leading-relaxed mb-6 text-center">
-                Quase lá! Para começar a usar a plataforma <strong>AXION</strong>, você precisa ativar sua conta. Enviamos um e-mail com o link de ativação para:
+              <h2 className="text-2xl font-extrabold text-slate-800 mb-3">Empresa cadastrada!</h2>
+              <p className="text-slate-500 text-sm leading-relaxed mb-6 max-w-sm">
+                Enviamos um e-mail de ativação para <strong className="text-slate-700">{formData.email}</strong>. Clique no link para ativar sua conta e acessar o painel.
               </p>
-              <div className="bg-[#F8F9FA] border border-aldebaran-border py-3 px-4 text-[#0D9488] font-mono text-sm font-bold rounded-none mb-6 w-full select-all text-center">
+              <div className="bg-slate-50 border border-slate-200 py-3 px-4 text-emerald-600 font-mono text-sm font-bold rounded-none mb-8 w-full select-all text-center">
                 {formData.email}
               </div>
-              <p className="text-theme-weak text-xs leading-relaxed mb-8 text-center">
-                Por favor, verifique sua caixa de entrada (e pasta de spam se necessário). O link de ativação é válido por 24 horas.
-              </p>
-              <Link 
+              <Link
                 to="/login"
-                className="w-full inline-block bg-aldebaran-gold hover:bg-blue-700 text-white font-bold text-sm tracking-wider uppercase py-3.5 text-center transition-colors shadow-md"
+                className="w-full inline-block bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wider uppercase py-3.5 text-center transition-colors shadow-sm"
               >
                 Ir para o Login
               </Link>
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-title font-extrabold text-theme-strong mb-8 text-center">
-                Cadastre-se
-              </h2>
+              {/* Stepper */}
+              <div className="flex items-center gap-3 mb-8">
+                {[
+                  { n: 1, label: 'Dados da Empresa' },
+                  { n: 2, label: 'Responsável & Acesso' },
+                ].map(({ n, label }, i) => (
+                  <React.Fragment key={n}>
+                    <div className="flex items-center gap-2">
+                      <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-extrabold border-2 transition-all ${
+                        step === n
+                          ? 'bg-emerald-500 border-emerald-500 text-white'
+                          : step > n
+                          ? 'bg-emerald-50 border-emerald-500 text-emerald-600'
+                          : 'bg-white border-slate-300 text-slate-400'
+                      }`}>
+                        {step > n ? <Check className="w-3.5 h-3.5" /> : n}
+                      </div>
+                      <span className={`text-xs font-semibold hidden sm:block ${step === n ? 'text-slate-700' : 'text-slate-400'}`}>{label}</span>
+                    </div>
+                    {i < 1 && <div className={`flex-1 h-px ${step > 1 ? 'bg-emerald-400' : 'bg-slate-200'}`}></div>}
+                  </React.Fragment>
+                ))}
+              </div>
 
+              {/* Erro */}
               {error && (
-                <div className="mb-6 p-4 bg-rose-50 border border-rose-200 text-rose-600 text-sm flex items-start gap-2.5 rounded-none shadow-sm">
-                  <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
+                <div className="mb-5 p-4 bg-rose-50 border border-rose-200 text-rose-600 text-sm flex items-start gap-2.5">
+                  <AlertCircle className="w-4 h-4 shrink-0 mt-0.5" />
                   <span>{error}</span>
                 </div>
               )}
 
-              <form onSubmit={handleRegister} className="space-y-4">
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-weak">
-                      <User className="w-4 h-4" />
-                    </span>
-                    <input 
-                      type="text" 
-                      name="nome"
-                      value={formData.nome}
-                      onChange={handleChange}
-                      placeholder="Insira seu nome" 
-                      className="w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-aldebaran-orange focus:ring-1 focus:ring-aldebaran-orange transition-all outline-none"
-                      required 
-                    />
+              {/* ETAPA 1 — Empresa */}
+              {step === 1 && (
+                <form onSubmit={handleNextStep} className="space-y-5">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-800 mb-1">Dados da Empresa</h2>
+                    <p className="text-slate-400 text-sm">Preencha as informações da sua empresa para criar a conta.</p>
                   </div>
-                  <div className="flex-1 relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-weak">
-                      <User className="w-4 h-4" />
-                    </span>
-                    <input 
-                      type="text" 
-                      name="sobrenome"
-                      value={formData.sobrenome}
-                      onChange={handleChange}
-                      placeholder="Insira seu sobrenome" 
-                      className="w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-aldebaran-orange focus:ring-1 focus:ring-aldebaran-orange transition-all outline-none"
-                      required 
-                    />
+
+                  <div>
+                    <label className={labelClass}>Nome Fantasia *</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><Building2 className="w-4 h-4" /></span>
+                      <input type="text" name="empresa" value={formData.empresa} onChange={handleChange}
+                        placeholder="Ex: Aldebaran Consultoria" className={inputClass} required />
+                    </div>
                   </div>
-                </div>
 
-                <div className="flex flex-col sm:flex-row gap-4">
-                  <div className="flex-1 relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-weak">
-                      <Briefcase className="w-4 h-4" />
-                    </span>
-                    <input 
-                      type="text" 
-                      name="empresa"
-                      value={formData.empresa}
-                      onChange={handleChange}
-                      placeholder="Empresa" 
-                      className="w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-aldebaran-orange focus:ring-1 focus:ring-aldebaran-orange transition-all outline-none"
-                      required 
-                    />
+                  <div>
+                    <label className={labelClass}>Razão Social</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><FileText className="w-4 h-4" /></span>
+                      <input type="text" name="razao_social" value={formData.razao_social} onChange={handleChange}
+                        placeholder="Ex: Aldebaran Consultoria Ltda" className={inputClass} />
+                    </div>
                   </div>
-                  <div className="flex-1 relative">
-                    <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-weak">
-                      <Phone className="w-4 h-4" />
-                    </span>
-                    <input 
-                      type="text" 
-                      name="telefone"
-                      value={formData.telefone}
-                      onChange={handleChange}
-                      placeholder="Insira seu telefone" 
-                      className="w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-aldebaran-orange focus:ring-1 focus:ring-aldebaran-orange transition-all outline-none"
-                      required 
-                    />
+
+                  <div>
+                    <label className={labelClass}>CNPJ</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><FileText className="w-4 h-4" /></span>
+                      <input type="text" name="cnpj" value={formData.cnpj} onChange={handleChange}
+                        placeholder="00.000.000/0000-00" className={inputClass} />
+                    </div>
                   </div>
-                </div>
 
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-weak">
-                    <Mail className="w-4 h-4" />
-                  </span>
-                  <input 
-                    type="email" 
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="Insira seu email de trabalho" 
-                    className="w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-aldebaran-orange focus:ring-1 focus:ring-aldebaran-orange transition-all outline-none"
-                    required 
-                  />
-                </div>
+                  <button
+                    type="submit"
+                    className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-all shadow-sm flex items-center justify-center gap-2 group"
+                  >
+                    Próximo passo
+                    <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
+                  </button>
 
-                <div className="relative">
-                  <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-theme-weak">
-                    <Lock className="w-4 h-4" />
-                  </span>
-                  <input 
-                    type="password" 
-                    name="senha"
-                    value={formData.senha}
-                    onChange={handleChange}
-                    placeholder="Insira sua senha" 
-                    className="w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-aldebaran-orange focus:ring-1 focus:ring-aldebaran-orange transition-all outline-none"
-                    required 
-                  />
-                </div>
+                  <div className="text-center pt-2">
+                    <Link to="/login" className="text-xs text-slate-400 hover:text-slate-700 font-semibold transition-colors">
+                      Já tem uma conta? Fazer login
+                    </Link>
+                  </div>
+                </form>
+              )}
 
-                <p className="text-[10px] text-theme-weak text-center pt-2">
-                  Ao clicar em "Criar conta", você aceita os Termos de Uso e Política de Privacidade.
-                </p>
+              {/* ETAPA 2 — Responsável */}
+              {step === 2 && (
+                <form onSubmit={handleRegister} className="space-y-5">
+                  <div>
+                    <h2 className="text-2xl font-extrabold text-slate-800 mb-1">Responsável & Acesso</h2>
+                    <p className="text-slate-400 text-sm">Dados do administrador principal da conta <strong className="text-slate-600">{formData.empresa}</strong>.</p>
+                  </div>
 
-                <button 
-                  type="submit"
-                  disabled={loading}
-                  className="w-full bg-[#41b080] hover:bg-[#36956b] active:bg-[#2b7856] text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-all shadow-md mt-2 disabled:opacity-50 flex justify-center items-center gap-2"
-                >
-                  {loading ? 'Criando Conta...' : 'CRIAR MINHA CONTA'}
-                </button>
-                
-              </form>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className={labelClass}>Nome *</label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><User className="w-4 h-4" /></span>
+                        <input type="text" name="nome" value={formData.nome} onChange={handleChange}
+                          placeholder="Nome" className={inputClass} required />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <label className={labelClass}>Sobrenome *</label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><User className="w-4 h-4" /></span>
+                        <input type="text" name="sobrenome" value={formData.sobrenome} onChange={handleChange}
+                          placeholder="Sobrenome" className={inputClass} required />
+                      </div>
+                    </div>
+                  </div>
 
-              <div className="mt-8 text-center border-t border-aldebaran-border pt-8">
-                <Link 
-                  to="/login"
-                  className="w-full inline-block bg-white hover:bg-[#F8F9FA] border border-[#41b080] text-[#41b080] font-bold text-sm tracking-wider uppercase py-3 transition-colors shadow-sm"
-                >
-                  JÁ TEM UMA CONTA? FAÇA LOGIN
-                </Link>
-              </div>
+                  <div className="flex gap-4">
+                    <div className="flex-1">
+                      <label className={labelClass}>Cargo</label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><Briefcase className="w-4 h-4" /></span>
+                        <input type="text" name="cargo" value={formData.cargo} onChange={handleChange}
+                          placeholder="Ex: Diretor, Gerente" className={inputClass} />
+                      </div>
+                    </div>
+                    <div className="flex-1">
+                      <label className={labelClass}>Telefone *</label>
+                      <div className="relative">
+                        <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><Phone className="w-4 h-4" /></span>
+                        <input type="text" name="telefone" value={formData.telefone} onChange={handleChange}
+                          placeholder="(00) 00000-0000" className={inputClass} required />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>E-mail corporativo *</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><Mail className="w-4 h-4" /></span>
+                      <input type="email" name="email" value={formData.email} onChange={handleChange}
+                        placeholder="voce@empresa.com.br" className={inputClass} required />
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className={labelClass}>Senha *</label>
+                    <div className="relative">
+                      <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><Lock className="w-4 h-4" /></span>
+                      <input type={showPassword ? 'text' : 'password'} name="senha" value={formData.senha} onChange={handleChange}
+                        placeholder="Mínimo 6 caracteres" className={inputClass} required minLength={6} />
+                      <button type="button" onClick={() => setShowPassword(!showPassword)}
+                        className="absolute inset-y-0 right-0 pr-3 flex items-center text-slate-400 hover:text-slate-600">
+                        {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                      </button>
+                    </div>
+                  </div>
+
+                  <p className="text-[10px] text-slate-400 text-center">
+                    Ao criar a conta, você aceita os Termos de Uso e a Política de Privacidade.
+                  </p>
+
+                  <div className="flex gap-3">
+                    <button
+                      type="button"
+                      onClick={() => setStep(1)}
+                      className="px-5 py-3.5 border border-slate-300 text-slate-500 hover:bg-slate-50 text-sm font-bold transition-all flex items-center gap-2"
+                    >
+                      <ArrowLeft className="w-4 h-4" />
+                      Voltar
+                    </button>
+                    <button
+                      type="submit"
+                      disabled={loading}
+                      className="flex-1 bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-all shadow-sm flex items-center justify-center gap-2"
+                    >
+                      {loading ? 'Criando Conta...' : 'Criar Conta da Empresa'}
+                    </button>
+                  </div>
+                </form>
+              )}
             </>
           )}
         </div>

@@ -10,6 +10,9 @@ class RegisterRequest(BaseModel):
     nome: str
     sobrenome: str
     empresa: str
+    razao_social: str | None = None
+    cnpj: str | None = None
+    cargo: str | None = None
     telefone: str
     email: str
     senha: str

@@ -52,6 +52,8 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
     # 2. Cria a Empresa
     nova_empresa = Empresa(
         nome_fantasia=request.empresa,
+        razao_social=request.razao_social or None,
+        cnpj=request.cnpj or None,
         ativo=True
     )
     db.add(nova_empresa)
