@@ -19,6 +19,12 @@ class Empresa(Base):
     
     taxa_imposto = Column(Float, default=0.0, nullable=False)
     
+    # Campos de Integração com Asaas
+    asaas_customer_id = Column(String(255), nullable=True)
+    asaas_subscription_id = Column(String(255), nullable=True)
+    plano = Column(String(50), nullable=True) # Ex: "basico", "pro"
+    status_pagamento = Column(String(50), default="ativo", nullable=False) # Ex: "ativo", "atrasado", "cancelado"
+    
     criado_em = Column(DateTime, default=datetime.utcnow, nullable=False)
     atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)
 

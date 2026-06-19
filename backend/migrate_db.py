@@ -42,6 +42,27 @@ def run_migration():
             print("Ativação automática executada para todos os usuários cadastrados.")
     except Exception as e:
         print(f"Aviso ao ativar usuários: {e}")
+
+    # 4. Adicionar colunas do Asaas na tabela empresas
+    colunas_asaas = [
+        ("asaas_customer_id", "VARCHAR(255)"),
+        ("asaas_subscription_id", "VARCHAR(255)"),
+        ("plano", "VARCHAR(50)"),
+        ("status_pagamento", "VARCHAR(50) DEFAULT 'ativo' NOT NULL")
+    ]
+    
+    for col_name, col_type in colunas_asaas:
+        try:
+            with engine.begin() as connection:
+                connection.execute(text(f"ALTER TABLE empresas ADD COLUMN {col_name} {col_type};"))
+                print(f"Coluna '{col_name}' adicionada à tabela 'empresas'.")
+        except Exception as e:
+            err_msg = str(e).lower()
+            if "already exists" in err_msg or "duplicate column" in err_msg or "duplicada" in err_msg or "duplicate_column" in err_msg:
+                print(f"Nota: Coluna '{col_name}' já existe na tabela 'empresas'.")
+            else:
+                print(f"Aviso ao adicionar '{col_name}': {e}")
+                
                 
     print("======================================================")
     print("Verificação/Migração concluída com sucesso!")

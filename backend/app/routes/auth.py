@@ -36,6 +36,13 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Esta conta ainda não foi ativada. Por favor, verifique seu e-mail para ativar."
         )
+        
+    empresa = db.query(Empresa).filter(Empresa.id == usuario.tenant_id).first()
+    if empresa and empresa.status_pagamento == "atrasado":
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="O acesso da sua empresa está suspenso devido a faturas em atraso. Por favor, regularize o pagamento para continuar usando o sistema."
+        )
     
     token = criar_sessao(db, usuario.id)
     return {

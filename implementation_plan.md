@@ -40,9 +40,73 @@ Atualmente temos "Admin", mas empresas exigem mais controle:
 
 ---
 
+## Execução da Fase 1: Integração com Asaas
+
+Como você já criou a conta no Asaas, vamos focar em integrar a API deles ao backend do Axion System. A integração funcionará assim: toda empresa cadastrada será sincronizada como um "Cliente" (`Customer`) no Asaas e terá uma "Assinatura" (`Subscription`) vinculada.
+
+### User Review Required
+
+> [!WARNING]
+> **Chave de API do Asaas:** Você precisará gerar uma chave de API (API Key) no painel do Asaas e colocá-la nas variáveis de ambiente do sistema (`.env` ou nas configurações do Windows), para que não fiquem expostas no código.
+
+### Open Questions
+
 > [!IMPORTANT]
-> **O que devemos atacar primeiro?**
-> Para começarmos as implementações, qual desses três módulos você gostaria que eu desenhasse os primeiros códigos? 
-> **(1)** Começar pela infra de pagamentos/planos?
-> **(2)** Melhorar os perfis de acesso e bloqueios de segurança?
-> **(3)** Preparar a migração para PostgreSQL (essencial para escalabilidade e segurança)?
+> 1. **Ambiente:** Vamos iniciar os testes usando a API de Sandbox do Asaas (ambiente de testes sem dinheiro real) ou já vamos apontar direto para Produção?
+> 2. **Planos e Preços:** Quais serão os nomes e valores dos planos que vamos oferecer (ex: Básico R$ 99/mês, Pro R$ 199/mês)?
+> 3. **Bloqueio de Inadimplência:** Se o Asaas notificar o webhook de que o pagamento de uma empresa está atrasado, devemos bloquear o login dos usuários daquela empresa imediatamente, ou apenas mostrar um alerta vermelho pedindo a regularização?
+
+### Proposed Changes
+
+---
+
+#### 1. Banco de Dados e Modelos (Backend)
+
+Precisamos expandir a tabela `empresas` para guardar os IDs de referência do Asaas.
+
+##### [MODIFY] [empresa.py](file:///c:/Users/Aldebaran/axion_system/backend/app/models/empresa.py)
+Adicionar os seguintes campos:
+- `asaas_customer_id`: ID do cliente no Asaas.
+- `asaas_subscription_id`: ID da assinatura no Asaas.
+- `plano`: Nome do plano assinado (ex: "pro", "basico").
+- `status_pagamento`: Status atual da assinatura (ex: "ativo", "atrasado", "cancelado").
+
+##### [MODIFY] [migrate_db.py](file:///c:/Users/Aldebaran/axion_system/backend/migrate_db.py)
+Adicionar comandos `ALTER TABLE empresas` para inserir essas novas colunas automaticamente nos bancos existentes.
+
+---
+
+#### 2. Serviço de Integração Asaas (Backend)
+
+Vamos criar um módulo específico para conversar com a API do Asaas.
+
+##### [NEW] `c:/Users/Aldebaran/axion_system/backend/app/services/asaas_service.py`
+Módulo responsável pelas seguintes funções:
+- `criar_cliente(empresa)`: Cria o cliente na API do Asaas e retorna o `asaas_customer_id`.
+- `criar_assinatura(customer_id, plano)`: Cria a cobrança recorrente no Asaas.
+- `obter_link_pagamento(subscription_id)`: Pega a URL do Asaas para o cliente inserir o cartão de crédito ou pagar via Pix.
+
+---
+
+#### 3. Rotas e Webhooks (Backend)
+
+O frontend precisará interagir com essas funções, e o Asaas precisa de um local no nosso servidor para enviar notificações (Webhooks) de pagamentos aprovados ou recusados.
+
+##### [NEW] `c:/Users/Aldebaran/axion_system/backend/app/routes/assinaturas.py`
+Rotas para o frontend:
+- `GET /assinatura/status`: Retorna o status atual da assinatura do tenant e o link de pagamento.
+- `POST /assinatura/webhook`: Rota desprotegida para receber eventos POST do Asaas (ex: `PAYMENT_RECEIVED`, `PAYMENT_OVERDUE`).
+
+##### [MODIFY] [main.py](file:///c:/Users/Aldebaran/axion_system/backend/main.py)
+Incluir o novo router `assinaturas_router`.
+
+---
+
+## Verification Plan
+
+### Manual Verification
+1. Configurar a `ASAAS_API_KEY` localmente.
+2. Iniciar o servidor FastAPI.
+3. Chamar o endpoint para criar uma assinatura (mock de cadastro).
+4. Verificar se o cliente e a assinatura aparecem no Dashboard do Asaas.
+5. Simular um evento de webhook usando o Postman ou o painel do Asaas para garantir que o sistema atualiza o `status_pagamento` da empresa para "ativo" ou "atrasado".
