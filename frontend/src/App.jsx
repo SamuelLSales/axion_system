@@ -14,11 +14,12 @@ import LandingPage from './pages/LandingPage';
 import ActivateAccount from './pages/ActivateAccount';
 import Configuracoes from './pages/Configuracoes';
 import DashboardFinanceiro from './pages/DashboardFinanceiro';
+import EscolherPlanoPage from './pages/EscolherPlanoPage';
 import { AuthProvider, useAuth } from './context/AuthContext';
 
 // Componente para rotas protegidas
-function ProtectedRoute({ children }) {
-  const { isAuthenticated, loading } = useAuth();
+function ProtectedRoute({ children, requirePlan = true }) {
+  const { user, isAuthenticated, loading } = useAuth();
   
   if (loading) {
     return <div className="min-h-screen bg-aldebaran-dark flex items-center justify-center text-amber-500 font-bold tracking-widest uppercase text-sm">Carregando...</div>;
@@ -26,6 +27,16 @@ function ProtectedRoute({ children }) {
   
   if (!isAuthenticated) {
     return <Navigate to="/login" replace />;
+  }
+  
+  // Se a rota exige um plano ativo, e o usuário não tem plano ou está inadimplente
+  if (requirePlan && user?.empresa) {
+    const isIsento = user.empresa.plano === "isento" || user.empresa.nome_fantasia === "Aldebaran Consultoria";
+    const isPlanOk = user.empresa.plano && user.empresa.status_pagamento === "ativo";
+    
+    if (!isIsento && !isPlanOk) {
+      return <Navigate to="/escolher-plano" replace />;
+    }
   }
   
   return children;
@@ -65,8 +76,11 @@ function App() {
           <Route path="/cadastro" element={<Cadastro />} />
           <Route path="/activate" element={<ActivateAccount />} />
 
-          {/* Rotas Principais (Protegidas) */}
-          <Route element={<ProtectedRoute><MainLayout /></ProtectedRoute>}>
+          {/* Rotas de Onboarding (Protegidas, mas não exigem plano ativo) */}
+          <Route path="/escolher-plano" element={<ProtectedRoute requirePlan={false}><EscolherPlanoPage /></ProtectedRoute>} />
+
+          {/* Rotas Principais (Protegidas, Exigem Plano) */}
+          <Route element={<ProtectedRoute requirePlan={true}><MainLayout /></ProtectedRoute>}>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/dashboard/financeiro" element={<DashboardFinanceiro />} />
             <Route path="/contratos/:id" element={<DetalheContrato />} />

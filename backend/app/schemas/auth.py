@@ -36,6 +36,8 @@ class CompanyResponse(BaseModel):
     razao_social: str | None = None
     cnpj: str | None = None
     taxa_imposto: float = 0.0
+    plano: str | None = None
+    status_pagamento: str = "ativo"
 
     class Config:
         from_attributes = True

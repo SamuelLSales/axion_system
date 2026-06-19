@@ -51,6 +51,7 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
     }
 
 @router.post("/register", response_model=RegisterResponse)
+@router.post("/signup", response_model=RegisterResponse)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
     # 1. Verifica se e-mail existe
     if db.query(Usuario).filter(Usuario.username == request.email).first():

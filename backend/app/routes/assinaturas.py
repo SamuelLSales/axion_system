@@ -9,10 +9,12 @@ from database import get_db
 
 router = APIRouter(prefix="/assinaturas", tags=["Assinaturas / Asaas"])
 
-# Preços base (Exemplo: Básico 99.00, Pro 199.00)
+# Preços base por ciclo (valor total cobrado no ciclo, não o valor mensal)
 PRECOS = {
-    "basico": 99.00,
-    "pro": 199.00
+    "mensal": {"valor": 200.00, "ciclo": "MONTHLY", "nome": "Mensal"},
+    "trimestral": {"valor": 540.00, "ciclo": "QUARTERLY", "nome": "Trimestral"},
+    "semestral": {"valor": 1020.00, "ciclo": "SEMIANNUALLY", "nome": "Semestral"},
+    "anual": {"valor": 1800.00, "ciclo": "YEARLY", "nome": "Anual"}
 }
 
 @router.post("/checkout")
@@ -30,7 +32,7 @@ def criar_checkout(plano: str, db: Session = Depends(get_db), usuario_atual: Usu
         raise HTTPException(status_code=404, detail="Empresa não encontrada.")
         
     if plano not in PRECOS:
-        raise HTTPException(status_code=400, detail="Plano inválido. Escolha 'basico' ou 'pro'.")
+        raise HTTPException(status_code=400, detail="Plano inválido. Escolha: mensal, trimestral, semestral ou anual.")
         
     # Se a empresa não tem cliente no Asaas, cria agora
     if not empresa.asaas_customer_id:
@@ -44,10 +46,12 @@ def criar_checkout(plano: str, db: Session = Depends(get_db), usuario_atual: Usu
             
     # Cria a assinatura no Asaas
     try:
+        detalhes_plano = PRECOS[plano]
         assinatura = criar_assinatura(
             customer_id=empresa.asaas_customer_id,
-            value=PRECOS[plano],
-            description=f"Assinatura Plano {plano.capitalize()} - Axion System"
+            value=detalhes_plano["valor"],
+            description=f"Assinatura Plano {detalhes_plano['nome']} - Axion System",
+            cycle=detalhes_plano["ciclo"]
         )
         empresa.asaas_subscription_id = assinatura["id"]
         empresa.plano = plano

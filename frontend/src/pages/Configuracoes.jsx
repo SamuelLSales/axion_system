@@ -7,7 +7,8 @@ import {
   Save, 
   AlertCircle, 
   CheckCircle,
-  ShieldAlert
+  ShieldAlert,
+  CreditCard
 } from 'lucide-react';
 import { 
   updateProfile, 
@@ -209,17 +210,30 @@ const Configuracoes = () => {
           </button>
           
           {user?.role === 'admin' && (
-            <button
-              onClick={() => setActiveTab('empresa')}
-              className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
-                activeTab === 'empresa'
-                  ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
-                  : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
-              }`}
-            >
-              <Building className="w-4 h-4 shrink-0 text-teal-600" />
-              Dados da Empresa
-            </button>
+            <>
+              <button
+                onClick={() => setActiveTab('empresa')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
+                  activeTab === 'empresa'
+                    ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
+                    : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
+                }`}
+              >
+                <Building className="w-4 h-4 shrink-0 text-teal-600" />
+                Dados da Empresa
+              </button>
+              <button
+                onClick={() => setActiveTab('meu_plano')}
+                className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
+                  activeTab === 'meu_plano'
+                    ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
+                    : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
+                }`}
+              >
+                <CreditCard className="w-4 h-4 shrink-0 text-teal-600" />
+                Meu Plano
+              </button>
+            </>
           )}
         </div>
 
@@ -445,6 +459,40 @@ const Configuracoes = () => {
                 </button>
               </div>
             </form>
+          )}
+
+          {/* TAB 4: MEU PLANO (ADMIN ONLY) */}
+          {activeTab === 'meu_plano' && user?.role === 'admin' && (
+            <div className="space-y-6">
+              <div>
+                <h2 className="text-lg font-bold text-theme-strong mb-1">Meu Plano de Assinatura</h2>
+                <p className="text-theme-weak text-xs">Acompanhe o status da sua assinatura no Axion System.</p>
+              </div>
+
+              <div className="bg-[#F8F9FA] border border-aldebaran-border p-6 rounded-lg space-y-4">
+                <div className="flex items-center justify-between">
+                  <span className="text-sm font-bold text-theme-normal uppercase">Plano Atual</span>
+                  <span className="px-3 py-1 bg-teal-100 text-teal-800 font-bold rounded-full capitalize">
+                    {user?.empresa?.plano || "Nenhum Plano"}
+                  </span>
+                </div>
+                
+                <div className="flex items-center justify-between border-t border-aldebaran-border pt-4">
+                  <span className="text-sm font-bold text-theme-normal uppercase">Status de Pagamento</span>
+                  <span className={`px-3 py-1 font-bold rounded-full capitalize ${
+                    user?.empresa?.status_pagamento === 'ativo' ? 'bg-green-100 text-green-800' :
+                    user?.empresa?.status_pagamento === 'atrasado' ? 'bg-red-100 text-red-800' :
+                    'bg-slate-200 text-slate-800'
+                  }`}>
+                    {user?.empresa?.status_pagamento || "Pendente"}
+                  </span>
+                </div>
+              </div>
+
+              <div className="p-4 bg-blue-500/10 border border-blue-500/20 text-sm text-blue-900 rounded-lg">
+                <p>Para alterar a forma de pagamento, visualizar as últimas faturas ou cancelar a assinatura, acesse o link de pagamento enviado no seu e-mail pelo <strong>Asaas</strong> na data de cobrança.</p>
+              </div>
+            </div>
           )}
 
         </div>

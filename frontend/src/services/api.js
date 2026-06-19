@@ -21,6 +21,21 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
+// Interceptor de resposta para tratamento global de erros (ex: Inadimplência ou Token Expirado)
+api.interceptors.response.use((response) => {
+  return response;
+}, (error) => {
+  if (error.response?.status === 403 && error.response?.data?.detail?.includes('faturas em atraso')) {
+    // Redireciona para a página de escolha de plano/onboarding se estiver suspenso
+    window.location.href = '/escolher-plano';
+  }
+  if (error.response?.status === 401 && !window.location.pathname.includes('/login')) {
+    localStorage.removeItem('aldebaran_token');
+    window.location.href = '/login';
+  }
+  return Promise.reject(error);
+});
+
 // === CONTRATOS ===
 export const getContratos = async () => {
   const response = await api.get('/contratos');
@@ -197,7 +212,7 @@ export const login = async (username, password) => {
 
 // Função para registrar nova conta/empresa
 export const registerUser = async (dados) => {
-  const response = await api.post('/auth/register', dados);
+  const response = await api.post('/auth/signup', dados);
   return response.data;
 };
 
@@ -233,6 +248,17 @@ export const getCompanyDetails = async () => {
 
 export const updateCompanyDetails = async (companyData) => {
   const response = await api.put('/auth/company', companyData);
+  return response.data;
+};
+
+// === ASSINATURAS (ASAAS) ===
+export const obterStatusAssinatura = async () => {
+  const response = await api.get('/assinaturas/status');
+  return response.data;
+};
+
+export const criarCheckoutAsaas = async (plano) => {
+  const response = await api.post(`/assinaturas/checkout?plano=${plano}`);
   return response.data;
 };
 

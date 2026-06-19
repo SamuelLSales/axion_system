@@ -20,20 +20,34 @@ def criar_cliente(nome: str, email: str = None, cpfCnpj: str = None):
     payload = {
         "name": nome,
         "email": email or "contato@empresa.com",
-        "cpfCnpj": cpfCnpj
     }
     
-    # Remove chaves com None
-    payload = {k: v for k, v in payload.items() if v is not None}
+    if cpfCnpj and str(cpfCnpj).strip():
+        payload["cpfCnpj"] = str(cpfCnpj).strip()
 
     response = requests.post(url, json=payload, headers=get_headers())
     
     if response.status_code in [200, 201]:
         return response.json()
     else:
+        # Se for erro de CPF/CNPJ inválido (comum em testes), tenta criar sem o documento
+        try:
+            error_data = response.json()
+            if "errors" in error_data and any(e.get("code") == "invalid_object" for e in error_data["errors"]):
+                if "cpfCnpj" in payload:
+                    print(f"Aviso: CPF/CNPJ '{payload['cpfCnpj']}' rejeitado pelo Asaas. Tentando sem o documento...")
+                    del payload["cpfCnpj"]
+                    fallback_response = requests.post(url, json=payload, headers=get_headers())
+                    if fallback_response.status_code in [200, 201]:
+                        return fallback_response.json()
+                    else:
+                        raise Exception(f"Erro ao criar cliente no Asaas (fallback): {fallback_response.text}")
+        except ValueError:
+            pass # Não é JSON
+            
         raise Exception(f"Erro ao criar cliente no Asaas: {response.text}")
 
-def criar_assinatura(customer_id: str, value: float, description: str):
+def criar_assinatura(customer_id: str, value: float, description: str, cycle: str = "MONTHLY"):
     """
     Cria uma assinatura (Subscription) via cartão/pix no Asaas para o cliente.
     """
@@ -44,7 +58,7 @@ def criar_assinatura(customer_id: str, value: float, description: str):
         "billingType": "UNDEFINED", # Deixa o cliente escolher PIX, BOLETO ou CREDIT_CARD
         "value": value,
         "nextDueDate": "2026-07-01", # Ajustar a data conforme a necessidade
-        "cycle": "MONTHLY",
+        "cycle": cycle,
         "description": description
     }
     

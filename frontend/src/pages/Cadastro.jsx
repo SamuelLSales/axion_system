@@ -46,8 +46,21 @@ export default function Cadastro() {
       await registerUser(formData);
       setIsRegistered(true);
     } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.detail || 'Erro ao realizar o cadastro. Verifique os dados e tente novamente.');
+      console.error("Erro completo:", err);
+      let errorMessage = 'Erro ao realizar o cadastro. Verifique os dados e tente novamente.';
+      
+      if (!err.response) {
+        errorMessage = `Erro de conexão com o servidor (${err.message || 'Sem resposta'}). Verifique se o backend está rodando ou se a requisição foi bloqueada por extensões de AdBlock/Privacy (como Brave Shield ou uBlock) no seu navegador.`;
+      } else if (err.response.data && err.response.data.detail) {
+        if (Array.isArray(err.response.data.detail)) {
+          // Erro 422 (Validação do Pydantic)
+          errorMessage = 'Campos inválidos: ' + err.response.data.detail.map(d => d.loc.join('.') + ' ' + d.msg).join(', ');
+        } else {
+          errorMessage = err.response.data.detail;
+        }
+      }
+      
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

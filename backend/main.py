@@ -51,10 +51,21 @@ def inicializar_admin_se_necessario():
     try:
         empresa_padrao = db.query(Empresa).filter(Empresa.nome_fantasia == "Aldebaran Consultoria").first()
         if not empresa_padrao:
-            empresa_padrao = Empresa(nome_fantasia="Aldebaran Consultoria", cnpj="00000000000000")
+            empresa_padrao = Empresa(
+                nome_fantasia="Aldebaran Consultoria", 
+                cnpj="00000000000000",
+                plano="isento",
+                status_pagamento="ativo"
+            )
             db.add(empresa_padrao)
             db.commit()
             db.refresh(empresa_padrao)
+        else:
+            # Garante que a empresa existente continue isenta
+            if empresa_padrao.plano != "isento":
+                empresa_padrao.plano = "isento"
+                empresa_padrao.status_pagamento = "ativo"
+                db.commit()
 
         admin_existente = db.query(Usuario).filter(Usuario.username == "admin").first()
         if not admin_existente:
