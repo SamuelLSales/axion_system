@@ -1,5 +1,6 @@
 import os
 import requests
+from datetime import datetime
 
 ASAAS_API_URL = "https://api.asaas.com/v3"
 
@@ -47,7 +48,15 @@ def criar_cliente(nome: str, email: str = None, cpfCnpj: str = None):
             
         raise Exception(f"Erro ao criar cliente no Asaas: {response.text}")
 
-def criar_assinatura(customer_id: str, value: float, description: str, cycle: str = "MONTHLY"):
+def criar_assinatura(
+    customer_id: str, 
+    value: float, 
+    description: str, 
+    cycle: str = "MONTHLY",
+    billingType: str = "UNDEFINED",
+    creditCard: dict = None,
+    creditCardHolderInfo: dict = None
+):
     """
     Cria uma assinatura (Subscription) via cartão/pix no Asaas para o cliente.
     """
@@ -55,12 +64,18 @@ def criar_assinatura(customer_id: str, value: float, description: str, cycle: st
     
     payload = {
         "customer": customer_id,
-        "billingType": "UNDEFINED", # Deixa o cliente escolher PIX, BOLETO ou CREDIT_CARD
+        "billingType": billingType, # PIX, CREDIT_CARD ou UNDEFINED
         "value": value,
-        "nextDueDate": "2026-07-01", # Ajustar a data conforme a necessidade
+        "nextDueDate": datetime.today().strftime('%Y-%m-%d'), # Vencimento hoje
         "cycle": cycle,
         "description": description
     }
+    
+    if billingType == "CREDIT_CARD" and creditCard and creditCardHolderInfo:
+        payload["creditCard"] = creditCard
+        payload["creditCardHolderInfo"] = creditCardHolderInfo
+        # Adiciona o IP simulado que é obrigatório pelo Asaas
+        payload["remoteIp"] = "127.0.0.1"
     
     response = requests.post(url, json=payload, headers=get_headers())
     
@@ -91,3 +106,27 @@ def obter_link_pagamento_assinatura(subscription_id: str):
         if data:
             return data[0].get("invoiceUrl")
     return None
+
+def obter_cobranca_assinatura(subscription_id: str):
+    """
+    Retorna o ID da primeira cobrança gerada para a assinatura.
+    """
+    url = f"{ASAAS_API_URL}/subscriptions/{subscription_id}/payments"
+    response = requests.get(url, headers=get_headers())
+    if response.status_code == 200:
+        data = response.json().get("data", [])
+        if data:
+            return data[0].get("id")
+    return None
+
+def obter_qrcode_pix(payment_id: str):
+    """
+    Retorna o payload e imagem do QR Code PIX de uma cobrança.
+    """
+    url = f"{ASAAS_API_URL}/payments/{payment_id}/pixQrCode"
+    response = requests.get(url, headers=get_headers())
+    if response.status_code == 200:
+        return response.json()
+    else:
+        raise Exception(f"Erro ao obter QR Code PIX: {response.text}")
+

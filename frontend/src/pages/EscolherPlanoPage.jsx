@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
-import { criarCheckoutAsaas } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { CheckCircle, Zap, ArrowRight, Loader2, LogOut } from 'lucide-react';
+import CheckoutTransparente from '../components/CheckoutTransparente';
 
 const PLANOS = [
   {
@@ -61,27 +61,14 @@ const FEATURES = [
 export default function EscolherPlanoPage() {
   const { logoutUser } = useAuth();
   const [cicloAtivo, setCicloAtivo] = useState('anual');
-  const [loading, setLoading] = useState(false);
+  const [step, setStep] = useState(1);
   const [error, setError] = useState('');
 
   const plano = PLANOS.find(p => p.id === cicloAtivo);
 
-  const handleSubscribe = async () => {
-    try {
-      setLoading(true);
-      setError('');
-      // Envia o ciclo selecionado para o backend (mensal, trimestral, semestral, anual)
-      const data = await criarCheckoutAsaas(cicloAtivo);
-      if (data.invoiceUrl) {
-        window.location.href = data.invoiceUrl;
-      } else {
-        throw new Error("Não foi possível gerar o link de pagamento.");
-      }
-    } catch (err) {
-      console.error(err);
-      setError(err.response?.data?.detail || err.message || 'Erro ao processar checkout. Tente novamente.');
-      setLoading(false);
-    }
+  const handleNextStep = () => {
+    setError('');
+    setStep(2);
   };
 
   return (
@@ -119,24 +106,26 @@ export default function EscolherPlanoPage() {
       <main className="flex-1 flex flex-col justify-center py-12 px-4 sm:px-6 lg:px-8">
         <div className="max-w-5xl mx-auto w-full">
           
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <span className="text-xs font-bold tracking-widest uppercase text-aldebaran-gold block mb-3">Bem-vindo(a) ao AXION</span>
-            <h2 className="text-3xl sm:text-4xl font-extrabold font-title text-theme-strong mb-4">
-              Ative sua assinatura para continuar
-            </h2>
-            <p className="text-theme-weak text-lg">
-              Um único plano com acesso a todas as ferramentas de gestão. Economize escolhendo um ciclo maior.
-            </p>
-          </div>
+          {step === 1 ? (
+            <>
+              <div className="text-center max-w-3xl mx-auto mb-12">
+                <span className="text-xs font-bold tracking-widest uppercase text-aldebaran-gold block mb-3">Bem-vindo(a) ao AXION</span>
+                <h2 className="text-3xl sm:text-4xl font-extrabold font-title text-theme-strong mb-4">
+                  Ative sua assinatura para continuar
+                </h2>
+                <p className="text-theme-weak text-lg">
+                  Um único plano com acesso a todas as ferramentas de gestão. Economize escolhendo um ciclo maior.
+                </p>
+              </div>
 
-          {error && (
-            <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-center text-sm font-bold animate-fade-in max-w-3xl mx-auto rounded-lg">
-              {error}
-            </div>
-          )}
+              {error && (
+                <div className="mb-8 p-4 bg-rose-500/10 border border-rose-500/20 text-rose-400 text-center text-sm font-bold animate-fade-in max-w-3xl mx-auto rounded-lg">
+                  {error}
+                </div>
+              )}
 
-          {/* Pricing Section (copiado e adaptado da LandingPage) */}
-          <div className="flex flex-col lg:flex-row gap-8 items-start justify-center">
+              {/* Pricing Section (copiado e adaptado da LandingPage) */}
+              <div className="flex flex-col lg:flex-row gap-8 items-start justify-center animate-fade-in">
             {/* Seletor de ciclo — esquerda */}
             <div className="w-full lg:w-72 shrink-0 space-y-3">
               {PLANOS.map(p => (
@@ -233,16 +222,10 @@ export default function EscolherPlanoPage() {
 
               {/* CTA */}
               <button
-                onClick={handleSubscribe}
-                disabled={loading}
-                className={`w-full flex items-center justify-center gap-2 px-8 py-4 font-bold text-sm tracking-wider uppercase transition-all shadow-md group relative z-10
-                  ${loading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-aldebaran-gold hover:bg-amber-500 text-white'}`}
+                onClick={handleNextStep}
+                className="w-full flex items-center justify-center gap-2 px-8 py-4 font-bold text-sm tracking-wider uppercase transition-all shadow-md group relative z-10 bg-aldebaran-gold hover:bg-amber-500 text-white"
               >
-                {loading ? (
-                  <><Loader2 className="w-5 h-5 animate-spin" /> Gerando Pagamento...</>
-                ) : (
-                  <>Assinar Plano {plano.label} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></>
-                )}
+                <>Assinar Plano {plano.label} <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" /></>
               </button>
 
               <p className="text-[11px] text-theme-weak mt-4 font-mono text-center">
@@ -250,6 +233,15 @@ export default function EscolherPlanoPage() {
               </p>
             </div>
           </div>
+            </>
+          ) : (
+            <div className="flex justify-center w-full animate-fade-in">
+              <CheckoutTransparente 
+                plano={plano} 
+                onBack={() => setStep(1)} 
+              />
+            </div>
+          )}
           
         </div>
       </main>

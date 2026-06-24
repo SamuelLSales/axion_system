@@ -263,4 +263,9 @@ export const criarCheckoutAsaas = async (plano) => {
   return response.data;
 };
 
+export const criarCheckoutTransparente = async (payload) => {
+  const response = await api.post('/assinaturas/checkout-transparente', payload);
+  return response.data;
+};
+
 export default api;

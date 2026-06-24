@@ -7,8 +7,33 @@ from app.models.empresa import Empresa
 from app.services.asaas_service import criar_cliente, criar_assinatura, obter_assinatura
 from database import get_db
 
+from typing import Optional
+from pydantic import BaseModel
+
 router = APIRouter(prefix="/assinaturas", tags=["Assinaturas / Asaas"])
 
+class CreditCardInfo(BaseModel):
+    holderName: str
+    number: str
+    expiryMonth: str
+    expiryYear: str
+    ccv: str
+
+class CreditCardHolderInfo(BaseModel):
+    name: str
+    email: str
+    cpfCnpj: str
+    postalCode: str
+    addressNumber: str
+    addressComplement: Optional[str] = None
+    phone: str
+    mobilePhone: Optional[str] = None
+
+class CheckoutTransparenteRequest(BaseModel):
+    plano: str
+    metodo_pagamento: str # "PIX" ou "CREDIT_CARD"
+    creditCard: Optional[CreditCardInfo] = None
+    creditCardHolderInfo: Optional[CreditCardHolderInfo] = None
 # Preços base por ciclo (valor total cobrado no ciclo, não o valor mensal)
 PRECOS = {
     "mensal": {"valor": 200.00, "ciclo": "MONTHLY", "nome": "Mensal"},
@@ -68,6 +93,77 @@ def criar_checkout(plano: str, db: Session = Depends(get_db), usuario_atual: Usu
             "subscription_id": assinatura["id"],
             "invoiceUrl": invoice_url or "" # Link de pagamento Asaas
         }
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+
+@router.post("/checkout-transparente")
+def criar_checkout_transparente(payload: CheckoutTransparenteRequest, db: Session = Depends(get_db), usuario_atual: Usuario = Depends(get_usuario_atual)):
+    """
+    Cria uma assinatura transparente e retorna os dados para pagamento (QR Code PIX ou sucesso do Cartão).
+    """
+    if usuario_atual.role != "admin":
+        raise HTTPException(status_code=403, detail="Apenas administradores podem gerenciar assinaturas.")
+        
+    empresa = db.query(Empresa).filter(Empresa.id == usuario_atual.tenant_id).first()
+    if not empresa:
+        raise HTTPException(status_code=404, detail="Empresa não encontrada.")
+        
+    if payload.plano not in PRECOS:
+        raise HTTPException(status_code=400, detail="Plano inválido.")
+        
+    if payload.metodo_pagamento not in ["PIX", "CREDIT_CARD"]:
+        raise HTTPException(status_code=400, detail="Método de pagamento inválido.")
+
+    if payload.metodo_pagamento == "CREDIT_CARD" and (not payload.creditCard or not payload.creditCardHolderInfo):
+        raise HTTPException(status_code=400, detail="Dados do cartão são obrigatórios para pagamento via cartão de crédito.")
+
+    # Se a empresa não tem cliente no Asaas, cria agora
+    if not empresa.asaas_customer_id:
+        try:
+            # Usa os dados do titular do cartão (se houver) ou os dados básicos
+            cpf_cnpj = payload.creditCardHolderInfo.cpfCnpj if payload.creditCardHolderInfo else empresa.cnpj
+            cliente_asaas = criar_cliente(nome=empresa.nome_fantasia, email=usuario_atual.username, cpfCnpj=cpf_cnpj)
+            empresa.asaas_customer_id = cliente_asaas["id"]
+            db.commit()
+        except Exception as e:
+            raise HTTPException(status_code=500, detail=str(e))
+            
+    try:
+        detalhes_plano = PRECOS[payload.plano]
+        
+        # Cria a assinatura no Asaas
+        assinatura = criar_assinatura(
+            customer_id=empresa.asaas_customer_id,
+            value=detalhes_plano["valor"],
+            description=f"Assinatura Plano {detalhes_plano['nome']} - Axion System",
+            cycle=detalhes_plano["ciclo"],
+            billingType=payload.metodo_pagamento,
+            creditCard=payload.creditCard.dict() if payload.creditCard else None,
+            creditCardHolderInfo=payload.creditCardHolderInfo.dict() if payload.creditCardHolderInfo else None
+        )
+        
+        empresa.asaas_subscription_id = assinatura["id"]
+        empresa.plano = payload.plano
+        db.commit()
+        
+        # Buscar pagamento para pegar QR Code PIX
+        from app.services.asaas_service import obter_cobranca_assinatura, obter_qrcode_pix
+        payment_id = obter_cobranca_assinatura(assinatura["id"])
+        
+        response_data = {
+            "status": "success",
+            "subscription_id": assinatura["id"],
+            "metodo": payload.metodo_pagamento
+        }
+        
+        if payload.metodo_pagamento == "PIX" and payment_id:
+            qr_code_data = obter_qrcode_pix(payment_id)
+            response_data["pix"] = {
+                "encodedImage": qr_code_data.get("encodedImage"),
+                "payload": qr_code_data.get("payload")
+            }
+            
+        return response_data
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
 
