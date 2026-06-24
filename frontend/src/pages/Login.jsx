@@ -95,20 +95,20 @@ export default function Login() {
         <form onSubmit={handleLogin} className="space-y-5 relative z-10">
           <div>
             <label className="block text-[10px] font-bold uppercase tracking-wider text-theme-weak mb-2">
-              Usuário
+              E-mail Corporativo
             </label>
             <div className="relative">
               <span className="absolute inset-y-0 left-0 pl-3.5 flex items-center text-theme-weak">
                 <User className="w-4 h-4" />
               </span>
               <input
-                type="text"
+                type="email"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-[#16191f] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-white placeholder-theme-weak focus:border-[#0D9488] focus:outline-none transition-colors"
-                placeholder="admin"
+                placeholder="seu@email.com"
                 disabled={loading}
-                autoComplete="username"
+                autoComplete="email"
                 required
               />
             </div>

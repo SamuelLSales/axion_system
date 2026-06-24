@@ -1,7 +1,8 @@
 // frontend/src/services/api.js
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.DEV ? 'http://localhost:8000' : '/api';
+// Sempre usa /api — em dev o Vite faz proxy para localhost:8000, em prod usa /api direto
+const API_BASE_URL = '/api';
 
 const api = axios.create({
   baseURL: API_BASE_URL,

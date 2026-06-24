@@ -1,5 +1,6 @@
 # backend/app/routes/auth.py
 import uuid
+import threading
 from datetime import datetime, timedelta
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
@@ -53,51 +54,77 @@ def login(request: LoginRequest, db: Session = Depends(get_db)):
 @router.post("/register", response_model=RegisterResponse)
 @router.post("/signup", response_model=RegisterResponse)
 def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    # 1. Verifica se e-mail existe
-    if db.query(Usuario).filter(Usuario.username == request.email).first():
-        raise HTTPException(status_code=400, detail="E-mail já está em uso.")
-    
-    # 2. Cria a Empresa
-    nova_empresa = Empresa(
-        nome_fantasia=request.empresa,
-        razao_social=request.razao_social or None,
-        cnpj=request.cnpj or None,
-        ativo=True
-    )
-    db.add(nova_empresa)
-    db.flush() # Para pegar o id da empresa
-    
-    # 3. Cria o Usuario admin (inativo até ativação por e-mail)
-    pwdhash, salt = gerar_hash_senha(request.senha)
-    token = uuid.uuid4().hex
-    expira_em = datetime.utcnow() + timedelta(hours=24)
-    
-    novo_usuario = Usuario(
-        nome=f"{request.nome} {request.sobrenome}".strip(),
-        username=request.email,
-        password_hash=pwdhash,
-        salt=salt,
-        role="admin",
-        is_active=False,
-        activation_token=token,
-        activation_token_expires=expira_em,
-        tenant_id=nova_empresa.id
-    )
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
-    
-    # 4. Envia o e-mail de ativação (SMTP ou Console Log)
-    enviar_email_ativacao(
-        email_destino=novo_usuario.username,
-        nome_usuario=novo_usuario.nome,
-        token_ativacao=token
-    )
-    
-    return {
-        "message": "Conta criada com sucesso! Verifique seu e-mail para ativar sua conta.",
-        "email": novo_usuario.username
-    }
+    import traceback
+    try:
+        # 1. Verifica se e-mail existe
+        if db.query(Usuario).filter(Usuario.username == request.email).first():
+            raise HTTPException(status_code=400, detail="E-mail já está em uso.")
+
+        # 2. Verifica se CNPJ já existe (evita IntegrityError)
+        cnpj_limpo = request.cnpj.strip() if request.cnpj else None
+        if cnpj_limpo:
+            if db.query(Empresa).filter(Empresa.cnpj == cnpj_limpo).first():
+                raise HTTPException(status_code=400, detail="CNPJ já está cadastrado no sistema.")
+
+        # 3. Cria a Empresa
+        nova_empresa = Empresa(
+            nome_fantasia=request.empresa,
+            razao_social=request.razao_social or None,
+            cnpj=cnpj_limpo or None,
+            ativo=True
+        )
+        db.add(nova_empresa)
+        db.flush()
+        
+        # 3. Cria o Usuario admin (inativo até ativação por e-mail)
+        pwdhash, salt = gerar_hash_senha(request.senha)
+        token = uuid.uuid4().hex
+        expira_em = datetime.utcnow() + timedelta(hours=24)
+        
+        novo_usuario = Usuario(
+            nome=f"{request.nome} {request.sobrenome}".strip(),
+            username=request.email,
+            password_hash=pwdhash,
+            salt=salt,
+            role="admin",
+            is_active=False,
+            activation_token=token,
+            activation_token_expires=expira_em,
+            tenant_id=nova_empresa.id
+        )
+        db.add(novo_usuario)
+        db.commit()
+        db.refresh(novo_usuario)
+        
+        # 4. Envia o e-mail de ativação em background
+        def _enviar():
+            try:
+                enviar_email_ativacao(
+                    email_destino=novo_usuario.username,
+                    nome_usuario=novo_usuario.nome,
+                    token_ativacao=token
+                )
+            except Exception as e:
+                print(f"[EMAIL BG] Erro: {e}")
+
+        threading.Thread(target=_enviar, daemon=True).start()
+        
+        return {
+            "message": "Conta criada com sucesso! Verifique seu e-mail para ativar sua conta.",
+            "email": novo_usuario.username
+        }
+
+    except HTTPException:
+        raise  # re-lança os HTTPExceptions normais (400, 401, etc.)
+    except Exception as e:
+        db.rollback()
+        tb = traceback.format_exc()
+        print(f"\n{'='*60}\n[SIGNUP ERROR] Exceção no cadastro:\n{tb}\n{'='*60}")
+        raise HTTPException(
+            status_code=500,
+            detail=f"Erro interno ao criar conta: {type(e).__name__}: {str(e)}"
+        )
+
 
 @router.get("/activate")
 def activate(token: str, db: Session = Depends(get_db)):

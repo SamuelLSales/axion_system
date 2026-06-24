@@ -58,10 +58,15 @@ def criar_checkout(plano: str, db: Session = Depends(get_db), usuario_atual: Usu
         # Até o primeiro pagamento ser feito, o status fica pendente
         db.commit()
         
+        # O Asaas não retorna o invoiceUrl na criação da assinatura.
+        # Precisamos buscar a primeira cobrança gerada por ela:
+        from app.services.asaas_service import obter_link_pagamento_assinatura
+        invoice_url = obter_link_pagamento_assinatura(assinatura["id"])
+        
         return {
             "status": "success",
             "subscription_id": assinatura["id"],
-            "invoiceUrl": assinatura.get("invoiceUrl", "") # Link de pagamento Asaas (Fatura da Assinatura)
+            "invoiceUrl": invoice_url or "" # Link de pagamento Asaas
         }
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))

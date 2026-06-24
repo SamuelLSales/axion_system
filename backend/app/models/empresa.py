@@ -22,8 +22,8 @@ class Empresa(Base):
     # Campos de Integração com Asaas
     asaas_customer_id = Column(String(255), nullable=True)
     asaas_subscription_id = Column(String(255), nullable=True)
-    plano = Column(String(50), nullable=True) # Ex: "basico", "pro"
-    status_pagamento = Column(String(50), default="ativo", nullable=False) # Ex: "ativo", "atrasado", "cancelado"
+    plano = Column(String(50), nullable=True) # Ex: "mensal", "anual"
+    status_pagamento = Column(String(50), default="pendente", nullable=False) # "pendente", "ativo", "atrasado", "cancelado"
     
     criado_em = Column(DateTime, default=datetime.utcnow, nullable=False)
     atualizado_em = Column(DateTime, default=datetime.utcnow, onupdate=datetime.utcnow, nullable=False)

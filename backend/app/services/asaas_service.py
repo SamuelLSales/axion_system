@@ -79,3 +79,15 @@ def obter_assinatura(subscription_id: str):
         return response.json()
     else:
         raise Exception(f"Erro ao obter assinatura no Asaas: {response.text}")
+
+def obter_link_pagamento_assinatura(subscription_id: str):
+    """
+    Busca as cobranças geradas por uma assinatura para pegar o link de pagamento (invoiceUrl).
+    """
+    url = f"{ASAAS_API_URL}/subscriptions/{subscription_id}/payments"
+    response = requests.get(url, headers=get_headers())
+    if response.status_code == 200:
+        data = response.json().get("data", [])
+        if data:
+            return data[0].get("invoiceUrl")
+    return None

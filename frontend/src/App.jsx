@@ -31,7 +31,8 @@ function ProtectedRoute({ children, requirePlan = true }) {
   
   // Se a rota exige um plano ativo, e o usuário não tem plano ou está inadimplente
   if (requirePlan && user?.empresa) {
-    const isIsento = user.empresa.plano === "isento" || user.empresa.nome_fantasia === "Aldebaran Consultoria";
+    // Permite bypass apenas se o banco de dados marcar explicitamente plano="isento"
+    const isIsento = user.empresa.plano === "isento";
     const isPlanOk = user.empresa.plano && user.empresa.status_pagamento === "ativo";
     
     if (!isIsento && !isPlanOk) {

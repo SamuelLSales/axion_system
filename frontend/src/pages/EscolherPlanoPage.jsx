@@ -189,10 +189,10 @@ export default function EscolherPlanoPage() {
                   Plano {plano.label}
                 </span>
                 <div className="flex items-end gap-2">
-                  <span className="text-5xl font-extrabold text-theme-strong font-mono">
+                  <span className="text-5xl font-extrabold text-white font-mono">
                     R$ {plano.preco.toFixed(2).replace('.', ',')}
                   </span>
-                  <span className="text-theme-weak text-sm mb-1.5 font-mono">/mês</span>
+                  <span className="text-slate-400 text-sm mb-1.5 font-mono">/mês</span>
                 </div>
 
                 {plano.total && (

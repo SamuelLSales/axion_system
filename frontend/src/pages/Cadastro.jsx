@@ -47,24 +47,33 @@ export default function Cadastro() {
       setIsRegistered(true);
     } catch (err) {
       console.error("Erro completo:", err);
-      let errorMessage = 'Erro ao realizar o cadastro. Verifique os dados e tente novamente.';
-      
+      let errorMessage = '';
+
       if (!err.response) {
-        errorMessage = `Erro de conexão com o servidor (${err.message || 'Sem resposta'}). Verifique se o backend está rodando ou se a requisição foi bloqueada por extensões de AdBlock/Privacy (como Brave Shield ou uBlock) no seu navegador.`;
-      } else if (err.response.data && err.response.data.detail) {
-        if (Array.isArray(err.response.data.detail)) {
-          // Erro 422 (Validação do Pydantic)
-          errorMessage = 'Campos inválidos: ' + err.response.data.detail.map(d => d.loc.join('.') + ' ' + d.msg).join(', ');
+        // Sem resposta = Network Error (backend offline, bloqueado por extensão, etc.)
+        errorMessage = `Erro de conexão (${err.message}). Backend offline ou bloqueado.`;
+      } else {
+        const status = err.response.status;
+        const data = err.response.data;
+        const detail = data?.detail;
+
+        if (Array.isArray(detail)) {
+          // Erro 422 - validação Pydantic
+          errorMessage = `[${status}] Campos inválidos: ` + detail.map(d => `${d.loc?.join('.')} — ${d.msg}`).join('; ');
+        } else if (typeof detail === 'string') {
+          errorMessage = `[${status}] ${detail}`;
         } else {
-          errorMessage = err.response.data.detail;
+          // Fallback: mostra o JSON bruto para diagnóstico
+          errorMessage = `[${status}] ${JSON.stringify(data)}`;
         }
       }
-      
+
       setError(errorMessage);
     } finally {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="min-h-screen flex flex-col md:flex-row bg-[#f4f5f7] selection:bg-emerald-500/20 selection:text-emerald-600">

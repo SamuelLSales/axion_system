@@ -31,10 +31,14 @@ Base = declarative_base()
 def get_db():
     """
     Função utilitária (Dependency Injection) para obter uma sessão do banco de dados.
-    Garante que a sessão seja aberta e devidamente fechada após a conclusão da requisição.
+    Garante que a sessão seja aberta, e em caso de erro, revertida (rollback)
+    antes de ser fechada — evitando dados órfãos no banco.
     """
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()  # Garante que nenhum dado parcial seja persistido em caso de erro
+        raise
     finally:
         db.close()
