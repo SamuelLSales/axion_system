@@ -20,6 +20,7 @@ export const AuthProvider = ({ children }) => {
       console.error("Erro ao checar autenticação:", error);
       setUser(null);
       localStorage.removeItem('aldebaran_token');
+      localStorage.removeItem('aldebaran_refresh_token');
     } finally {
       setLoading(false);
     }
@@ -32,6 +33,9 @@ export const AuthProvider = ({ children }) => {
   const loginUser = async (username, password) => {
     const data = await apiLogin(username, password);
     localStorage.setItem('aldebaran_token', data.token);
+    if (data.refresh_token) {
+      localStorage.setItem('aldebaran_refresh_token', data.refresh_token);
+    }
     setUser(data.user);
     return data.user;
   };
@@ -43,6 +47,7 @@ export const AuthProvider = ({ children }) => {
       console.error(error);
     } finally {
       localStorage.removeItem('aldebaran_token');
+      localStorage.removeItem('aldebaran_refresh_token');
       setUser(null);
     }
   };

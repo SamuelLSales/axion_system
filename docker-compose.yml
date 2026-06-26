@@ -6,13 +6,18 @@ services:
     container_name: aldebaran_db
     restart: unless-stopped
     environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: aldebaran_password
-      POSTGRES_DB: aldebaran
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Defina POSTGRES_PASSWORD no .env}
+      POSTGRES_DB: ${POSTGRES_DB:-aldebaran}
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   backend:
     build:
@@ -21,14 +26,27 @@ services:
     container_name: aldebaran_backend
     restart: unless-stopped
     environment:
-      - DATABASE_URL=postgresql://postgres:aldebaran_password@db:5432/aldebaran
+      - DATABASE_URL=postgresql://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-aldebaran}
+      - SECRET_KEY=${SECRET_KEY:?Defina SECRET_KEY no .env}
+      - ENVIRONMENT=${ENVIRONMENT:-production}
+      - CORS_ORIGINS=${CORS_ORIGINS:-http://localhost:3000}
+      - ENABLE_HSTS=${ENABLE_HSTS:-false}
+      - ADMIN_DEFAULT_PASSWORD=${ADMIN_DEFAULT_PASSWORD:-Trocar@123!}
+      - ASAAS_API_KEY=${ASAAS_API_KEY}
+      - ASAAS_WEBHOOK_TOKEN=${ASAAS_WEBHOOK_TOKEN}
+      - SMTP_HOST=${SMTP_HOST}
+      - SMTP_PORT=${SMTP_PORT:-587}
+      - SMTP_USER=${SMTP_USER}
+      - SMTP_PASSWORD=${SMTP_PASSWORD}
+      - SMTP_FROM=${SMTP_FROM}
+      - FRONTEND_URL=${FRONTEND_URL:-http://localhost:3000}
     volumes:
-      # O banco não está mais no sqlite local, mas mantemos o mapeamento para exportações (CSV)
       - ./backend/historico_alteracoes.csv:/app/historico_alteracoes.csv
     ports:
       - "8000:8000"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   frontend:
     build:
@@ -45,10 +63,12 @@ services:
     image: ngrok/ngrok:latest
     container_name: aldebaran_ngrok
     restart: unless-stopped
+    profiles:
+      - tunnel
     command:
       - "http"
       - "frontend:80"
-      - "--domain=kudos-commerce-legwarmer.ngrok-free.dev"
+      - "--domain=${NGROK_DOMAIN:-kudos-commerce-legwarmer.ngrok-free.dev}"
     environment:
       - NGROK_AUTHTOKEN=${NGROK_AUTHTOKEN}
     depends_on:

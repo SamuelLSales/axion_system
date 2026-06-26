@@ -1,38 +1,88 @@
 # backend/app/routes/auth.py
-import uuid
+import re
+import logging
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
 from database import get_db
 from slowapi import Limiter
 from slowapi.util import get_remote_address
 
+logger = logging.getLogger("axion.auth")
+
 limiter = Limiter(key_func=get_remote_address)
-from database import get_db
+
 from app.models.usuario import Usuario
-from app.models.sessao import Sessao
 from app.models.empresa import Empresa
 from app.schemas.auth import (
     LoginRequest, LoginResponse, UserResponse, RegisterRequest, RegisterResponse,
     ProfileUpdateRequest, PasswordChangeRequest, CompanyUpdateRequest, CompanyResponse
 )
-from app.services.auth import verificar_senha, gerar_hash_senha, criar_sessao, get_usuario_atual
+from app.services.auth import (
+    verificar_senha, gerar_hash_senha,
+    criar_access_token, criar_refresh_token, decodificar_token,
+    get_usuario_atual
+)
 from app.services.email import enviar_email_ativacao
 
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
+
+
+# ─── Validadores ──────────────────────────────────────────────────────────────
+
+def validar_senha_forte(senha: str) -> None:
+    """Valida que a senha atende os requisitos mínimos de segurança."""
+    if len(senha) < 8:
+        raise HTTPException(status_code=400, detail="A senha deve ter no mínimo 8 caracteres.")
+    if not re.search(r"[A-Z]", senha):
+        raise HTTPException(status_code=400, detail="A senha deve conter pelo menos uma letra maiúscula.")
+    if not re.search(r"[a-z]", senha):
+        raise HTTPException(status_code=400, detail="A senha deve conter pelo menos uma letra minúscula.")
+    if not re.search(r"\d", senha):
+        raise HTTPException(status_code=400, detail="A senha deve conter pelo menos um número.")
+
+
+def validar_cnpj(cnpj: str) -> bool:
+    """Valida CNPJ com verificação dos dígitos verificadores."""
+    cnpj = re.sub(r'[^0-9]', '', cnpj)
+    if len(cnpj) != 14:
+        return False
+    # Rejeita CNPJs com todos os dígitos iguais
+    if cnpj == cnpj[0] * 14:
+        return False
+    # Cálculo do primeiro dígito verificador
+    pesos1 = [5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    soma = sum(int(cnpj[i]) * pesos1[i] for i in range(12))
+    resto = soma % 11
+    digito1 = 0 if resto < 2 else 11 - resto
+    if int(cnpj[12]) != digito1:
+        return False
+    # Cálculo do segundo dígito verificador
+    pesos2 = [6, 5, 4, 3, 2, 9, 8, 7, 6, 5, 4, 3, 2]
+    soma = sum(int(cnpj[i]) * pesos2[i] for i in range(13))
+    resto = soma % 11
+    digito2 = 0 if resto < 2 else 11 - resto
+    if int(cnpj[13]) != digito2:
+        return False
+    return True
+
+
+# ─── Endpoints de Autenticação ────────────────────────────────────────────────
 
 @router.post("/login", response_model=LoginResponse)
 @limiter.limit("5/minute")
 def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
     usuario = db.query(Usuario).filter(Usuario.username == login_data.username).first()
     if not usuario:
+        logger.warning(f"Tentativa de login com usuário inexistente: {login_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário ou senha incorretos."
         )
     
     if not verificar_senha(login_data.password, usuario.password_hash, usuario.salt):
+        logger.warning(f"Senha incorreta para usuário: {login_data.username}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário ou senha incorretos."
@@ -50,46 +100,96 @@ def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_
             status_code=status.HTTP_403_FORBIDDEN,
             detail="O acesso da sua empresa está suspenso devido a faturas em atraso. Por favor, regularize o pagamento para continuar usando o sistema."
         )
+
+    # Migrar hash antigo para bcrypt no login (transparente para o usuário)
+    if not usuario.password_hash.startswith(("$2b$", "$2a$")):
+        new_hash, new_salt = gerar_hash_senha(login_data.password)
+        usuario.password_hash = new_hash
+        usuario.salt = new_salt
+        db.commit()
+        logger.info(f"Hash migrado para bcrypt para o usuário {usuario.id}")
     
-    token = criar_sessao(db, usuario.id)
+    # Gerar tokens JWT
+    token_data = {"sub": str(usuario.id), "tenant_id": str(usuario.tenant_id), "role": usuario.role}
+    access_token = criar_access_token(token_data)
+    refresh_token = criar_refresh_token(token_data)
+    
+    logger.info(f"Login bem-sucedido: usuário {usuario.id} ({usuario.username})")
+    
     return {
-        "token": token,
+        "token": access_token,
+        "refresh_token": refresh_token,
         "user": usuario
     }
 
+
+@router.post("/refresh")
+def refresh_token(request: Request, db: Session = Depends(get_db)):
+    """Gera um novo access token a partir de um refresh token válido."""
+    auth_header = request.headers.get("Authorization", "")
+    if not auth_header.startswith("Bearer "):
+        raise HTTPException(status_code=401, detail="Refresh token não fornecido.")
+    
+    token = auth_header.replace("Bearer ", "")
+    payload = decodificar_token(token)
+    
+    if not payload or payload.get("type") != "refresh":
+        raise HTTPException(status_code=401, detail="Refresh token inválido ou expirado.")
+    
+    user_id = payload.get("sub")
+    usuario = db.query(Usuario).filter(Usuario.id == int(user_id)).first()
+    if not usuario or not usuario.is_active:
+        raise HTTPException(status_code=401, detail="Usuário não encontrado ou desativado.")
+    
+    # Gerar novo access token
+    token_data = {"sub": str(usuario.id), "tenant_id": str(usuario.tenant_id), "role": usuario.role}
+    new_access_token = criar_access_token(token_data)
+    
+    logger.info(f"Token renovado para usuário {usuario.id}")
+    
+    return {"token": new_access_token}
+
+
 @router.post("/register", response_model=RegisterResponse)
 @router.post("/signup", response_model=RegisterResponse)
-def register(request: RegisterRequest, db: Session = Depends(get_db)):
-    import traceback
+@limiter.limit("3/hour")
+def register(request: Request, register_data: RegisterRequest, db: Session = Depends(get_db)):
     try:
-        # 1. Verifica se e-mail existe
-        if db.query(Usuario).filter(Usuario.username == request.email).first():
+        # 1. Validar senha forte
+        validar_senha_forte(register_data.senha)
+        
+        # 2. Verifica se e-mail existe
+        if db.query(Usuario).filter(Usuario.username == register_data.email).first():
             raise HTTPException(status_code=400, detail="E-mail já está em uso.")
 
-        # 2. Verifica se CNPJ já existe (evita IntegrityError)
-        cnpj_limpo = request.cnpj.strip() if request.cnpj else None
+        # 3. Verifica e valida CNPJ
+        cnpj_limpo = re.sub(r'[^0-9]', '', register_data.cnpj.strip()) if register_data.cnpj else None
         if cnpj_limpo:
+            if not validar_cnpj(cnpj_limpo):
+                raise HTTPException(status_code=400, detail="CNPJ inválido. Verifique os dígitos.")
             if db.query(Empresa).filter(Empresa.cnpj == cnpj_limpo).first():
                 raise HTTPException(status_code=400, detail="CNPJ já está cadastrado no sistema.")
 
-        # 3. Cria a Empresa
+        # 4. Cria a Empresa
         nova_empresa = Empresa(
-            nome_fantasia=request.empresa,
-            razao_social=request.razao_social or None,
+            nome_fantasia=register_data.empresa,
+            razao_social=register_data.razao_social or None,
             cnpj=cnpj_limpo or None,
             ativo=True
         )
         db.add(nova_empresa)
         db.flush()
         
-        # 3. Cria o Usuario admin (inativo até ativação por e-mail)
-        pwdhash, salt = gerar_hash_senha(request.senha)
+        # 5. Cria o Usuario admin (inativo até ativação por e-mail)
+        pwdhash, salt = gerar_hash_senha(register_data.senha)
+        
+        import uuid
         token = uuid.uuid4().hex
-        expira_em = datetime.utcnow() + timedelta(hours=24)
+        expira_em = datetime.now(timezone.utc) + timedelta(hours=24)
         
         novo_usuario = Usuario(
-            nome=f"{request.nome} {request.sobrenome}".strip(),
-            username=request.email,
+            nome=f"{register_data.nome} {register_data.sobrenome}".strip(),
+            username=register_data.email,
             password_hash=pwdhash,
             salt=salt,
             role="admin",
@@ -102,7 +202,9 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         db.commit()
         db.refresh(novo_usuario)
         
-        # 4. Envia o e-mail de ativação em background
+        logger.info(f"Nova conta criada: empresa={nova_empresa.nome_fantasia}, email={novo_usuario.username}")
+        
+        # 6. Envia o e-mail de ativação em background
         def _enviar():
             try:
                 enviar_email_ativacao(
@@ -111,7 +213,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
                     token_ativacao=token
                 )
             except Exception as e:
-                print(f"[EMAIL BG] Erro: {e}")
+                logger.error(f"Erro ao enviar e-mail de ativação para {novo_usuario.username}: {e}")
 
         threading.Thread(target=_enviar, daemon=True).start()
         
@@ -121,11 +223,10 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         }
 
     except HTTPException:
-        raise  # re-lança os HTTPExceptions normais (400, 401, etc.)
+        raise
     except Exception as e:
         db.rollback()
-        tb = traceback.format_exc()
-        print(f"\n{'='*60}\n[SIGNUP ERROR] Exceção no cadastro:\n{tb}\n{'='*60}")
+        logger.exception(f"Erro interno no cadastro")
         raise HTTPException(
             status_code=500,
             detail="Ocorreu um erro interno ao processar seu cadastro. Por favor, tente novamente mais tarde."
@@ -138,7 +239,7 @@ def activate(token: str, db: Session = Depends(get_db)):
     if not usuario:
         raise HTTPException(status_code=400, detail="Token de ativação inválido.")
     
-    if usuario.activation_token_expires and usuario.activation_token_expires < datetime.utcnow():
+    if usuario.activation_token_expires and usuario.activation_token_expires < datetime.now(timezone.utc):
         raise HTTPException(status_code=400, detail="Este token de ativação expirou.")
     
     # Ativa o usuário e limpa os campos de token
@@ -147,13 +248,17 @@ def activate(token: str, db: Session = Depends(get_db)):
     usuario.activation_token_expires = None
     db.commit()
     
+    logger.info(f"Conta ativada: usuário {usuario.id} ({usuario.username})")
+    
     return {"message": "Sua conta foi ativada com sucesso! Você já pode fazer login."}
 
 @router.post("/logout")
-def logout(usuario: Usuario = Depends(get_usuario_atual), db: Session = Depends(get_db)):
-    # Deleta todas as sessões do usuário atual
-    db.query(Sessao).filter(Sessao.usuario_id == usuario.id).delete()
-    db.commit()
+def logout(usuario: Usuario = Depends(get_usuario_atual)):
+    """
+    Com JWT, o logout é tratado no frontend (remover o token).
+    Este endpoint existe para compatibilidade e logging.
+    """
+    logger.info(f"Logout: usuário {usuario.id} ({usuario.username})")
     return {"message": "Sessão encerrada com sucesso."}
 
 @router.get("/me", response_model=UserResponse)
@@ -176,11 +281,16 @@ def change_password(request: PasswordChangeRequest, usuario: Usuario = Depends(g
             detail="A senha atual fornecida está incorreta."
         )
     
-    # 2. Gera a nova senha e salva
+    # 2. Validar nova senha forte
+    validar_senha_forte(request.new_password)
+    
+    # 3. Gera a nova senha (agora com bcrypt) e salva
     pwdhash, salt = gerar_hash_senha(request.new_password)
     usuario.password_hash = pwdhash
     usuario.salt = salt
     db.commit()
+    
+    logger.info(f"Senha alterada: usuário {usuario.id}")
     
     return {"message": "Senha alterada com sucesso!"}
 
@@ -221,10 +331,12 @@ def update_company(request: CompanyUpdateRequest, usuario: Usuario = Depends(get
             detail="Empresa não encontrada."
         )
         
-    # Verificar se o CNPJ fornecido já está em uso por outra empresa
+    # Verificar e validar o CNPJ fornecido
     if request.cnpj:
-        cnpj_limpo = request.cnpj.strip()
+        cnpj_limpo = re.sub(r'[^0-9]', '', request.cnpj.strip())
         if cnpj_limpo:
+            if not validar_cnpj(cnpj_limpo):
+                raise HTTPException(status_code=400, detail="CNPJ inválido. Verifique os dígitos.")
             empresa_existente = db.query(Empresa).filter(Empresa.cnpj == cnpj_limpo, Empresa.id != empresa.id).first()
             if empresa_existente:
                 raise HTTPException(

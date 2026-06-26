@@ -22,18 +22,89 @@ api.interceptors.request.use((config) => {
   return Promise.reject(error);
 });
 
-// Interceptor de resposta para tratamento global de erros (ex: Inadimplência ou Token Expirado)
+// Flag para evitar loops infinitos de refresh
+let isRefreshing = false;
+let failedQueue = [];
+
+const processQueue = (error, token = null) => {
+  failedQueue.forEach(prom => {
+    if (error) {
+      prom.reject(error);
+    } else {
+      prom.resolve(token);
+    }
+  });
+  failedQueue = [];
+};
+
+// Interceptor de resposta para tratamento global de erros e refresh automático de token
 api.interceptors.response.use((response) => {
   return response;
-}, (error) => {
+}, async (error) => {
+  const originalRequest = error.config;
+
+  // Se recebeu 403 por faturas em atraso, redireciona
   if (error.response?.status === 403 && error.response?.data?.detail?.includes('faturas em atraso')) {
-    // Redireciona para a página de escolha de plano/onboarding se estiver suspenso
     window.location.href = '/escolher-plano';
+    return Promise.reject(error);
   }
-  if (error.response?.status === 401 && !window.location.pathname.includes('/login')) {
-    localStorage.removeItem('aldebaran_token');
-    window.location.href = '/login';
+
+  // Se recebeu 401 e não é a rota de login/refresh, tenta renovar o token
+  if (error.response?.status === 401 && !originalRequest._retry && !originalRequest.url?.includes('/auth/login') && !originalRequest.url?.includes('/auth/refresh')) {
+    
+    if (isRefreshing) {
+      // Se já está renovando, enfileira este request
+      return new Promise((resolve, reject) => {
+        failedQueue.push({ resolve, reject });
+      }).then(token => {
+        originalRequest.headers.Authorization = `Bearer ${token}`;
+        return api(originalRequest);
+      }).catch(err => {
+        return Promise.reject(err);
+      });
+    }
+
+    originalRequest._retry = true;
+    isRefreshing = true;
+
+    const refreshToken = localStorage.getItem('aldebaran_refresh_token');
+    
+    if (refreshToken) {
+      try {
+        const { data } = await axios.post(`${API_BASE_URL}/auth/refresh`, null, {
+          headers: { Authorization: `Bearer ${refreshToken}` }
+        });
+        
+        const newToken = data.token;
+        localStorage.setItem('aldebaran_token', newToken);
+        
+        processQueue(null, newToken);
+        
+        originalRequest.headers.Authorization = `Bearer ${newToken}`;
+        return api(originalRequest);
+      } catch (refreshError) {
+        processQueue(refreshError, null);
+        // Refresh falhou — limpa tudo e redireciona pro login
+        localStorage.removeItem('aldebaran_token');
+        localStorage.removeItem('aldebaran_refresh_token');
+        if (!window.location.pathname.includes('/login')) {
+          window.location.href = '/login';
+        }
+        return Promise.reject(refreshError);
+      } finally {
+        isRefreshing = false;
+      }
+    } else {
+      // Sem refresh token — vai pro login
+      isRefreshing = false;
+      localStorage.removeItem('aldebaran_token');
+      if (!window.location.pathname.includes('/login')) {
+        window.location.href = '/login';
+      }
+      return Promise.reject(error);
+    }
   }
+
   return Promise.reject(error);
 });
 

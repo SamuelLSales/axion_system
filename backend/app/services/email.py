@@ -1,14 +1,18 @@
 # backend/app/services/email.py
 import os
+import logging
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+logger = logging.getLogger("axion.email")
+
 
 def enviar_email_ativacao(email_destino: str, nome_usuario: str, token_ativacao: str):
     """
     Envia e-mail de ativação de conta.
     Se as credenciais SMTP estiverem definidas no ambiente, envia um e-mail real.
-    Caso contrário, imprime o link de ativação no console para testes.
+    Caso contrário, loga o link de ativação no console para testes.
     """
     frontend_url = os.getenv("FRONTEND_URL", "http://localhost:3000")
     link_ativacao = f"{frontend_url}/activate?token={token_ativacao}"
@@ -38,6 +42,8 @@ def enviar_email_ativacao(email_destino: str, nome_usuario: str, token_ativacao:
     Equipe AXION
     """
     
+    ano_atual = datetime_now_year()
+    
     corpo_html = f"""
     <html>
       <body style="font-family: Arial, sans-serif; color: #374151; line-height: 1.6; background-color: #f3f4f6; padding: 20px;">
@@ -60,7 +66,7 @@ def enviar_email_ativacao(email_destino: str, nome_usuario: str, token_ativacao:
           
           <p style="font-size: 12px; color: #9ca3af; margin-top: 32px;">Este link é válido por 24 horas. Se você não solicitou este cadastro, pode ignorar este e-mail.</p>
           <hr style="border: 0; border-top: 1px solid #e5e7eb; margin: 24px 0;" />
-          <p style="font-size: 12px; color: #6b7280; text-align: center; margin: 0;">&copy; {datetime_now_year()} AXION Sistemas. Todos os direitos reservados.</p>
+          <p style="font-size: 12px; color: #6b7280; text-align: center; margin: 0;">&copy; {ano_atual} AXION Sistemas. Todos os direitos reservados.</p>
         </div>
       </body>
     </html>
@@ -82,19 +88,14 @@ def enviar_email_ativacao(email_destino: str, nome_usuario: str, token_ativacao:
                 server.starttls()
                 server.login(smtp_user, smtp_pass)
                 server.sendmail(smtp_from, email_destino, msg.as_string())
-            print(f"E-mail de ativação enviado com sucesso para {email_destino} via SMTP.")
+            logger.info(f"E-mail de ativação enviado para {email_destino} via SMTP.")
             return True
         except Exception as e:
-            print(f"Erro ao enviar e-mail via SMTP: {e}. Fazendo fallback para o console.")
+            logger.error(f"Erro ao enviar e-mail via SMTP para {email_destino}: {e}")
             
     # Fallback / Log no console
-    print("\n" + "="*80)
-    print("   [FALLBACK LOG DE E-MAIL] - ATIVAÇÃO DE CONTA NO AXION")
-    print("="*80)
-    print(f"   Destinatário: {email_destino} ({nome_usuario})")
-    print(f"   Assunto:      {assunto}")
-    print(f"   Link de Ativação: {link_ativacao}")
-    print("="*80 + "\n")
+    logger.info(f"[FALLBACK] E-mail de ativação para {email_destino} ({nome_usuario})")
+    logger.info(f"[FALLBACK] Link de Ativação: {link_ativacao}")
     return True
 
 def datetime_now_year():

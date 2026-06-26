@@ -1,4 +1,6 @@
 # backend/app/routes/assinaturas.py
+import os
+import logging
 from fastapi import APIRouter, Depends, HTTPException, Request
 from sqlalchemy.orm import Session
 from app.services.auth import get_usuario_atual
@@ -6,6 +8,8 @@ from app.models.usuario import Usuario
 from app.models.empresa import Empresa
 from app.services.asaas_service import criar_cliente, criar_assinatura, obter_assinatura
 from database import get_db
+
+logger = logging.getLogger("axion.assinaturas")
 
 from typing import Optional
 from pydantic import BaseModel
@@ -185,23 +189,37 @@ def obter_status(db: Session = Depends(get_db), usuario_atual: Usuario = Depends
 @router.post("/webhook")
 async def webhook_asaas(request: Request, db: Session = Depends(get_db)):
     """
-    Webhook não autenticado que o Asaas vai chamar quando houver pagamento, atraso, etc.
+    Webhook autenticado via ASAAS_WEBHOOK_TOKEN que o Asaas chama para notificações de pagamento.
     """
+    # Verificar token de autenticação do webhook
+    webhook_token = os.getenv("ASAAS_WEBHOOK_TOKEN")
+    if webhook_token:
+        received_token = request.headers.get("asaas-access-token", "")
+        if received_token != webhook_token:
+            logger.warning(f"Webhook rejeitado: token inválido de IP {request.client.host}")
+            raise HTTPException(status_code=401, detail="Token de webhook inválido.")
+    else:
+        logger.warning("ASAAS_WEBHOOK_TOKEN não configurado — webhook aceita qualquer chamada!")
+
     try:
         payload = await request.json()
         evento = payload.get("event")
         payment = payload.get("payment", {})
         customer_id = payment.get("customer")
         
+        logger.info(f"Webhook recebido: evento={evento}, customer={customer_id}, IP={request.client.host}")
+        
         if not customer_id:
             return {"status": "ignored", "reason": "No customer ID"}
             
         empresa = db.query(Empresa).filter(Empresa.asaas_customer_id == customer_id).first()
         if not empresa:
+            logger.warning(f"Webhook: empresa não encontrada para customer_id={customer_id}")
             return {"status": "ignored", "reason": "Empresa not found for this customer"}
             
         # Analisa o evento
-        if evento == "PAYMENT_RECEIVED" or evento == "PAYMENT_CONFIRMED":
+        status_anterior = empresa.status_pagamento
+        if evento in ("PAYMENT_RECEIVED", "PAYMENT_CONFIRMED"):
             empresa.status_pagamento = "ativo"
             empresa.ativo = True
         elif evento == "PAYMENT_OVERDUE":
@@ -210,8 +228,12 @@ async def webhook_asaas(request: Request, db: Session = Depends(get_db)):
             empresa.status_pagamento = "cancelado"
             
         db.commit()
+        logger.info(f"Webhook processado: empresa={empresa.id}, status {status_anterior} → {empresa.status_pagamento}")
         return {"status": "ok"}
         
+    except HTTPException:
+        raise
     except Exception as e:
-        print(f"Erro no webhook: {e}")
+        logger.exception(f"Erro ao processar webhook")
         return {"status": "error"}
+
