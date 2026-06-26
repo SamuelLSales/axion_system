@@ -15,9 +15,12 @@ def criar_fase(fase_in: FaseCreate, db: Session = Depends(get_db), usuario_atual
     """
     Cria uma nova fase associada a um contrato.
     """
-    contrato = db.query(Contrato).filter(Contrato.id == fase_in.contrato_id).first()
+    contrato = db.query(Contrato).filter(
+        Contrato.id == fase_in.contrato_id,
+        Contrato.tenant_id == usuario_atual.tenant_id
+    ).first()
     if not contrato:
-        raise HTTPException(status_code=404, detail="Contrato associado não encontrado")
+        raise HTTPException(status_code=404, detail="Contrato associado não encontrado ou pertence a outra empresa")
     
     db_fase = Fase(
         contrato_id=fase_in.contrato_id,

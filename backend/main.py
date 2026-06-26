@@ -1,8 +1,11 @@
 # backend/main.py
 import sys
 import os
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Request
 from fastapi.middleware.cors import CORSMiddleware
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
 # Garante que o diretório backend e backend/app estejam no sys.path do Python para resolver os imports
 sys.path.append(os.path.dirname(os.path.abspath(__file__)))
@@ -69,7 +72,9 @@ def inicializar_admin_se_necessario():
 
         admin_existente = db.query(Usuario).filter(Usuario.username == "admin").first()
         if not admin_existente:
-            hash_senha, salt = gerar_hash_senha("admin")
+            # Use environment variable for default password, fallback to a stronger one, not 'admin'
+            default_pw = os.getenv("ADMIN_DEFAULT_PASSWORD", "trocar_imediatamente_123!")
+            hash_senha, salt = gerar_hash_senha(default_pw)
             admin_user = Usuario(
                 username="admin",
                 nome="Administrador",
@@ -96,12 +101,22 @@ app = FastAPI(
     version="1.0.0"
 )
 
+# Configuração de Rate Limiting
+limiter = Limiter(key_func=get_remote_address)
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # Configuração de CORS (Cross-Origin Resource Sharing)
 # Habilitado para allow_origins=["*"] para permitir que outros dispositivos
 # na rede interna local acessem a API hospedada neste servidor Windows/Linux.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:5173",
+        "http://127.0.0.1:3000",
+        "https://aldebaran.axion.app" # domain_example
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],

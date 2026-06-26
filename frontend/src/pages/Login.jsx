@@ -102,11 +102,11 @@ export default function Login() {
                 <User className="w-4 h-4" />
               </span>
               <input
-                type="email"
+                type="text"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 className="w-full bg-[#16191f] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-white placeholder-theme-weak focus:border-[#0D9488] focus:outline-none transition-colors"
-                placeholder="seu@email.com"
+                placeholder="seu@email.com ou admin"
                 disabled={loading}
                 autoComplete="email"
                 required

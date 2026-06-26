@@ -19,9 +19,12 @@ def criar_etapa(etapa_in: EtapaCreate, db: Session = Depends(get_db), usuario_at
     """
     Cria uma nova etapa dentro de uma fase e atualiza o status do contrato correspondente.
     """
-    fase = db.query(Fase).filter(Fase.id == etapa_in.fase_id).first()
+    fase = db.query(Fase).filter(
+        Fase.id == etapa_in.fase_id,
+        Fase.tenant_id == usuario_atual.tenant_id
+    ).first()
     if not fase:
-        raise HTTPException(status_code=404, detail="Fase associada não encontrada")
+        raise HTTPException(status_code=404, detail="Fase associada não encontrada ou pertence a outra empresa")
     
     contrato = db.query(Contrato).filter(Contrato.id == fase.contrato_id).first()
     

@@ -2,8 +2,13 @@
 import uuid
 import threading
 from datetime import datetime, timedelta
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, status, Request
 from sqlalchemy.orm import Session
+from database import get_db
+from slowapi import Limiter
+from slowapi.util import get_remote_address
+
+limiter = Limiter(key_func=get_remote_address)
 from database import get_db
 from app.models.usuario import Usuario
 from app.models.sessao import Sessao
@@ -18,15 +23,16 @@ from app.services.email import enviar_email_ativacao
 router = APIRouter(prefix="/auth", tags=["Autenticação"])
 
 @router.post("/login", response_model=LoginResponse)
-def login(request: LoginRequest, db: Session = Depends(get_db)):
-    usuario = db.query(Usuario).filter(Usuario.username == request.username).first()
+@limiter.limit("5/minute")
+def login(request: Request, login_data: LoginRequest, db: Session = Depends(get_db)):
+    usuario = db.query(Usuario).filter(Usuario.username == login_data.username).first()
     if not usuario:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário ou senha incorretos."
         )
     
-    if not verificar_senha(request.password, usuario.password_hash, usuario.salt):
+    if not verificar_senha(login_data.password, usuario.password_hash, usuario.salt):
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Usuário ou senha incorretos."
@@ -122,7 +128,7 @@ def register(request: RegisterRequest, db: Session = Depends(get_db)):
         print(f"\n{'='*60}\n[SIGNUP ERROR] Exceção no cadastro:\n{tb}\n{'='*60}")
         raise HTTPException(
             status_code=500,
-            detail=f"Erro interno ao criar conta: {type(e).__name__}: {str(e)}"
+            detail="Ocorreu um erro interno ao processar seu cadastro. Por favor, tente novamente mais tarde."
         )
 
 
