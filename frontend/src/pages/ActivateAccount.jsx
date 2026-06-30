@@ -1,4 +1,4 @@
-// frontend/src/pages/ActivateAccount.jsx
+﻿// frontend/src/pages/ActivateAccount.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { activateUser } from '../services/api';
@@ -41,32 +41,22 @@ export default function ActivateAccount() {
       <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
       
       {/* Glow decorativo no fundo */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-aldebaran-orange/5 rounded-full blur-[120px] pointer-events-none"></div>
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-aldebaran-gold/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute -top-40 -right-40 w-96 h-96 bg-[#0D9488]/5 rounded-full blur-[120px] pointer-events-none"></div>
+      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-[#0D9488]/5 rounded-full blur-[120px] pointer-events-none"></div>
 
-      <div className="w-full max-w-md bg-[#111317] border border-aldebaran-border p-8 md:p-10 relative overflow-hidden text-center z-10">
+      <div className="w-full max-w-md bg-[#111317] border border-slate-200 p-8 md:p-10 relative overflow-hidden text-center z-10">
         
         {/* Logo Branding */}
         <div className="flex flex-col items-center mb-8">
-          <div className="w-[70px] h-[65px] relative overflow-hidden mb-3">
-            <img 
-              src="/axion_icon.png" 
-              alt="AXION" 
-              style={{
-                position: 'absolute',
-                width: '180px',
-                height: 'auto',
-                maxWidth: 'none',
-                top: '-26px',
-                left: '-51.5px'
-              }}
-              className="drop-shadow-md" 
-            />
-          </div>
-          <h1 className="text-xl font-bold tracking-widest text-white uppercase">
-            AXION
-          </h1>
-          <span className="text-[9px] font-bold tracking-[0.25em] text-theme-weak uppercase block mt-1">
+          <div className="flex items-center gap-2.5 mb-4 justify-center">
+              <div className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0">
+                <span className="text-white font-extrabold text-sm">G</span>
+              </div>
+              <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
+                GEOGEST
+              </span>
+            </div>
+          <span className="text-[9px] font-bold tracking-[0.25em] text-slate-400 uppercase block mt-1">
             Gestão Inteligente de Contratos
           </span>
         </div>
@@ -76,7 +66,7 @@ export default function ActivateAccount() {
           <div className="py-6 flex flex-col items-center justify-center animate-pulse">
             <Loader2 className="w-12 h-12 text-[#0D9488] animate-spin mb-4" />
             <h3 className="text-lg font-bold text-white mb-2">Verificando Token</h3>
-            <p className="text-theme-weak text-sm">Aguarde enquanto ativamos o seu acesso...</p>
+            <p className="text-slate-400 text-sm">Aguarde enquanto ativamos o seu acesso...</p>
           </div>
         )}
 
@@ -87,11 +77,11 @@ export default function ActivateAccount() {
               <CheckCircle className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Conta Ativada!</h3>
-            <p className="text-theme-weak text-sm leading-relaxed mb-8 px-2">{message}</p>
+            <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">{message}</p>
             
             <Link 
               to="/login"
-              className="w-full bg-[#0D9488] hover:bg-teal-500 text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-colors shadow-md block text-center"
+              className="w-full bg-[#0D9488] hover:bg-teal-500 text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-colors shadow-lg block text-center"
             >
               Fazer Login
             </Link>
@@ -105,18 +95,18 @@ export default function ActivateAccount() {
               <AlertCircle className="w-8 h-8" />
             </div>
             <h3 className="text-lg font-bold text-white mb-2">Falha na Ativação</h3>
-            <p className="text-theme-weak text-sm leading-relaxed mb-8 px-2">{message}</p>
+            <p className="text-slate-400 text-sm leading-relaxed mb-8 px-2">{message}</p>
             
             <div className="space-y-3 w-full">
               <Link 
                 to="/cadastro"
-                className="w-full bg-aldebaran-gold hover:bg-blue-700 text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-colors shadow-md block text-center"
+                className="w-full bg-[#0D9488] hover:bg-blue-700 text-white font-bold text-sm tracking-wider uppercase py-3.5 transition-colors shadow-lg block text-center"
               >
                 Voltar para o Cadastro
               </Link>
               <Link 
                 to="/login"
-                className="w-full bg-transparent hover:bg-white/5 border border-aldebaran-border text-slate-300 font-bold text-sm tracking-wider uppercase py-3 transition-colors block text-center"
+                className="w-full bg-transparent hover:bg-white/5 border border-slate-200 text-slate-300 font-bold text-sm tracking-wider uppercase py-3 transition-colors block text-center"
               >
                 Ir para o Login
               </Link>
@@ -128,3 +118,6 @@ export default function ActivateAccount() {
     </div>
   );
 }
+
+
+

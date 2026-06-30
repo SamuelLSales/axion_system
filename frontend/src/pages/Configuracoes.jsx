@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useAuth } from '../context/AuthContext';
 import { 
   User, 
@@ -176,9 +176,9 @@ const Configuracoes = () => {
     <div className="p-6 max-w-5xl mx-auto space-y-6">
       
       {/* Title Header */}
-      <div className="border-b border-aldebaran-border pb-4">
-        <h1 className="text-2xl font-extrabold text-theme-strong">Configurações</h1>
-        <p className="text-theme-weak text-sm">Gerencie suas preferências de perfil, segurança e dados corporativos.</p>
+      <div className="border-b border-slate-200 pb-4">
+        <h1 className="text-2xl font-extrabold text-slate-900">Configurações</h1>
+        <p className="text-slate-400 text-sm">Gerencie suas preferências de perfil, segurança e dados corporativos.</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
@@ -189,8 +189,8 @@ const Configuracoes = () => {
             onClick={() => setActiveTab('perfil')}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
               activeTab === 'perfil'
-                ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
-                : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
+                ? 'bg-[#F8F9FA] text-slate-900 border-slate-200 border-l-4 border-l-teal-600 shadow-sm'
+                : 'text-slate-400 border-transparent hover:bg-[#F8F9FA] hover:text-slate-700'
             }`}
           >
             <User className="w-4 h-4 shrink-0 text-teal-600" />
@@ -201,8 +201,8 @@ const Configuracoes = () => {
             onClick={() => setActiveTab('seguranca')}
             className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
               activeTab === 'seguranca'
-                ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
-                : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
+                ? 'bg-[#F8F9FA] text-slate-900 border-slate-200 border-l-4 border-l-teal-600 shadow-sm'
+                : 'text-slate-400 border-transparent hover:bg-[#F8F9FA] hover:text-slate-700'
             }`}
           >
             <Lock className="w-4 h-4 shrink-0 text-teal-600" />
@@ -215,8 +215,8 @@ const Configuracoes = () => {
                 onClick={() => setActiveTab('empresa')}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
                   activeTab === 'empresa'
-                    ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
-                    : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
+                    ? 'bg-[#F8F9FA] text-slate-900 border-slate-200 border-l-4 border-l-teal-600 shadow-sm'
+                    : 'text-slate-400 border-transparent hover:bg-[#F8F9FA] hover:text-slate-700'
                 }`}
               >
                 <Building className="w-4 h-4 shrink-0 text-teal-600" />
@@ -226,8 +226,8 @@ const Configuracoes = () => {
                 onClick={() => setActiveTab('meu_plano')}
                 className={`w-full flex items-center gap-3 px-4 py-3 text-sm font-bold transition-all border ${
                   activeTab === 'meu_plano'
-                    ? 'bg-[#F8F9FA] text-slate-900 border-aldebaran-border border-l-4 border-l-teal-600 shadow-sm'
-                    : 'text-theme-weak border-transparent hover:bg-[#F8F9FA] hover:text-theme-normal'
+                    ? 'bg-[#F8F9FA] text-slate-900 border-slate-200 border-l-4 border-l-teal-600 shadow-sm'
+                    : 'text-slate-400 border-transparent hover:bg-[#F8F9FA] hover:text-slate-700'
                 }`}
               >
                 <CreditCard className="w-4 h-4 shrink-0 text-teal-600" />
@@ -238,14 +238,14 @@ const Configuracoes = () => {
         </div>
 
         {/* Right Side Content Panel */}
-        <div className="md:col-span-9 bg-white border border-aldebaran-border p-6 shadow-sm">
+        <div className="md:col-span-9 bg-white border border-slate-200 p-6 shadow-sm">
           
           {/* TAB 1: PERFIL */}
           {activeTab === 'perfil' && (
             <form onSubmit={handleProfileSubmit} className="space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-theme-strong mb-1">Informações Pessoais</h2>
-                <p className="text-theme-weak text-xs">Atualize os dados básicos da sua conta de acesso.</p>
+                <h2 className="text-lg font-bold text-slate-900 mb-1">Informações Pessoais</h2>
+                <p className="text-slate-400 text-xs">Atualize os dados básicos da sua conta de acesso.</p>
               </div>
 
               {profileMessage.text && (
@@ -261,35 +261,35 @@ const Configuracoes = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Nome Completo</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Nome Completo</label>
                   <input
                     type="text"
                     value={profileName}
                     onChange={(e) => setProfileName(e.target.value)}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600 placeholder-slate-400"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600 placeholder-slate-400"
                     placeholder="Seu nome"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">E-mail (Username)</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">E-mail (Username)</label>
                   <input
                     type="text"
                     value={user?.username || ''}
                     disabled
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-weak opacity-60 cursor-not-allowed"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-400 opacity-60 cursor-not-allowed"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Nível de Acesso</label>
-                  <span className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-weak opacity-60 block capitalize">
+                  <label className="text-xs font-bold text-slate-700 uppercase">Nível de Acesso</label>
+                  <span className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-400 opacity-60 block capitalize">
                     {user?.role === 'admin' ? 'Administrador' : 'Visualizador'}
                   </span>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-aldebaran-border flex justify-end">
+              <div className="pt-4 border-t border-slate-200 flex justify-end">
                 <button
                   type="submit"
                   disabled={profileLoading}
@@ -306,8 +306,8 @@ const Configuracoes = () => {
           {activeTab === 'seguranca' && (
             <form onSubmit={handlePasswordSubmit} className="space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-theme-strong mb-1">Segurança da Conta</h2>
-                <p className="text-theme-weak text-xs">Mantenha sua conta protegida alterando sua senha regularmente.</p>
+                <h2 className="text-lg font-bold text-slate-900 mb-1">Segurança da Conta</h2>
+                <p className="text-slate-400 text-xs">Mantenha sua conta protegida alterando sua senha regularmente.</p>
               </div>
 
               {passwordMessage.text && (
@@ -323,40 +323,40 @@ const Configuracoes = () => {
 
               <div className="space-y-4 max-w-md">
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Senha Atual</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Senha Atual</label>
                   <input
                     type="password"
                     value={passwordForm.old_password}
                     onChange={(e) => setPasswordForm({ ...passwordForm, old_password: e.target.value })}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                     placeholder="Sua senha atual"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Nova Senha</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Nova Senha</label>
                   <input
                     type="password"
                     value={passwordForm.new_password}
                     onChange={(e) => setPasswordForm({ ...passwordForm, new_password: e.target.value })}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                     placeholder="No mínimo 6 caracteres"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Confirmar Nova Senha</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Confirmar Nova Senha</label>
                   <input
                     type="password"
                     value={passwordForm.confirm_password}
                     onChange={(e) => setPasswordForm({ ...passwordForm, confirm_password: e.target.value })}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                     placeholder="Repita a nova senha"
                   />
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-aldebaran-border flex justify-end">
+              <div className="pt-4 border-t border-slate-200 flex justify-end">
                 <button
                   type="submit"
                   disabled={passwordLoading}
@@ -373,8 +373,8 @@ const Configuracoes = () => {
           {activeTab === 'empresa' && user?.role === 'admin' && (
             <form onSubmit={handleCompanySubmit} className="space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-theme-strong mb-1">Informações Corporativas</h2>
-                <p className="text-theme-weak text-xs">Atualize os dados institucionais do seu tenant de empresa.</p>
+                <h2 className="text-lg font-bold text-slate-900 mb-1">Informações Corporativas</h2>
+                <p className="text-slate-400 text-xs">Atualize os dados institucionais do seu tenant de empresa.</p>
               </div>
 
               {companyMessage.text && (
@@ -390,41 +390,41 @@ const Configuracoes = () => {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="space-y-1.5 col-span-2">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Nome Fantasia / Nome Comercial</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Nome Fantasia / Nome Comercial</label>
                   <input
                     type="text"
                     value={companyForm.nome_fantasia}
                     onChange={(e) => setCompanyForm({ ...companyForm, nome_fantasia: e.target.value })}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                     placeholder="Ex: Minha Empresa Ltda"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Razão Social</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Razão Social</label>
                   <input
                     type="text"
                     value={companyForm.razao_social}
                     onChange={(e) => setCompanyForm({ ...companyForm, razao_social: e.target.value })}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                     placeholder="Razão Social completa"
                   />
                 </div>
 
                 <div className="space-y-1.5">
-                  <label className="text-xs font-bold text-theme-normal uppercase">CNPJ</label>
+                  <label className="text-xs font-bold text-slate-700 uppercase">CNPJ</label>
                   <input
                     type="text"
                     value={companyForm.cnpj}
                     onChange={(e) => setCompanyForm({ ...companyForm, cnpj: e.target.value })}
-                    className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                    className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                     placeholder="Apenas números ou CNPJ formatado"
                   />
                 </div>
 
                 <div className="space-y-1.5 col-span-2">
-                  <label className="text-xs font-bold text-theme-normal uppercase">Taxa de Imposto (%)</label>
-                  <p className="text-theme-weak text-xs mb-2">Descontada automaticamente na Margem de Lucro e Painel Financeiro.</p>
+                  <label className="text-xs font-bold text-slate-700 uppercase">Taxa de Imposto (%)</label>
+                  <p className="text-slate-400 text-xs mb-2">Descontada automaticamente na Margem de Lucro e Painel Financeiro.</p>
                   <div className="relative">
                     <input
                       type="number"
@@ -433,7 +433,7 @@ const Configuracoes = () => {
                       max="100"
                       value={companyForm.taxa_imposto}
                       onChange={(e) => setCompanyForm({ ...companyForm, taxa_imposto: e.target.value })}
-                      className="w-full p-2.5 bg-[#F8F9FA] border border-aldebaran-border text-sm text-theme-strong focus:outline-none focus:border-teal-600"
+                      className="w-full p-2.5 bg-[#F8F9FA] border border-slate-200 text-sm text-slate-900 focus:outline-none focus:border-teal-600"
                       placeholder="Ex: 10.5"
                     />
                   </div>
@@ -444,11 +444,11 @@ const Configuracoes = () => {
                 <ShieldAlert className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
                 <div>
                   <p className="font-bold">Atenção Administrativa</p>
-                  <p className="mt-0.5 text-theme-weak leading-relaxed">As alterações nesta seção afetarão a identificação da empresa em todos os contratos, relatórios e dashboards operacionais dos demais usuários vinculados a este tenant.</p>
+                  <p className="mt-0.5 text-slate-400 leading-relaxed">As alterações nesta seção afetarão a identificação da empresa em todos os contratos, relatórios e dashboards operacionais dos demais usuários vinculados a este tenant.</p>
                 </div>
               </div>
 
-              <div className="pt-4 border-t border-aldebaran-border flex justify-end">
+              <div className="pt-4 border-t border-slate-200 flex justify-end">
                 <button
                   type="submit"
                   disabled={companyLoading}
@@ -465,20 +465,20 @@ const Configuracoes = () => {
           {activeTab === 'meu_plano' && user?.role === 'admin' && (
             <div className="space-y-6">
               <div>
-                <h2 className="text-lg font-bold text-theme-strong mb-1">Meu Plano de Assinatura</h2>
-                <p className="text-theme-weak text-xs">Acompanhe o status da sua assinatura no Axion System.</p>
+                <h2 className="text-lg font-bold text-slate-900 mb-1">Meu Plano de Assinatura</h2>
+                <p className="text-slate-400 text-xs">Acompanhe o status da sua assinatura no Geogest System.</p>
               </div>
 
-              <div className="bg-[#F8F9FA] border border-aldebaran-border p-6 rounded-lg space-y-4">
+              <div className="bg-[#F8F9FA] border border-slate-200 p-6 rounded-lg space-y-4">
                 <div className="flex items-center justify-between">
-                  <span className="text-sm font-bold text-theme-normal uppercase">Plano Atual</span>
+                  <span className="text-sm font-bold text-slate-700 uppercase">Plano Atual</span>
                   <span className="px-3 py-1 bg-teal-100 text-teal-800 font-bold rounded-full capitalize">
                     {user?.empresa?.plano || "Nenhum Plano"}
                   </span>
                 </div>
                 
-                <div className="flex items-center justify-between border-t border-aldebaran-border pt-4">
-                  <span className="text-sm font-bold text-theme-normal uppercase">Status de Pagamento</span>
+                <div className="flex items-center justify-between border-t border-slate-200 pt-4">
+                  <span className="text-sm font-bold text-slate-700 uppercase">Status de Pagamento</span>
                   <span className={`px-3 py-1 font-bold rounded-full capitalize ${
                     user?.empresa?.status_pagamento === 'ativo' ? 'bg-green-100 text-green-800' :
                     user?.empresa?.status_pagamento === 'atrasado' ? 'bg-red-100 text-red-800' :
@@ -503,3 +503,7 @@ const Configuracoes = () => {
 };
 
 export default Configuracoes;
+
+
+
+

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { 
  Users, 
  Plus, 
@@ -191,26 +191,26 @@ const Responsaveis = () => {
 
  if (loading && responsaveis.length === 0) {
  return (
- <div className="flex items-center justify-center min-h-screen bg-aldebaran-dark text-theme-strong">
+ <div className="flex items-center justify-center min-h-screen bg-white text-slate-900">
  <div className="flex flex-col items-center gap-4">
- <div className="w-12 h-12 border-4 border-aldebaran-gold border-t-transparent rounded-full animate-spin"></div>
- <p className="text-theme-weak font-medium">Carregando quadro de colaboradores...</p>
+ <div className="w-12 h-12 border-4 border-[#0D9488] border-t-transparent rounded-full animate-spin"></div>
+ <p className="text-slate-400 font-medium">Carregando quadro de colaboradores...</p>
  </div>
  </div>
  );
  }
 
  return (
- <div className="p-6 space-y-6 max-w-[1200px] mx-auto animate-fade-in text-theme-strong">
+ <div className="p-6 space-y-6 max-w-[1200px] mx-auto animate-fade-in text-slate-900">
  
  {/* CABEÇALHO */}
- <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-aldebaran-border pb-4">
+ <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-b border-slate-200 pb-4">
  <div>
  <h1 className="text-2xl font-extrabold flex items-center gap-3">
- <Users className="text-aldebaran-goldDark w-8 h-8" />
+ <Users className="text-[#0D9488] w-8 h-8" />
  Gerenciamento de Equipe
  </h1>
- <p className="text-theme-weak text-xs mt-1">
+ <p className="text-slate-400 text-xs mt-1">
  Cadastre e gerencie a lista de colaboradores qualificados para as atividades de campo e escritório
  </p>
  </div>
@@ -218,7 +218,7 @@ const Responsaveis = () => {
  {user?.role === 'admin' && (
  <button
  onClick={abrirCriarModal}
- className="px-4 py-2 bg-aldebaran-gold hover:opacity-90 text-white font-bold rounded-none text-sm transition-all shadow-sm hover:scale-[1.02] flex items-center gap-2 self-start sm:self-auto"
+ className="px-4 py-2 bg-[#0D9488] hover:opacity-90 text-white font-bold rounded-xl text-sm transition-all shadow-sm hover:scale-[1.02] flex items-center gap-2 self-start sm:self-auto"
  >
  <Plus className="w-4 h-4" />
  Novo Responsável
@@ -228,7 +228,7 @@ const Responsaveis = () => {
 
  {/* ERROS DE CONEXÃO */}
  {error && (
- <div className="bg-transparent text-rose-500 border border-rose-500/20 rounded-none p-4 flex items-start gap-3">
+ <div className="bg-transparent text-rose-500 border border-rose-500/20 rounded-xl p-4 flex items-start gap-3">
  <ShieldAlert className="text-rose-400 w-5 h-5 shrink-0 mt-0.5" />
  <p className="text-rose-300 text-xs">{error}</p>
  </div>
@@ -238,34 +238,34 @@ const Responsaveis = () => {
  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
  
  {/* Topografia */}
- <div className="bg-aldebaran-gray border border-aldebaran-border p-5 rounded-none flex items-center justify-between shadow-sm">
+ <div className="bg-white border border-slate-200 p-5 rounded-xl flex items-center justify-between shadow-sm">
  <div>
- <span className="text-xs font-semibold uppercase text-theme-weak tracking-wider">Equipe Topografia</span>
- <h2 className="text-3xl font-extrabold text-aldebaran-gold mt-1">{totalTopografia}</h2>
+ <span className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Equipe Topografia</span>
+ <h2 className="text-3xl font-extrabold text-[#0D9488] mt-1">{totalTopografia}</h2>
  </div>
- <div className="p-3 bg-aldebaran-gold/10 rounded-none text-aldebaran-gold">
+ <div className="p-3 bg-[#0D9488]/10 rounded-xl text-[#0D9488]">
  <MapPin className="w-5 h-5" />
  </div>
  </div>
 
  {/* Geologia */}
- <div className="bg-aldebaran-gray border border-aldebaran-border p-5 rounded-none flex items-center justify-between shadow-sm">
+ <div className="bg-white border border-slate-200 p-5 rounded-xl flex items-center justify-between shadow-sm">
  <div>
- <span className="text-xs font-semibold uppercase text-theme-weak tracking-wider">Equipe Geologia</span>
+ <span className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Equipe Geologia</span>
  <h2 className="text-3xl font-extrabold text-yellow-400 mt-1">{totalGeologia}</h2>
  </div>
- <div className="p-3 bg-transparent text-yellow-500 rounded-none text-yellow-400">
+ <div className="p-3 bg-transparent text-yellow-500 rounded-xl text-yellow-400">
  <Layers className="w-5 h-5" />
  </div>
  </div>
 
  {/* Administrativo */}
- <div className="bg-aldebaran-gray border border-aldebaran-border p-5 rounded-none flex items-center justify-between shadow-sm">
+ <div className="bg-white border border-slate-200 p-5 rounded-xl flex items-center justify-between shadow-sm">
  <div>
- <span className="text-xs font-semibold uppercase text-theme-weak tracking-wider">Administrativo / Outros</span>
+ <span className="text-xs font-semibold uppercase text-slate-400 tracking-wider">Administrativo / Outros</span>
  <h2 className="text-3xl font-extrabold text-emerald-400 mt-1">{totalAdministrativo}</h2>
  </div>
- <div className="p-3 bg-transparent text-emerald-500 rounded-none text-emerald-400">
+ <div className="p-3 bg-transparent text-emerald-600 rounded-xl text-emerald-400">
  <FileText className="w-5 h-5" />
  </div>
  </div>
@@ -273,12 +273,12 @@ const Responsaveis = () => {
  </div>
 
  {/* LISTA DE RESPONSÁVEIS */}
- <div className="bg-aldebaran-gray border border-aldebaran-border rounded-none shadow-sm overflow-hidden">
+ <div className="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
  <div className="overflow-x-auto">
  {responsaveis.length > 0 ? (
  <table className="w-full text-left border-collapse">
  <thead>
- <tr className="bg-aldebaran-dark/40 border-b border-aldebaran-border text-xs font-semibold uppercase tracking-wider text-theme-weak">
+ <tr className="bg-slate-50 border-b border-slate-200 text-xs font-semibold uppercase tracking-wider text-slate-400">
  <th className="py-4 px-5">Colaborador</th>
  <th className="py-4 px-5">Cargo / Função</th>
  <th className="py-4 px-5">Área de Atuação</th>
@@ -290,33 +290,33 @@ const Responsaveis = () => {
  {responsaveis.map((resp) => {
  const contratosAtivos = obterContratosAtivosCount(resp.nome);
  return (
- <tr key={resp.id} className="hover:bg-aldebaran-gray/20 transition-colors">
+ <tr key={resp.id} className="hover:bg-white/20 transition-colors">
  
  {/* Avatar e Nome */}
  <td className="py-4 px-5">
  <div className="flex items-center gap-3">
- <div className="w-9 h-9 rounded-full bg-aldebaran-gold text-white border border-aldebaran-border flex items-center justify-center font-bold text-xs select-none">
+ <div className="w-9 h-9 rounded-full bg-[#0D9488] text-white border border-slate-200 flex items-center justify-center font-bold text-xs select-none">
  {obterIniciais(resp.nome)}
  </div>
- <span className="font-bold text-theme-strong text-base">{resp.nome}</span>
+ <span className="font-bold text-slate-900 text-base">{resp.nome}</span>
  </div>
  </td>
 
  {/* Cargo */}
  <td className="py-4 px-5">
- <span className="text-theme-normal font-semibold">{resp.cargo}</span>
+ <span className="text-slate-700 font-semibold">{resp.cargo}</span>
  </td>
 
  {/* Área */}
  <td className="py-4 px-5">
- <span className={`px-2 py-0.5 rounded-none text-xs font-bold ${
+ <span className={`px-2 py-0.5 rounded-xl text-xs font-bold ${
  resp.area === 'Topografia' 
- ? 'bg-aldebaran-gold/10 text-aldebaran-gold' 
+ ? 'bg-[#0D9488]/10 text-[#0D9488]' 
  : resp.area === 'Geologia'
  ? 'bg-transparent text-yellow-500 text-yellow-400'
  : resp.area === 'Administrativo'
- ? 'bg-transparent text-emerald-500 text-emerald-400'
- : 'bg-aldebaran-dark0/10 text-theme-weak'
+ ? 'bg-transparent text-emerald-600 text-emerald-400'
+ : 'bg-slate-100/60 text-slate-400'
  }`}>
  {resp.area}
  </span>
@@ -325,11 +325,11 @@ const Responsaveis = () => {
  {/* Contratos Ativos */}
  <td className="py-4 px-5 text-center font-mono">
  {contratosAtivos > 0 ? (
- <span className="px-2 py-0.5 text-aldebaran-gold text-xs font-semibold rounded-none font-bold">
+ <span className="px-2 py-0.5 text-[#0D9488] text-xs font-semibold rounded-xl font-bold">
  {contratosAtivos} ativo(s)
  </span>
  ) : (
- <span className="text-theme-weak italic text-xs">Sem projetos</span>
+ <span className="text-slate-400 italic text-xs">Sem projetos</span>
  )}
  </td>
 
@@ -339,7 +339,7 @@ const Responsaveis = () => {
  <div className="flex items-center justify-center gap-2">
  <button
  onClick={() => abrirEditarModal(resp)}
- className="p-2 hover:bg-aldebaran-gray text-theme-weak hover:text-theme-normal rounded-none transition"
+ className="p-2 hover:bg-white text-slate-400 hover:text-slate-700 rounded-xl transition"
  title="Editar Dados"
  >
  <Edit3 className="w-4 h-4" />
@@ -348,7 +348,7 @@ const Responsaveis = () => {
  {/* Impede a exclusão do "Robson Ribeiro" padrão se desejado, ou deixa livre com aviso */}
  <button
  onClick={() => handleExcluir(resp)}
- className="p-2 hover:bg-transparent text-rose-500 text-theme-weak hover:text-rose-400 rounded-none transition"
+ className="p-2 hover:bg-transparent text-rose-500 text-slate-400 hover:text-rose-400 rounded-xl transition"
  title="Remover Colaborador"
  >
  <Trash2 className="w-4 h-4" />
@@ -363,8 +363,8 @@ const Responsaveis = () => {
  </tbody>
  </table>
  ) : (
- <div className="py-12 flex flex-col items-center justify-center text-theme-weak gap-3">
- <UserX className="w-12 h-12 text-theme-normal " />
+ <div className="py-12 flex flex-col items-center justify-center text-slate-400 gap-3">
+ <UserX className="w-12 h-12 text-slate-700 " />
  <p className="text-sm font-medium">Nenhum colaborador cadastrado. Clique em "+ Novo Responsável".</p>
  </div>
  )}
@@ -375,15 +375,15 @@ const Responsaveis = () => {
  {/* 🛡️ MODAL ADICIONAR / EDITAR RESPONSÁVEL */}
  {modalAberto && (
  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in">
- <div className="bg-aldebaran-gray border border-aldebaran-border rounded-none w-full max-w-md overflow-hidden shadow-md">
- <div className="p-5 border-b border-aldebaran-border flex justify-between items-center bg-aldebaran-dark/40">
- <h3 className="text-base font-bold text-theme-strong flex items-center gap-2">
- {editandoId ? <Edit3 className="w-5 h-5 text-aldebaran-goldDark" /> : <Plus className="w-5 h-5 text-aldebaran-goldDark" />}
+ <div className="bg-white border border-slate-200 rounded-xl w-full max-w-md overflow-hidden shadow-lg">
+ <div className="p-5 border-b border-slate-200 flex justify-between items-center bg-slate-50">
+ <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+ {editandoId ? <Edit3 className="w-5 h-5 text-[#0D9488]" /> : <Plus className="w-5 h-5 text-[#0D9488]" />}
  {editandoId ? 'Editar Colaborador' : 'Adicionar Novo Colaborador'}
  </h3>
  <button 
  onClick={() => setModalAberto(false)}
- className="text-theme-weak hover:text-theme-strong transition"
+ className="text-slate-400 hover:text-slate-900 transition"
  >
  <X className="w-5 h-5" />
  </button>
@@ -392,64 +392,64 @@ const Responsaveis = () => {
  <form onSubmit={handleSalvar} className="p-5 space-y-4">
  
  {erroForm && (
- <div className="bg-transparent text-rose-500 border border-rose-500/20 rounded-none p-3 flex items-start gap-2 text-rose-400 text-xs">
+ <div className="bg-transparent text-rose-500 border border-rose-500/20 rounded-xl p-3 flex items-start gap-2 text-rose-400 text-xs">
  <ShieldAlert className="w-4 h-4 shrink-0 mt-0.5" />
  <p>{erroForm}</p>
  </div>
  )}
 
  <div>
- <label className="text-xs font-semibold text-theme-weak block mb-1">Nome Completo *</label>
+ <label className="text-xs font-semibold text-slate-400 block mb-1">Nome Completo *</label>
  <input 
  type="text" 
  required
  placeholder="ex: Robson Ribeiro"
  value={form.nome}
  onChange={(e) => setForm({...form, nome: e.target.value})}
- className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold"
+ className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10"
  />
  </div>
 
  <div>
- <label className="text-xs font-semibold text-theme-weak block mb-1">Cargo / Função *</label>
+ <label className="text-xs font-semibold text-slate-400 block mb-1">Cargo / Função *</label>
  <select 
  value={form.cargo}
  onChange={(e) => setForm({...form, cargo: e.target.value})}
- className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold cursor-pointer"
+ className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 cursor-pointer"
  >
- <option value="Diretor" className="bg-aldebaran-dark">Diretor</option>
- <option value="Coordenador" className="bg-aldebaran-dark">Coordenador</option>
- <option value="Campo" className="bg-aldebaran-dark">Técnico de Campo</option>
- <option value="Financeiro" className="bg-aldebaran-dark">Financeiro</option>
- <option value="Outro" className="bg-aldebaran-dark">Outro</option>
+ <option value="Diretor" className="bg-white">Diretor</option>
+ <option value="Coordenador" className="bg-white">Coordenador</option>
+ <option value="Campo" className="bg-white">Técnico de Campo</option>
+ <option value="Financeiro" className="bg-white">Financeiro</option>
+ <option value="Outro" className="bg-white">Outro</option>
  </select>
  </div>
 
  <div>
- <label className="text-xs font-semibold text-theme-weak block mb-1">Área Principal *</label>
+ <label className="text-xs font-semibold text-slate-400 block mb-1">Área Principal *</label>
  <select 
  value={form.area}
  onChange={(e) => setForm({...form, area: e.target.value})}
- className="w-full p-2.5 bg-aldebaran-dark border border-aldebaran-border rounded-none text-sm text-theme-strong focus:outline-none focus:border-aldebaran-gold cursor-pointer"
+ className="w-full p-2.5 bg-white border border-slate-200 rounded-xl text-sm text-slate-900 focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 cursor-pointer"
  >
- <option value="Topografia" className="bg-aldebaran-dark">Topografia</option>
- <option value="Geologia" className="bg-aldebaran-dark">Geologia</option>
- <option value="Administrativo" className="bg-aldebaran-dark">Administrativo</option>
- <option value="Todas" className="bg-aldebaran-dark">Todas as áreas</option>
+ <option value="Topografia" className="bg-white">Topografia</option>
+ <option value="Geologia" className="bg-white">Geologia</option>
+ <option value="Administrativo" className="bg-white">Administrativo</option>
+ <option value="Todas" className="bg-white">Todas as áreas</option>
  </select>
  </div>
 
- <div className="flex justify-end gap-3 pt-3 border-t border-aldebaran-border">
+ <div className="flex justify-end gap-3 pt-3 border-t border-slate-200">
  <button 
  type="button" 
  onClick={() => setModalAberto(false)}
- className="px-4 py-2 bg-transparent border border-aldebaran-border hover:bg-aldebaran-dark text-theme-normal rounded-none text-xs font-bold transition"
+ className="px-4 py-2 bg-transparent border border-slate-200 hover:bg-white text-slate-700 rounded-xl text-xs font-bold transition"
  >
  Cancelar
  </button>
  <button 
  type="submit" 
- className="px-4 py-2 bg-aldebaran-gold hover:opacity-90 text-white font-bold rounded-none text-xs transition flex items-center gap-1.5"
+ className="px-4 py-2 bg-[#0D9488] hover:opacity-90 text-white font-bold rounded-xl text-xs transition flex items-center gap-1.5"
  >
  <Save className="w-3.5 h-3.5" />
  {editandoId ? 'Salvar Alterações' : 'Cadastrar'}
@@ -465,3 +465,6 @@ const Responsaveis = () => {
 };
 
 export default Responsaveis;
+
+
+

@@ -8,7 +8,7 @@ load_dotenv()
 
 # Caminho do banco de dados absoluto para evitar múltiplos arquivos dependendo de onde o script é rodado
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-db_path = os.path.join(BASE_DIR, 'aldebaran.db').replace('\\', '/')
+db_path = os.path.join(BASE_DIR, 'geogest.db').replace('\\', '/')
 DATABASE_URL = os.getenv("DATABASE_URL", f"sqlite:///{db_path}")
 
 # Criação do engine de conexão

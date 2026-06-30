@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import {
   Briefcase,
@@ -232,10 +232,10 @@ const Dashboard = () => {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center h-screen bg-aldebaran-dark">
+      <div className="flex items-center justify-center h-screen bg-slate-50">
         <div className="flex flex-col items-center gap-4">
-          <div className="w-12 h-12 border-4 border-aldebaran-gold border-t-transparent rounded-full animate-spin"></div>
-          <p className="text-theme-weak font-medium">Carregando dados da Aldebaran...</p>
+          <div className="w-10 h-10 border-4 border-[#0D9488] border-t-transparent rounded-full animate-spin"></div>
+          <p className="text-slate-500 font-medium text-sm">Carregando dados...</p>
         </div>
       </div>
     );
@@ -244,67 +244,64 @@ const Dashboard = () => {
   return (
     <div className="p-6 space-y-6 max-w-[1600px] mx-auto animate-fade-in">
 
-      {/* CADASTRAR/EXPORTAR CABEÇALHO */}
-      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-aldebaran-border pb-6">
+      {/* CABEÇALHO */}
+      <div className="flex flex-col md:flex-row md:items-end justify-between gap-4 pb-6 border-b border-slate-200">
         <div>
-          <h1 className="text-2xl font-bold text-theme-strong tracking-tight">
-            Controle de Contratos
-          </h1>
-          <p className="text-theme-weak text-sm mt-1 font-mono">
-            {user?.empresa?.nome_fantasia
-              ? `Painel de ${user.empresa.nome_fantasia}`
-              : 'Painel de Gestão de Contratos'}
+          <h1 className="text-2xl font-bold text-slate-900 tracking-tight">Controle de Contratos</h1>
+          <p className="text-slate-500 text-sm mt-1">
+            {user?.empresa?.nome_fantasia ? `Painel de ${user.empresa.nome_fantasia}` : 'Painel de Gestao de Contratos'}
           </p>
         </div>
-
         <div className="flex items-center gap-3">
           <button
             onClick={exportarCSV}
-            className="px-4 py-1.5 bg-transparent text-theme-weak border border-aldebaran-border hover:border-theme-strong rounded-none text-xs font-semibold lowercase transition-colors"
+            className="px-4 py-2 bg-white text-slate-600 border border-slate-200 hover:border-slate-400 rounded-lg text-xs font-semibold transition-all shadow-sm"
           >
             exportar csv
           </button>
           <button
             onClick={() => navigate('/contratos/novo')}
-            className="px-4 py-1.5 bg-aldebaran-gold hover:opacity-90 text-white rounded-none text-xs font-bold lowercase transition-all shadow-sm flex items-center gap-1.5"
+            className="px-4 py-2 bg-[#0D9488] hover:bg-[#0b7c71] text-white rounded-lg text-xs font-bold transition-all shadow-sm shadow-[#0D9488]/20 flex items-center gap-1.5"
           >
-            + novo contrato
+            + Novo Contrato
           </button>
         </div>
       </div>
 
-      {/* TABS DE NAVEGAÇÃO DO DASHBOARD */}
-      <div className="flex border-b border-aldebaran-border gap-6">
+      {/* TABS */}
+      <div className="flex gap-1 bg-slate-100 p-1 rounded-xl w-fit">
         <button
           onClick={() => setAbaAtiva('geral')}
-          className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all relative ${abaAtiva === 'geral'
-            ? 'text-aldebaran-gold border-b-2 border-aldebaran-gold font-extrabold'
-            : 'text-theme-weak hover:text-theme-normal'
-            }`}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all ${
+            abaAtiva === 'geral'
+              ? 'bg-white text-[#0D9488] shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
         >
-          Visão Geral & Contratos
+          Visao Geral & Contratos
         </button>
         <button
           onClick={() => setAbaAtiva('gargalos')}
-          className={`pb-3 text-xs font-bold uppercase tracking-wider transition-all relative flex items-center gap-1.5 ${abaAtiva === 'gargalos'
-            ? 'text-aldebaran-gold border-b-2 border-aldebaran-gold font-extrabold'
-            : 'text-theme-weak hover:text-theme-normal'
-            }`}
+          className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-1.5 ${
+            abaAtiva === 'gargalos'
+              ? 'bg-white text-[#0D9488] shadow-sm'
+              : 'text-slate-500 hover:text-slate-700'
+          }`}
         >
-          Análise de Gargalos & Atrasos
+          Analise de Gargalos
           {etapasAtrasadas.length > 0 && (
-            <span className="w-2.5 h-2.5 rounded-full bg-rose-500 animate-pulse block"></span>
+            <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse block"></span>
           )}
         </button>
       </div>
 
       {/* ERROS DE CONEXÃO */}
       {error && (
-        <div className="bg-transparent text-rose-500 border border-rose-500/20 rounded-none p-4 flex items-start gap-3">
-          <AlertCircle className="text-rose-400 w-5 h-5 shrink-0 mt-0.5" />
+        <div className="bg-rose-50 text-rose-600 border border-rose-200 rounded-xl p-4 flex items-start gap-3">
+          <AlertCircle className="w-5 h-5 shrink-0 mt-0.5" />
           <div>
-            <h4 className="text-rose-400 font-bold text-sm">Problema com o servidor</h4>
-            <p className="text-rose-300/80 text-xs mt-1">{error}</p>
+            <h4 className="font-bold text-sm">Problema com o servidor</h4>
+            <p className="text-xs mt-1 opacity-80">{error}</p>
           </div>
         </div>
       )}
@@ -312,35 +309,29 @@ const Dashboard = () => {
       {/* CONTEÚDO DA ABA 1: VISÃO GERAL */}
       {abaAtiva === 'geral' && (
         <div className="space-y-6">
-          {/* LISTA DE CONTRATOS EM ABERTO */}
-          <div className="border border-aldebaran-border rounded-none p-6 bg-aldebaran-dark0/5 space-y-6">
+          <div className="bg-white border border-slate-200 rounded-2xl p-6 shadow-sm space-y-6">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Contratos em Aberto</span>
-                <h3 className="text-lg font-bold text-theme-strong lowercase mt-1">Todos os projetos em andamento</h3>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Contratos em Aberto</span>
+                <h3 className="text-lg font-bold text-slate-900 mt-1">Todos os projetos em andamento</h3>
               </div>
-
-              {/* Filtros */}
               <div className="flex flex-wrap items-center gap-3">
-                {/* Busca */}
                 <div className="relative">
-                  <Search className="w-3.5 h-3.5 text-theme-weak absolute left-3 top-1/2 -translate-y-1/2" />
+                  <Search className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
                     type="text"
                     value={termoBusca}
                     onChange={(e) => setTermoBusca(e.target.value)}
-                    placeholder="filtrar projeto, cliente..."
-                    className="w-[200px] sm:w-[240px] pl-9 pr-4 py-1.5 bg-aldebaran-dark border border-aldebaran-border text-theme-normal text-xs rounded-none placeholder-theme-weak/50 focus:outline-none focus:border-theme-strong transition-colors"
+                    placeholder="Filtrar projeto, cliente..."
+                    className="w-[200px] sm:w-[240px] pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg placeholder-slate-400 focus:outline-none focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 transition-all"
                   />
                 </div>
-
-                {/* Filtro por Área */}
                 <select
                   value={areaFiltro}
                   onChange={(e) => setAreaFiltro(e.target.value)}
-                  className="px-3 py-1.5 bg-aldebaran-dark border border-aldebaran-border text-theme-normal text-xs rounded-none focus:outline-none focus:border-theme-strong"
+                  className="px-3 py-2 bg-slate-50 border border-slate-200 text-slate-700 text-xs rounded-lg focus:outline-none focus:border-[#0D9488] transition-all"
                 >
-                  <option value="todas">todas as áreas</option>
+                  <option value="todas">Todas as areas</option>
                   {areas.map(area => (
                     <option key={area.id} value={area.nome.toLowerCase()}>
                       {formatArea(area.nome)}
@@ -351,95 +342,82 @@ const Dashboard = () => {
             </div>
 
             {contratosEmAberto.length === 0 ? (
-              <div className="text-center py-12 border border-dashed border-aldebaran-border text-theme-weak text-sm lowercase font-mono">
-                Nenhum contrato em aberto localizado com os filtros aplicados.
+              <div className="text-center py-12 border border-dashed border-slate-200 rounded-xl text-slate-400 text-sm">
+                Nenhum contrato em aberto com os filtros aplicados.
               </div>
             ) : (
               <div className="overflow-x-auto">
-                <table className="w-full text-left border-collapse">
+                <table className="w-full text-left">
                   <thead>
-                    <tr className="border-b border-aldebaran-border text-[10px] uppercase font-bold text-theme-weak tracking-wider">
-                      <th className="pb-3 px-2">projeto / cliente</th>
-                      <th className="pb-3 px-2">área</th>
-                      <th className="pb-3 px-2">diretor responsável</th>
-                      <th className="pb-3 px-2">entrega prevista</th>
-                      <th className="pb-3 px-2">dias restantes</th>
-                      <th className="pb-3 px-2">progresso</th>
-                      <th className="pb-3 px-2 text-right">ações</th>
+                    <tr className="bg-slate-50 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
+                      <th className="py-3 px-4 rounded-tl-lg">Projeto / Cliente</th>
+                      <th className="py-3 px-4">Area</th>
+                      <th className="py-3 px-4">Diretor</th>
+                      <th className="py-3 px-4">Entrega</th>
+                      <th className="py-3 px-4">Dias Restantes</th>
+                      <th className="py-3 px-4">Progresso</th>
+                      <th className="py-3 px-4 text-right rounded-tr-lg">Acoes</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-aldebaran-border/50 text-sm">
+                  <tbody className="divide-y divide-slate-100 text-sm">
                     {contratosEmAberto.map(contrato => {
                       const progresso = obterProgressoContrato(contrato);
                       const diasRestantes = calcularDiasRestantes(contrato.data_entrega_final);
-
-                      let diasBadgeStyle = 'text-theme-normal';
+                      let diasBadgeStyle = 'text-slate-600';
                       if (diasRestantes !== null) {
-                        if (diasRestantes < 0) {
-                          diasBadgeStyle = 'text-rose-500 font-bold';
-                        } else if (diasRestantes <= 7) {
-                          diasBadgeStyle = 'text-aldebaran-gold font-bold';
-                        } else {
-                          diasBadgeStyle = 'text-emerald-500';
-                        }
+                        if (diasRestantes < 0) diasBadgeStyle = 'text-rose-500 font-bold';
+                        else if (diasRestantes <= 7) diasBadgeStyle = 'text-amber-500 font-bold';
+                        else diasBadgeStyle = 'text-emerald-600';
                       }
-
                       return (
                         <tr
                           key={contrato.id}
                           onClick={() => navigate(`/contratos/${contrato.id}`)}
-                          className="group hover:bg-aldebaran-border/10 cursor-pointer transition-colors"
+                          className="group hover:bg-slate-50 cursor-pointer transition-colors"
                         >
-                          <td className="py-4 px-2">
-                            <div className="font-bold text-theme-strong group-hover:text-aldebaran-gold transition-colors">{contrato.nome_projeto}</div>
-                            <div className="text-xs text-theme-weak font-mono lowercase">{contrato.cliente}</div>
+                          <td className="py-4 px-4">
+                            <div className="font-bold text-slate-900 group-hover:text-[#0D9488] transition-colors">{contrato.nome_projeto}</div>
+                            <div className="text-xs text-slate-400">{contrato.cliente}</div>
                           </td>
-                          <td className="py-4 px-2">
-                            <span className="inline-block text-[10px] font-bold px-2 py-0.5 rounded-none font-mono bg-blue-500/10 text-blue-400 border border-blue-500/20">
-                              {contrato.area_atuacao ? formatArea(contrato.area_atuacao.nome) : 'Sem Área'}
+                          <td className="py-4 px-4">
+                            <span className="inline-block text-[10px] font-bold px-2 py-1 rounded-full bg-blue-50 text-blue-600 border border-blue-100">
+                              {contrato.area_atuacao ? formatArea(contrato.area_atuacao.nome) : 'Sem Area'}
                             </span>
                           </td>
-                          <td className="py-4 px-2">
+                          <td className="py-4 px-4">
                             <div className="flex items-center gap-2">
-                              <div className="w-6 h-6 rounded-full bg-aldebaran-border text-theme-weak text-[10px] font-bold flex items-center justify-center">
+                              <div className="w-6 h-6 rounded-full bg-slate-200 text-slate-600 text-[10px] font-bold flex items-center justify-center">
                                 {contrato.diretor_projeto ? contrato.diretor_projeto.substring(0, 2).toUpperCase() : '??'}
                               </div>
-                              <span className="text-theme-normal text-xs">{contrato.diretor_projeto}</span>
+                              <span className="text-slate-700 text-xs">{contrato.diretor_projeto}</span>
                             </div>
                           </td>
-                          <td className="py-4 px-2 text-xs font-mono text-theme-weak">
-                            {formatarData(contrato.data_entrega_final)}
-                          </td>
-                          <td className="py-4 px-2 text-xs font-mono">
+                          <td className="py-4 px-4 text-xs text-slate-500">{formatarData(contrato.data_entrega_final)}</td>
+                          <td className="py-4 px-4 text-xs">
                             {diasRestantes !== null ? (
                               <span className={diasBadgeStyle}>
-                                {diasRestantes < 0
-                                  ? `atrasado há ${Math.abs(diasRestantes)}d`
-                                  : `${diasRestantes} dias`}
+                                {diasRestantes < 0 ? `atrasado ha ${Math.abs(diasRestantes)}d` : `${diasRestantes} dias`}
                               </span>
-                            ) : (
-                              <span className="text-theme-weak">-</span>
-                            )}
+                            ) : <span className="text-slate-400">-</span>}
                           </td>
-                          <td className="py-4 px-2">
+                          <td className="py-4 px-4">
                             <div className="flex items-center gap-3 min-w-[120px]">
-                              <div className="flex-1 h-1.5 bg-aldebaran-border rounded-none relative overflow-hidden">
+                              <div className="flex-1 h-1.5 bg-slate-100 rounded-full overflow-hidden">
                                 <div
-                                  className={`absolute left-0 top-0 h-full transition-all duration-500 ${contrato.status === 'atrasado'
-                                    ? 'bg-rose-500'
-                                    : contrato.status === 'atencao'
-                                      ? 'bg-aldebaran-gold'
-                                      : 'bg-emerald-500'
-                                    }`}
+                                  className={`h-full rounded-full transition-all duration-500 ${
+                                    contrato.status === 'atrasado' ? 'bg-rose-500'
+                                    : contrato.status === 'atencao' ? 'bg-amber-500'
+                                    : 'bg-emerald-500'
+                                  }`}
                                   style={{ width: `${progresso}%` }}
-                                ></div>
+                                />
                               </div>
-                              <span className="text-xs font-bold font-mono text-theme-strong w-8 text-right">{progresso}%</span>
+                              <span className="text-xs font-bold text-slate-700 w-8 text-right">{progresso}%</span>
                             </div>
                           </td>
-                          <td className="py-4 px-2 text-right">
-                            <button className="p-1 hover:bg-transparent text-theme-weak hover:text-theme-strong rounded-none transition">
-                              <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
+                          <td className="py-4 px-4 text-right">
+                            <button className="p-1.5 rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-700 transition-all">
+                              <ArrowRight className="w-4 h-4" />
                             </button>
                           </td>
                         </tr>
@@ -456,54 +434,51 @@ const Dashboard = () => {
       {/* CONTEÚDO DA ABA 2: ANÁLISE DE GARGALOS */}
       {abaAtiva === 'gargalos' && (
         <div className="space-y-6 animate-fade-in">
-          {/* CARDS DE RESUMO DE ATRASOS */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            <div className="border border-aldebaran-border p-5 bg-aldebaran-dark0/10 flex items-start gap-4">
-              <div className="p-3 bg-rose-500/10 rounded-none text-rose-500 shrink-0">
+            <div className="bg-white border border-slate-200 rounded-2xl p-5 shadow-sm flex items-start gap-4">
+              <div className="p-2.5 bg-rose-50 rounded-xl text-rose-500 shrink-0">
                 <AlertTriangle className="w-5 h-5 animate-pulse" />
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Tarefas Atrasadas</span>
-                <h3 className="text-2xl font-extrabold text-theme-strong font-mono mt-1">
-                  {etapasAtrasadas.length.toString().padStart(2, '0')}
-                </h3>
-                <span className="text-[10px] text-rose-400 lowercase mt-1 block">necessitam de atenção</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Tarefas Atrasadas</span>
+                <h3 className="text-2xl font-extrabold text-slate-900 mt-1">{etapasAtrasadas.length.toString().padStart(2, '0')}</h3>
+                <span className="text-[10px] text-rose-400 mt-1 block">necessitam de atencao</span>
               </div>
             </div>
 
-            <div className="border border-aldebaran-border p-5 bg-aldebaran-dark0/10 flex items-start gap-4">
-              <div className="p-3 bg-aldebaran-gold/10 rounded-none text-aldebaran-gold shrink-0">
+            <div className="border border-slate-200 p-5 bg-slate-100/60 flex items-start gap-4">
+              <div className="p-3 bg-[#0D9488]/10 rounded-xl text-[#0D9488] shrink-0">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Média de Atraso</span>
-                <h3 className="text-2xl font-extrabold text-theme-strong font-mono mt-1">
-                  {gargalosInfo.mediaAtraso.toString().padStart(2, '0')} <span className="text-xs font-semibold text-theme-weak">dias</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Média de Atraso</span>
+                <h3 className="text-2xl font-extrabold text-slate-900 font-mono mt-1">
+                  {gargalosInfo.mediaAtraso.toString().padStart(2, '0')} <span className="text-xs font-semibold text-slate-400">dias</span>
                 </h3>
-                <span className="text-[10px] text-theme-weak lowercase mt-1 block">por atividade pendente</span>
+                <span className="text-[10px] text-slate-400 lowercase mt-1 block">por atividade pendente</span>
               </div>
             </div>
 
-            <div className="border border-aldebaran-border p-5 bg-aldebaran-dark0/10 flex items-start gap-4">
-              <div className="p-3 bg-red-600/10 rounded-none text-red-500 shrink-0">
+            <div className="border border-slate-200 p-5 bg-slate-100/60 flex items-start gap-4">
+              <div className="p-3 bg-red-600/10 rounded-xl text-red-500 shrink-0">
                 <AlertCircle className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Maior Gargalo Único</span>
-                <h3 className="text-2xl font-extrabold text-theme-strong font-mono mt-1">
-                  {gargalosInfo.maiorAtraso.toString().padStart(2, '0')} <span className="text-xs font-semibold text-theme-weak">dias</span>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Maior Gargalo Único</span>
+                <h3 className="text-2xl font-extrabold text-slate-900 font-mono mt-1">
+                  {gargalosInfo.maiorAtraso.toString().padStart(2, '0')} <span className="text-xs font-semibold text-slate-400">dias</span>
                 </h3>
-                <span className="text-[10px] text-theme-weak lowercase mt-1 block">maior atraso isolado</span>
+                <span className="text-[10px] text-slate-400 lowercase mt-1 block">maior atraso isolado</span>
               </div>
             </div>
 
-            <div className="border border-aldebaran-border p-5 bg-aldebaran-dark0/10 flex items-start gap-4">
-              <div className="p-3 bg-blue-500/10 rounded-none text-blue-400 shrink-0">
+            <div className="border border-slate-200 p-5 bg-slate-100/60 flex items-start gap-4">
+              <div className="p-3 bg-blue-500/10 rounded-xl text-blue-400 shrink-0">
                 <User className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak block">Responsável Crítico</span>
-                <h3 className="text-lg font-bold text-theme-strong mt-1 truncate max-w-[200px]" title={gargalosInfo.respCritico}>
+                <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block">Responsável Crítico</span>
+                <h3 className="text-lg font-bold text-slate-900 mt-1 truncate max-w-[200px]" title={gargalosInfo.respCritico}>
                   {gargalosInfo.respCritico}
                 </h3>
                 <span className="text-[10px] text-[#F2AF47] lowercase mt-1 block">maior acúmulo de atraso</span>
@@ -515,14 +490,14 @@ const Dashboard = () => {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
 
             {/* Gargalo por Colaborador */}
-            <div className="border border-aldebaran-border p-6 bg-aldebaran-dark0/10 flex flex-col space-y-6">
+            <div className="border border-slate-200 p-6 bg-slate-100/60 flex flex-col space-y-6">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Métricas de Sobrecarga</span>
-                <h4 className="text-base font-bold text-theme-strong lowercase mt-1">atraso acumulado por responsável (dias)</h4>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Métricas de Sobrecarga</span>
+                <h4 className="text-base font-bold text-slate-900 lowercase mt-1">atraso acumulado por responsável (dias)</h4>
               </div>
 
               {gargalosInfo.colabGargalos.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-center py-16 text-theme-weak text-xs font-mono lowercase">
+                <div className="flex-1 flex items-center justify-center text-center py-16 text-slate-400 text-xs font-mono lowercase">
                   sem atrasos registrados para colaboradores.
                 </div>
               ) : (
@@ -534,12 +509,12 @@ const Dashboard = () => {
                     return (
                       <div key={colab.nome} className="space-y-1.5">
                         <div className="flex justify-between text-xs font-mono">
-                          <span className="text-theme-normal font-bold">{colab.nome}</span>
-                          <span className="text-theme-weak">
+                          <span className="text-slate-700 font-bold">{colab.nome}</span>
+                          <span className="text-slate-400">
                             {colab.dias} dias em {colab.count} tarefas
                           </span>
                         </div>
-                        <div className="h-4 bg-aldebaran-border rounded-none relative">
+                        <div className="h-4 bg-slate-200 rounded-xl relative">
                           <div
                             className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#d9972b] to-rose-600 transition-all duration-500"
                             style={{ width: `${percent}%` }}
@@ -553,14 +528,14 @@ const Dashboard = () => {
             </div>
 
             {/* Gargalo por Fase */}
-            <div className="border border-aldebaran-border p-6 bg-aldebaran-dark0/10 flex flex-col space-y-6">
+            <div className="border border-slate-200 p-6 bg-slate-100/60 flex flex-col space-y-6">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Gargalos de Processo</span>
-                <h4 className="text-base font-bold text-theme-strong lowercase mt-1">atraso acumulado por fase do projeto (dias)</h4>
+                <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Gargalos de Processo</span>
+                <h4 className="text-base font-bold text-slate-900 lowercase mt-1">atraso acumulado por fase do projeto (dias)</h4>
               </div>
 
               {gargalosInfo.faseGargalos.length === 0 ? (
-                <div className="flex-1 flex items-center justify-center text-center py-16 text-theme-weak text-xs font-mono lowercase">
+                <div className="flex-1 flex items-center justify-center text-center py-16 text-slate-400 text-xs font-mono lowercase">
                   sem atrasos registrados por fases.
                 </div>
               ) : (
@@ -572,12 +547,12 @@ const Dashboard = () => {
                     return (
                       <div key={fase.fase} className="space-y-1.5">
                         <div className="flex justify-between text-xs font-mono">
-                          <span className="text-theme-normal font-bold lowercase">{fase.fase}</span>
-                          <span className="text-theme-weak">{fase.dias} dias de atraso</span>
+                          <span className="text-slate-700 font-bold lowercase">{fase.fase}</span>
+                          <span className="text-slate-400">{fase.dias} dias de atraso</span>
                         </div>
-                        <div className="h-4 bg-aldebaran-border rounded-none relative">
+                        <div className="h-4 bg-slate-200 rounded-xl relative">
                           <div
-                            className="absolute left-0 top-0 h-full bg-gradient-to-r from-aldebaran-gold to-orange-600 transition-all duration-500"
+                            className="absolute left-0 top-0 h-full bg-gradient-to-r from-[#0D9488] to-orange-600 transition-all duration-500"
                             style={{ width: `${percent}%` }}
                           ></div>
                         </div>
@@ -591,14 +566,14 @@ const Dashboard = () => {
           </div>
 
           {/* DETALHAMENTO DAS TAREFAS ATRASADAS (MAPEAMENTO CRÍTICO) */}
-          <div className="border border-aldebaran-border rounded-none p-6 bg-aldebaran-dark0/5 space-y-6">
+          <div className="border border-slate-200 rounded-xl p-6 bg-slate-50 space-y-6">
             <div>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-theme-weak block">Mapeamento Crítico</span>
-              <h3 className="text-lg font-bold text-theme-strong lowercase mt-1">todas as atividades atualmente com prazo vencido</h3>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block">Mapeamento Crítico</span>
+              <h3 className="text-lg font-bold text-slate-900 lowercase mt-1">todas as atividades atualmente com prazo vencido</h3>
             </div>
 
             {etapasAtrasadas.length === 0 ? (
-              <div className="text-center py-12 border border-dashed border-aldebaran-border text-emerald-400 text-sm lowercase font-mono flex flex-col items-center gap-2">
+              <div className="text-center py-12 border border-dashed border-slate-200 text-emerald-400 text-sm lowercase font-mono flex flex-col items-center gap-2">
                 <CheckCircle className="w-6 h-6 text-emerald-400" />
                 excelente! nenhuma tarefa está atrasada no momento.
               </div>
@@ -606,7 +581,7 @@ const Dashboard = () => {
               <div className="overflow-x-auto">
                 <table className="w-full text-left border-collapse">
                   <thead>
-                    <tr className="border-b border-aldebaran-border text-[10px] uppercase font-bold text-theme-weak tracking-wider">
+                    <tr className="border-b border-slate-200 text-[10px] uppercase font-bold text-slate-400 tracking-wider">
                       <th className="pb-3 px-2">tarefa / etapa</th>
                       <th className="pb-3 px-2">projeto (fase)</th>
                       <th className="pb-3 px-2">responsável</th>
@@ -616,44 +591,44 @@ const Dashboard = () => {
                       <th className="pb-3 px-2 text-right">ações</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-aldebaran-border/50 text-sm">
+                  <tbody className="divide-y divide-slate-100/50 text-sm">
                     {etapasAtrasadas.map(etapa => (
                       <tr
                         key={etapa.id}
                         onClick={() => navigate(`/contratos/${etapa.contrato_id}`)}
-                        className="group hover:bg-aldebaran-border/10 cursor-pointer transition-colors"
+                        className="group hover:bg-slate-100 cursor-pointer transition-colors"
                       >
                         <td className="py-4 px-2">
-                          <span className="font-bold text-theme-strong group-hover:text-aldebaran-gold transition-colors">{etapa.nome_tarefa}</span>
+                          <span className="font-bold text-slate-900 group-hover:text-[#0D9488] transition-colors">{etapa.nome_tarefa}</span>
                         </td>
                         <td className="py-4 px-2">
-                          <div className="text-xs text-theme-normal font-semibold">{etapa.nome_projeto}</div>
-                          <div className="text-[10px] text-theme-weak lowercase font-mono">{etapa.nome_fase}</div>
+                          <div className="text-xs text-slate-700 font-semibold">{etapa.nome_projeto}</div>
+                          <div className="text-[10px] text-slate-400 lowercase font-mono">{etapa.nome_fase}</div>
                         </td>
                         <td className="py-4 px-2 text-xs">
                           <div className="flex items-center gap-2">
                             <span className="w-2 h-2 rounded-full bg-rose-500 animate-pulse"></span>
-                            <span className="text-theme-normal">{etapa.responsavel}</span>
+                            <span className="text-slate-700">{etapa.responsavel}</span>
                           </div>
                         </td>
-                        <td className="py-4 px-2 text-xs font-mono text-theme-weak">
+                        <td className="py-4 px-2 text-xs font-mono text-slate-400">
                           {formatarData(etapa.data_termino)}
                         </td>
                         <td className="py-4 px-2 text-xs font-mono">
-                          <span className="bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded-none font-bold">
+                          <span className="bg-rose-500/10 text-rose-500 border border-rose-500/20 px-2 py-0.5 rounded-xl font-bold">
                             {etapa.dias_atraso}d atraso
                           </span>
                         </td>
                         <td className="py-4 px-2">
                           <div className="flex items-center gap-2">
-                            <div className="w-16 h-1.5 bg-aldebaran-border rounded-none relative">
+                            <div className="w-16 h-1.5 bg-slate-200 rounded-xl relative">
                               <div className="absolute left-0 top-0 h-full bg-rose-500" style={{ width: `${etapa.progresso}%` }}></div>
                             </div>
-                            <span className="text-xs font-bold font-mono text-theme-weak">{etapa.progresso}%</span>
+                            <span className="text-xs font-bold font-mono text-slate-400">{etapa.progresso}%</span>
                           </div>
                         </td>
                         <td className="py-4 px-2 text-right">
-                          <button className="p-1 hover:bg-transparent text-theme-weak hover:text-theme-strong rounded-none transition">
+                          <button className="p-1 hover:bg-transparent text-slate-400 hover:text-slate-900 rounded-xl transition">
                             <ArrowRight className="w-4 h-4 transition-transform group-hover:translate-x-1" />
                           </button>
                         </td>
@@ -672,3 +647,4 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
+

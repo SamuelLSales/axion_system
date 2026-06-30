@@ -68,10 +68,10 @@ from app.services.auth import gerar_hash_senha
 def inicializar_admin_se_necessario():
     db = SessionLocal()
     try:
-        empresa_padrao = db.query(Empresa).filter(Empresa.nome_fantasia == "Aldebaran Consultoria").first()
+        empresa_padrao = db.query(Empresa).filter(Empresa.nome_fantasia == "Geogest").first()
         if not empresa_padrao:
             empresa_padrao = Empresa(
-                nome_fantasia="Aldebaran Consultoria", 
+                nome_fantasia="Geogest", 
                 cnpj="00000000000000",
                 plano="isento",
                 status_pagamento="ativo"
@@ -120,8 +120,8 @@ if not secret_key or secret_key == "TROQUE_ESTA_CHAVE_EM_PRODUCAO_OBRIGATORIAMEN
 
 # ─── Inicialização da aplicação FastAPI ───────────────────────────────────────
 app = FastAPI(
-    title="Aldebaran Contratos API",
-    description="API Corporativa para Controle de Contratos e Prazos da Aldebaran Consultoria",
+    title="Geogest Contratos API",
+    description="API Corporativa para Controle de Contratos e Prazos da Geogest",
     version="1.1.0",
     docs_url="/docs" if os.getenv("ENVIRONMENT", "development") != "production" else None,
     redoc_url="/redoc" if os.getenv("ENVIRONMENT", "development") != "production" else None,
@@ -210,7 +210,7 @@ app.include_router(assinaturas_router) # Webhook não tem dependência de auth. 
 def read_root():
     return {
         "status": "Online",
-        "description": "API do Sistema de Controle de Contratos Aldebaran.",
+        "description": "API do Sistema de Controle de Contratos Geogest.",
         "version": "1.1.0",
         "documentation": "/docs"
     }

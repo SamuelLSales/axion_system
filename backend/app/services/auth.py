@@ -21,8 +21,8 @@ ALGORITHM = "HS256"
 ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
 
-# ─── Password Hashing (bcrypt via passlib) ────────────────────────────────────
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# ─── Password Hashing (bcrypt) ────────────────────────────────────
+import bcrypt
 
 # ─── Bearer token security scheme ─────────────────────────────────────────────
 security = HTTPBearer(auto_error=False)
@@ -31,12 +31,9 @@ security = HTTPBearer(auto_error=False)
 def gerar_hash_senha(senha: str, salt: str = None) -> tuple[str, str]:
     """
     Gera hash bcrypt da senha.
-    O parâmetro 'salt' é mantido por compatibilidade, mas bcrypt gera seu próprio salt internamente.
-    Retorna (hash, salt_placeholder) para manter compatibilidade com o schema do banco.
+    O parâmetro 'salt' é mantido por compatibilidade.
     """
-    password_hash = pwd_context.hash(senha)
-    # O salt real está embutido no hash bcrypt. Mantemos uma string placeholder
-    # para compatibilidade com o schema existente do banco de dados.
+    password_hash = bcrypt.hashpw(senha.encode('utf-8'), bcrypt.gensalt()).decode('utf-8')
     return password_hash, salt or "bcrypt_internal"
 
 
@@ -47,7 +44,10 @@ def verificar_senha(senha_fornecida: str, hash_salvada: str, salt: str) -> bool:
     """
     # Hashes bcrypt sempre começam com $2b$ ou $2a$
     if hash_salvada.startswith(("$2b$", "$2a$")):
-        return pwd_context.verify(senha_fornecida, hash_salvada)
+        try:
+            return bcrypt.checkpw(senha_fornecida.encode('utf-8'), hash_salvada.encode('utf-8'))
+        except ValueError:
+            return False
     
     # Fallback para o formato antigo PBKDF2 (para usuários existentes que ainda não trocaram a senha)
     import hashlib

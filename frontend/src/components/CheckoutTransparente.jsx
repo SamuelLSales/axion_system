@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+﻿import React, { useState, useEffect } from 'react';
 import { criarCheckoutTransparente, obterStatusAssinatura } from '../services/api';
 import { QrCode, CreditCard, Copy, CheckCircle2, Loader2, ArrowLeft, ShieldCheck } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -117,9 +117,9 @@ export default function CheckoutTransparente({ plano, onBack }) {
   }
 
   return (
-    <div className="w-full max-w-2xl bg-[#111827] border border-aldebaran-border rounded-lg shadow-xl shadow-black/20 overflow-hidden">
+    <div className="w-full max-w-2xl bg-[#111827] border border-slate-200 rounded-lg shadow-xl shadow-black/20 overflow-hidden">
       {/* Header do Checkout */}
-      <div className="bg-[#1f2937] px-6 py-4 border-b border-aldebaran-border flex items-center gap-4">
+      <div className="bg-[#1f2937] px-6 py-4 border-b border-slate-200 flex items-center gap-4">
         <button onClick={onBack} className="text-slate-400 hover:text-white transition-colors">
           <ArrowLeft className="w-5 h-5" />
         </button>
@@ -141,7 +141,7 @@ export default function CheckoutTransparente({ plano, onBack }) {
           <button
             onClick={() => setMetodo('PIX')}
             className={`flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-colors ${
-              metodo === 'PIX' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-aldebaran-border text-slate-400 hover:bg-[#1f2937]'
+              metodo === 'PIX' ? 'border-emerald-500 bg-emerald-50/60 text-emerald-400' : 'border-slate-200 text-slate-400 hover:bg-[#1f2937]'
             }`}
           >
             <QrCode className="w-6 h-6" />
@@ -151,7 +151,7 @@ export default function CheckoutTransparente({ plano, onBack }) {
           <button
             onClick={() => setMetodo('CREDIT_CARD')}
             className={`flex-1 flex flex-col items-center justify-center gap-2 p-4 rounded-lg border-2 transition-colors ${
-              metodo === 'CREDIT_CARD' ? 'border-aldebaran-gold bg-aldebaran-gold/10 text-aldebaran-gold' : 'border-aldebaran-border text-slate-400 hover:bg-[#1f2937]'
+              metodo === 'CREDIT_CARD' ? 'border-[#0D9488] bg-[#0D9488]/10 text-[#0D9488]' : 'border-slate-200 text-slate-400 hover:bg-[#1f2937]'
             }`}
           >
             <CreditCard className="w-6 h-6" />
@@ -182,7 +182,7 @@ export default function CheckoutTransparente({ plano, onBack }) {
                 
                 <p className="text-sm text-slate-400 mb-4">Aguardando pagamento... (Essa tela atualizará sozinha)</p>
                 
-                <div className="w-full max-w-sm flex items-center bg-[#1f2937] p-1 rounded-lg border border-aldebaran-border">
+                <div className="w-full max-w-sm flex items-center bg-[#1f2937] p-1 rounded-lg border border-slate-200">
                   <input 
                     type="text" 
                     readOnly 
@@ -207,57 +207,57 @@ export default function CheckoutTransparente({ plano, onBack }) {
           <form onSubmit={handlePayCreditCard} className="animate-fade-in space-y-6">
             <div>
               <h4 className="text-sm font-bold text-slate-300 mb-4 flex items-center gap-2">
-                <CreditCard className="w-4 h-4 text-aldebaran-gold" /> Dados do Cartão
+                <CreditCard className="w-4 h-4 text-[#0D9488]" /> Dados do Cartão
               </h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-slate-400 mb-1">Nome no Cartão</label>
-                  <input required type="text" value={cardData.holderName} onChange={e => setCardData({...cardData, holderName: e.target.value})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="Como impresso no cartão" />
+                  <input required type="text" value={cardData.holderName} onChange={e => setCardData({...cardData, holderName: e.target.value})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="Como impresso no cartão" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-slate-400 mb-1">Número do Cartão</label>
-                  <input required type="text" value={cardData.number} onChange={e => setCardData({...cardData, number: e.target.value.replace(/\D/g, '')})} maxLength="16" className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="0000 0000 0000 0000" />
+                  <input required type="text" value={cardData.number} onChange={e => setCardData({...cardData, number: e.target.value.replace(/\D/g, '')})} maxLength="16" className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="0000 0000 0000 0000" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">Mês (MM) / Ano (AAAA)</label>
                   <div className="flex gap-2">
-                    <input required type="text" value={cardData.expiryMonth} onChange={e => setCardData({...cardData, expiryMonth: e.target.value.replace(/\D/g, '')})} maxLength="2" className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none text-center" placeholder="MM" />
-                    <input required type="text" value={cardData.expiryYear} onChange={e => setCardData({...cardData, expiryYear: e.target.value.replace(/\D/g, '')})} maxLength="4" className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none text-center" placeholder="AAAA" />
+                    <input required type="text" value={cardData.expiryMonth} onChange={e => setCardData({...cardData, expiryMonth: e.target.value.replace(/\D/g, '')})} maxLength="2" className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none text-center" placeholder="MM" />
+                    <input required type="text" value={cardData.expiryYear} onChange={e => setCardData({...cardData, expiryYear: e.target.value.replace(/\D/g, '')})} maxLength="4" className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none text-center" placeholder="AAAA" />
                   </div>
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">Cód. Segurança (CVV)</label>
-                  <input required type="text" value={cardData.ccv} onChange={e => setCardData({...cardData, ccv: e.target.value.replace(/\D/g, '')})} maxLength="4" className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="123" />
+                  <input required type="text" value={cardData.ccv} onChange={e => setCardData({...cardData, ccv: e.target.value.replace(/\D/g, '')})} maxLength="4" className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="123" />
                 </div>
               </div>
             </div>
 
-            <div className="border-t border-aldebaran-border pt-6">
+            <div className="border-t border-slate-200 pt-6">
               <h4 className="text-sm font-bold text-slate-300 mb-4">Dados do Titular</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-slate-400 mb-1">Nome Completo</label>
-                  <input required type="text" value={holderData.name} onChange={e => setHolderData({...holderData, name: e.target.value})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="Nome do titular" />
+                  <input required type="text" value={holderData.name} onChange={e => setHolderData({...holderData, name: e.target.value})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="Nome do titular" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">CPF ou CNPJ</label>
-                  <input required type="text" value={holderData.cpfCnpj} onChange={e => setHolderData({...holderData, cpfCnpj: e.target.value.replace(/\D/g, '')})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="Somente números" />
+                  <input required type="text" value={holderData.cpfCnpj} onChange={e => setHolderData({...holderData, cpfCnpj: e.target.value.replace(/\D/g, '')})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="Somente números" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">Celular (com DDD)</label>
-                  <input required type="text" value={holderData.phone} onChange={e => setHolderData({...holderData, phone: e.target.value.replace(/\D/g, '')})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="Ex: 31999999999" />
+                  <input required type="text" value={holderData.phone} onChange={e => setHolderData({...holderData, phone: e.target.value.replace(/\D/g, '')})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="Ex: 31999999999" />
                 </div>
                 <div className="md:col-span-2">
                   <label className="block text-xs font-bold text-slate-400 mb-1">E-mail</label>
-                  <input required type="email" value={holderData.email} onChange={e => setHolderData({...holderData, email: e.target.value})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="email@exemplo.com" />
+                  <input required type="email" value={holderData.email} onChange={e => setHolderData({...holderData, email: e.target.value})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="email@exemplo.com" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">CEP</label>
-                  <input required type="text" value={holderData.postalCode} onChange={e => setHolderData({...holderData, postalCode: e.target.value.replace(/\D/g, '')})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="00000000" />
+                  <input required type="text" value={holderData.postalCode} onChange={e => setHolderData({...holderData, postalCode: e.target.value.replace(/\D/g, '')})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="00000000" />
                 </div>
                 <div>
                   <label className="block text-xs font-bold text-slate-400 mb-1">Número</label>
-                  <input required type="text" value={holderData.addressNumber} onChange={e => setHolderData({...holderData, addressNumber: e.target.value})} className="w-full bg-[#1f2937] border border-aldebaran-border rounded-lg px-4 py-2 text-sm text-white focus:border-aldebaran-gold focus:outline-none" placeholder="Ex: 123" />
+                  <input required type="text" value={holderData.addressNumber} onChange={e => setHolderData({...holderData, addressNumber: e.target.value})} className="w-full bg-[#1f2937] border border-slate-200 rounded-lg px-4 py-2 text-sm text-white focus:border-[#0D9488] focus:ring-2 focus:ring-[#0D9488]/10 focus:outline-none" placeholder="Ex: 123" />
                 </div>
               </div>
             </div>
@@ -265,8 +265,8 @@ export default function CheckoutTransparente({ plano, onBack }) {
             <button
               type="submit"
               disabled={loading}
-              className={`w-full flex items-center justify-center gap-2 px-8 py-4 font-bold text-sm tracking-wider uppercase transition-all rounded-lg shadow-md mt-6
-                ${loading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-aldebaran-gold hover:bg-amber-500 text-white'}`}
+              className={`w-full flex items-center justify-center gap-2 px-8 py-4 font-bold text-sm tracking-wider uppercase transition-all rounded-lg shadow-lg mt-6
+                ${loading ? 'bg-slate-800 text-slate-500 cursor-not-allowed' : 'bg-[#0D9488] hover:bg-amber-500 text-white'}`}
             >
               {loading ? (
                 <><Loader2 className="w-5 h-5 animate-spin" /> Processando Pagamento...</>
@@ -284,3 +284,4 @@ export default function CheckoutTransparente({ plano, onBack }) {
     </div>
   );
 }
+

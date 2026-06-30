@@ -1,9 +1,9 @@
-import React, { useState, useEffect } from 'react';
-import { NavLink } from 'react-router-dom';
-import { 
-  LayoutDashboard, 
-  Users, 
-  PlusCircle, 
+import React, { useState, useEffect } from "react";
+import { NavLink } from "react-router-dom";
+import {
+  LayoutDashboard,
+  Users,
+  PlusCircle,
   Compass,
   FileSpreadsheet,
   ChevronLeft,
@@ -11,253 +11,144 @@ import {
   FolderOpen,
   LogOut,
   Settings
-} from 'lucide-react';
-import { exportarCSV, getAreasAtuacao } from '../services/api';
-import { useAuth } from '../context/AuthContext';
+} from "lucide-react";
+import { exportarCSV, getAreasAtuacao } from "../services/api";
+import { useAuth } from "../context/AuthContext";
 
 const formatArea = (nome) => {
-  if (!nome) return '';
-  return nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+  if (!nome) return "";
+  return nome.split(" ").map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(" ");
 };
 
-const Sidebar = () => {
- const [isExpanded, setIsExpanded] = useState(true);
- const { user, logoutUser } = useAuth();
- const [areas, setAreas] = useState([]);
-
- useEffect(() => {
-   const carregarAreas = async () => {
-     if (!user) return;
-     try {
-       const data = await getAreasAtuacao();
-       setAreas(data);
-     } catch (err) {
-       console.error("Erro ao carregar áreas no sidebar:", err);
-     }
-   };
-   carregarAreas();
- }, [user]);
-
- return (
-  <aside 
-  className={`bg-aldebaran-gray border-r border-aldebaran-border flex flex-col justify-between shrink-0 h-screen sticky top-0 transition-all duration-300 relative ${
-  isExpanded ? 'w-64' : 'w-20'
-  }`}
-  >
-  
-  
-
-  {/* BRAND HEADER */}
-  <div className={`bg-[#111827] border-b border-[#1f2937] h-[70px] relative flex items-center ${isExpanded ? 'px-4 justify-start overflow-visible' : 'justify-center overflow-hidden'}`}>
-  {isExpanded ? (
-    <img 
-      src="/axion_lateral.png" 
-      alt="AXION" 
-      style={{
-        position: 'absolute',
-        top: '-9px',
-        left: '-7px',
-        width: '170px',
-        height: 'auto',
-        pointerEvents: 'none'
-      }}
-      className="animate-fade-in z-10" 
-    />
-  ) : (
-    <div className="absolute inset-0 flex items-center justify-center">
-      <img 
-        src="/axion_aba.png" 
-        alt="AX" 
-        style={{
-          transform: 'scale(1.65) translateY(16px) translateX(8.29%)'
-        }}
-        className="w-[60px] h-[60px] object-cover" 
-      />
-    </div>
-  )}
-  </div>
-
-  {/* NAVIGATION ITEMS */}
-  <nav className="flex-1 px-4 py-6 space-y-2 overflow-y-auto overflow-x-hidden">
-  
-  <div className={`transition-all duration-300 overflow-hidden ${isExpanded ? 'h-auto opacity-100 mb-4' : 'h-0 opacity-0 mb-0'}`}>
-  <span className="text-[10px] font-bold uppercase tracking-wider text-theme-weak px-3 block whitespace-nowrap">
-  Painel Operacional
-  </span>
-  </div>
-  
-  <NavLink 
-  to="/dashboard" 
-  title={!isExpanded ? "Dashboard" : ""}
-  className={({ isActive }) => 
-  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-  isActive 
-  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
-  }`
-  }
-  >
-  <LayoutDashboard className="w-5 h-5 shrink-0" />
-  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Dashboard Geral
-  </span>
-  </NavLink>
-
-  <NavLink 
-  to="/dashboard/financeiro" 
-  title={!isExpanded ? "Painel Financeiro" : ""}
-  className={({ isActive }) => 
-  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-  isActive 
-  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
-  }`
-  }
-  >
-  <FileSpreadsheet className="w-5 h-5 shrink-0" />
-  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Painel Financeiro
-  </span>
-  </NavLink>
-
-  {areas.map(area => {
-    const areaUrl = area.nome.toLowerCase().replace(/\s+/g, '-');
-    return (
-      <NavLink 
-      key={area.id}
-      to={`/area/${areaUrl}`} 
-      title={!isExpanded ? formatArea(area.nome) : ""}
-      className={({ isActive }) => 
-      `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-      isActive 
-      ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-      : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
+const NavItem = ({ to, icon: Icon, label, isExpanded, iconColor, end }) => (
+  <NavLink
+    to={to}
+    end={end}
+    title={!isExpanded ? label : ""}
+    className={({ isActive }) =>
+      `flex items-center gap-3 py-2.5 rounded-xl text-sm font-semibold transition-all duration-150 ${isExpanded ? "px-3" : "justify-center px-0"} ${
+        isActive
+          ? "bg-[#0D9488]/10 text-[#0D9488] shadow-sm"
+          : "text-slate-500 hover:bg-slate-100 hover:text-slate-800"
       }`
+    }
+  >
+    <Icon className="w-[18px] h-[18px] shrink-0" style={iconColor ? { color: iconColor } : {}} />
+    <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? "w-auto opacity-100" : "w-0 opacity-0"}`}>
+      {label}
+    </span>
+  </NavLink>
+);
+
+const Sidebar = () => {
+  const [isExpanded, setIsExpanded] = useState(true);
+  const { user, logoutUser } = useAuth();
+  const [areas, setAreas] = useState([]);
+
+  useEffect(() => {
+    const carregarAreas = async () => {
+      if (!user) return;
+      try {
+        const data = await getAreasAtuacao();
+        setAreas(data);
+      } catch (err) {
+        console.error("Erro ao carregar areas no sidebar:", err);
       }
-      >
-      <FolderOpen className="w-5 h-5 shrink-0" style={{ color: area.cor_visual }} />
-      <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-      {formatArea(area.nome)}
-      </span>
-      </NavLink>
-    );
-  })}
+    };
+    carregarAreas();
+  }, [user]);
 
-  <NavLink 
-  to="/responsaveis" 
-  title={!isExpanded ? "Equipe" : ""}
-  className={({ isActive }) => 
-  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-  isActive 
-  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
-  }`
-  }
-  >
-  <Users className="w-5 h-5 shrink-0" />
-  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Equipe
-  </span>
-  </NavLink>
-
-  <NavLink 
-  to="/contratos/novo" 
-  title={!isExpanded ? "Novo Contrato" : ""}
-  className={({ isActive }) => 
-  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-  isActive 
-  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
-  }`
-  }
-  >
-  <PlusCircle className="w-5 h-5 shrink-0" />
-  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Novo Contrato
-  </span>
-  </NavLink>
-
-  <NavLink 
-  to="/areas" 
-  title={!isExpanded ? "Áreas de Atuação" : ""}
-  className={({ isActive }) => 
-  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-  isActive 
-  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
-  }`
-  }
-  >
-  <Compass className="w-5 h-5 shrink-0" />
-  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Áreas de Atuação
-  </span>
-  </NavLink>
-
-  <NavLink 
-  to="/configuracoes" 
-  title={!isExpanded ? "Configurações" : ""}
-  className={({ isActive }) => 
-  `flex items-center gap-3 py-2.5 rounded-none text-sm font-bold transition-all ${isExpanded ? 'px-3' : 'justify-center px-0'} ${
-  isActive 
-  ? 'bg-aldebaran-dark text-aldebaran-gold border-l-4 border-l-aldebaran-orange border-y border-r border-aldebaran-border shadow-sm' 
-  : 'text-theme-weak hover:bg-aldebaran-dark hover:text-theme-normal border-l-4 border-l-transparent border-y border-r border-y-transparent border-r-transparent'
-  }`
-  }
-  >
-  <Settings className="w-5 h-5 shrink-0" />
-  <span className={`transition-all duration-300 whitespace-nowrap overflow-hidden ${isExpanded ? 'w-auto opacity-100' : 'w-0 opacity-0'}`}>
-  Configurações
-  </span>
-  </NavLink>
-  </nav>
-
-  {/* TOGGLE FOOTER */}
-  <div className="p-4 border-t border-aldebaran-border space-y-3">
-    {/* USER PROFILE INFO */}
-    {isExpanded && (
-      <div className="flex items-center justify-between p-2.5 bg-aldebaran-dark/40 border border-aldebaran-border rounded-none">
-        <div className="flex items-center gap-2 overflow-hidden">
-          <div className="w-8 h-8 rounded-none bg-amber-500/10 border border-amber-500/25 flex items-center justify-center shrink-0 text-amber-500 font-bold text-xs uppercase">
-            {user?.nome?.substring(0, 2) || 'AD'}
+  return (
+    <aside
+      className={`bg-white border-r border-slate-200 flex flex-col justify-between shrink-0 h-screen sticky top-0 transition-all duration-300 shadow-sm ${isExpanded ? "w-64" : "w-20"}`}
+    >
+      {/* BRAND HEADER */}
+      <div className="h-[70px] flex items-center justify-center px-4 border-b border-slate-100">
+        {isExpanded ? (
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0 shadow-sm">
+              <span className="text-white font-extrabold text-sm">G</span>
+            </div>
+            <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
+              GEOGEST
+            </span>
           </div>
-          <div className="flex flex-col min-w-0">
-            <span className="text-xs font-bold text-theme-strong truncate block">{user?.nome || 'Usuário'}</span>
-            <span className="text-[9px] font-bold text-theme-weak uppercase tracking-wider block">{user?.username || 'username'}</span>
+        ) : (
+          <div className="w-9 h-9 rounded-xl bg-[#0D9488] flex items-center justify-center shadow-sm">
+            <span className="text-white font-extrabold text-base">G</span>
           </div>
-        </div>
+        )}
       </div>
-    )}
 
-    <button
-      onClick={logoutUser}
-      title="Sair do Sistema"
-      className="flex items-center justify-center gap-2 py-2.5 bg-red-500/10 hover:bg-red-500/20 text-red-500 hover:text-red-400 rounded-none text-xs font-bold border border-red-500/20 transition shadow-sm w-full"
-    >
-      <LogOut className="w-4 h-4 shrink-0" />
-      {isExpanded && (
-        <span className="whitespace-nowrap overflow-hidden animate-fade-in">
-          Sair
-        </span>
-      )}
-    </button>
+      {/* NAVIGATION */}
+      <nav className="flex-1 px-3 py-5 space-y-1 overflow-y-auto overflow-x-hidden">
+        {isExpanded && (
+          <p className="text-[10px] font-bold uppercase tracking-widest text-slate-400 px-3 mb-3">
+            Painel Operacional
+          </p>
+        )}
 
-    <button
-      onClick={() => setIsExpanded(!isExpanded)}
-      title={isExpanded ? "Recolher Menu" : "Expandir Menu"}
-      className="flex items-center justify-center gap-2 py-2.5 bg-aldebaran-dark hover:bg-aldebaran-border text-theme-weak hover:text-theme-strong rounded-none text-xs font-bold border border-aldebaran-border transition shadow-sm w-full"
-    >
-      {isExpanded ? <ChevronLeft className="w-4 h-4 shrink-0" /> : <ChevronRight className="w-4 h-4 shrink-0" />}
-      {isExpanded && (
-        <span className="whitespace-nowrap overflow-hidden animate-fade-in">
-          Recolher Aba
-        </span>
-      )}
-    </button>
-  </div>
+        <NavItem to="/dashboard" icon={LayoutDashboard} label="Dashboard Geral" isExpanded={isExpanded} end />
+        <NavItem to="/dashboard/financeiro" icon={FileSpreadsheet} label="Painel Financeiro" isExpanded={isExpanded} />
 
- </aside>
- );
+        {areas.map(area => {
+          const areaUrl = area.nome.toLowerCase().replace(/\s+/g, "-");
+          return (
+            <NavItem
+              key={area.id}
+              to={`/area/${areaUrl}`}
+              icon={FolderOpen}
+              label={formatArea(area.nome)}
+              isExpanded={isExpanded}
+              iconColor={area.cor_visual}
+            />
+          );
+        })}
+
+        <NavItem to="/responsaveis" icon={Users} label="Equipe" isExpanded={isExpanded} />
+        <NavItem to="/contratos/novo" icon={PlusCircle} label="Novo Contrato" isExpanded={isExpanded} />
+        <NavItem to="/areas" icon={Compass} label="Areas de Atuacao" isExpanded={isExpanded} />
+        <NavItem to="/configuracoes" icon={Settings} label="Configuracoes" isExpanded={isExpanded} />
+      </nav>
+
+      {/* FOOTER */}
+      <div className="p-3 border-t border-slate-100 space-y-2">
+        {/* User card */}
+        {isExpanded && (
+          <div className="flex items-center gap-2.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100">
+            <div className="w-8 h-8 rounded-lg bg-[#0D9488]/10 flex items-center justify-center shrink-0 text-[#0D9488] font-bold text-xs uppercase border border-[#0D9488]/20">
+              {user?.nome?.substring(0, 2) || "AD"}
+            </div>
+            <div className="flex flex-col min-w-0">
+              <span className="text-xs font-bold text-slate-800 truncate">{user?.nome || "Usuario"}</span>
+              <span className="text-[9px] font-bold text-slate-400 uppercase tracking-wider">{user?.username || "username"}</span>
+            </div>
+          </div>
+        )}
+
+        {/* Logout */}
+        <button
+          onClick={logoutUser}
+          title="Sair do Sistema"
+          className="flex items-center justify-center gap-2 py-2.5 w-full rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-500 hover:text-rose-600 text-xs font-bold border border-rose-100 transition-all"
+        >
+          <LogOut className="w-4 h-4 shrink-0" />
+          {isExpanded && <span className="animate-fade-in">Sair</span>}
+        </button>
+
+        {/* Toggle */}
+        <button
+          onClick={() => setIsExpanded(!isExpanded)}
+          title={isExpanded ? "Recolher Menu" : "Expandir Menu"}
+          className="flex items-center justify-center gap-2 py-2.5 w-full rounded-xl bg-slate-50 hover:bg-slate-100 text-slate-500 hover:text-slate-700 text-xs font-bold border border-slate-200 transition-all"
+        >
+          {isExpanded ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+          {isExpanded && <span className="animate-fade-in">Recolher Aba</span>}
+        </button>
+      </div>
+    </aside>
+  );
 };
 
 export default Sidebar;
+

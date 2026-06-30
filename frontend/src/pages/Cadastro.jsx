@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+﻿import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import {
@@ -6,7 +6,7 @@ import {
   ArrowLeft, ArrowRight, Building2, FileText, Check, Eye, EyeOff
 } from 'lucide-react';
 
-const inputClass = "w-full bg-[#F8F9FA] border border-aldebaran-border rounded-none py-3 pl-10 pr-4 text-sm text-theme-strong focus:bg-white focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] transition-all outline-none placeholder:text-slate-400";
+const inputClass = "w-full bg-[#F8F9FA] border border-slate-200 rounded-xl py-3 pl-10 pr-4 text-sm text-slate-900 focus:bg-white focus:border-[#10b981] focus:ring-1 focus:ring-[#10b981] transition-all outline-none placeholder:text-slate-400";
 const labelClass = "block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5";
 
 export default function Cadastro() {
@@ -79,10 +79,10 @@ export default function Cadastro() {
     <div className="min-h-screen flex flex-col md:flex-row bg-[#f4f5f7] selection:bg-emerald-500/20 selection:text-emerald-600">
 
       {/* Painel Esquerdo — Branding */}
-      <div className="w-full md:w-[42%] bg-[#0B0F19] relative overflow-hidden flex flex-col p-8 border-r border-aldebaran-border/50 min-h-[260px] md:min-h-screen">
+      <div className="w-full md:w-[42%] bg-[#0B0F19] relative overflow-hidden flex flex-col p-8 border-r border-slate-200 min-h-[260px] md:min-h-screen">
         <div className="absolute inset-0 bg-[url('https://www.transparenttextures.com/patterns/cubes.png')] opacity-5"></div>
-        <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-500/10 rounded-full blur-[120px] pointer-events-none"></div>
-        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-aldebaran-gold/10 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute -top-40 -left-40 w-96 h-96 bg-emerald-50/60 rounded-full blur-[120px] pointer-events-none"></div>
+        <div className="absolute -bottom-40 -right-40 w-96 h-96 bg-[#0D9488]/10 rounded-full blur-[120px] pointer-events-none"></div>
 
         {/* Voltar */}
         <div className="relative z-10">
@@ -98,14 +98,14 @@ export default function Cadastro() {
         {/* Conteúdo centralizado */}
         <div className="relative z-10 flex flex-col flex-1 justify-center mt-8 md:mt-0">
           <div className="mb-8 flex flex-col items-start">
-            <div className="w-[56px] h-[52px] relative overflow-hidden mb-4">
-              <img
-                src="/axion_icon.png"
-                alt="AXION"
-                style={{ position: 'absolute', width: '145px', height: 'auto', maxWidth: 'none', top: '-21px', left: '-41px' }}
-              />
+            <div className="flex items-center gap-2.5 mb-4">
+              <div className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0">
+                <span className="text-white font-extrabold text-sm">G</span>
+              </div>
+              <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
+                GEOGEST
+              </span>
             </div>
-            <h1 className="text-2xl font-extrabold tracking-widest text-white uppercase mb-1">AXION</h1>
             <span className="text-[11px] font-bold tracking-[0.2em] text-emerald-400 uppercase">Contratos & Prazos</span>
           </div>
 
@@ -143,14 +143,14 @@ export default function Cadastro() {
           {/* Sucesso */}
           {isRegistered ? (
             <div className="text-center animate-fade-in flex flex-col items-center">
-              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-500 mb-6 border border-emerald-100">
+              <div className="w-16 h-16 bg-emerald-50 rounded-full flex items-center justify-center text-emerald-600 mb-6 border border-emerald-100">
                 <Check className="w-8 h-8" />
               </div>
               <h2 className="text-2xl font-extrabold text-slate-800 mb-3">Empresa cadastrada!</h2>
               <p className="text-slate-500 text-sm leading-relaxed mb-6 max-w-sm">
                 Enviamos um e-mail de ativação para <strong className="text-slate-700">{formData.email}</strong>. Clique no link para ativar sua conta e acessar o painel.
               </p>
-              <div className="bg-slate-50 border border-slate-200 py-3 px-4 text-emerald-600 font-mono text-sm font-bold rounded-none mb-8 w-full select-all text-center">
+              <div className="bg-slate-50 border border-slate-200 py-3 px-4 text-emerald-600 font-mono text-sm font-bold rounded-xl mb-8 w-full select-all text-center">
                 {formData.email}
               </div>
               <Link
@@ -207,7 +207,7 @@ export default function Cadastro() {
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><Building2 className="w-4 h-4" /></span>
                       <input type="text" name="empresa" value={formData.empresa} onChange={handleChange}
-                        placeholder="Ex: Aldebaran Consultoria" className={inputClass} required />
+                        placeholder="Ex: Geogest Consultoria" className={inputClass} required />
                     </div>
                   </div>
 
@@ -216,7 +216,7 @@ export default function Cadastro() {
                     <div className="relative">
                       <span className="absolute inset-y-0 left-0 pl-3 flex items-center text-slate-400"><FileText className="w-4 h-4" /></span>
                       <input type="text" name="razao_social" value={formData.razao_social} onChange={handleChange}
-                        placeholder="Ex: Aldebaran Consultoria Ltda" className={inputClass} />
+                        placeholder="Ex: Geogest Consultoria Ltda" className={inputClass} />
                     </div>
                   </div>
 
@@ -343,3 +343,6 @@ export default function Cadastro() {
     </div>
   );
 }
+
+
+

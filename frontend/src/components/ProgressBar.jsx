@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const ProgressBar = ({ value, showText = true }) => {
  // Garantir que o valor seja numérico e esteja entre 0 e 100
@@ -16,14 +16,14 @@ const ProgressBar = ({ value, showText = true }) => {
 
  return (
  <div className="w-full flex items-center gap-3">
- <div className="w-full bg-aldebaran-gray rounded-full h-2 overflow-hidden border border-aldebaran-border/50">
+ <div className="w-full bg-white rounded-full h-2 overflow-hidden border border-slate-200">
  <div 
  className={`h-full rounded-full transition-all duration-500 ease-out shadow-sm ${progressColor}`}
  style={{ width: `${cleanValue}%` }}
  ></div>
  </div>
  {showText && (
- <span className="text-xs font-mono font-bold text-theme-weak min-w-[32px] text-right">
+ <span className="text-xs font-mono font-bold text-slate-400 min-w-[32px] text-right">
  {cleanValue}%
  </span>
  )}
@@ -32,3 +32,4 @@ const ProgressBar = ({ value, showText = true }) => {
 };
 
 export default ProgressBar;
+

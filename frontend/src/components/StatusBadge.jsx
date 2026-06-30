@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 
 const StatusBadge = ({ status }) => {
   const config = {
@@ -26,7 +26,7 @@ const StatusBadge = ({ status }) => {
 
  const current = config[status] || {
  label: status,
- classes: 'bg-aldebaran-dark0/10 text-theme-weak border border-slate-500/20',
+ classes: 'bg-slate-100/60 text-slate-400 border border-slate-500/20',
  dot: 'bg-slate-400'
  };
 
@@ -39,3 +39,4 @@ const StatusBadge = ({ status }) => {
 };
 
 export default StatusBadge;
+

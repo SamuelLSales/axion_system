@@ -1,4 +1,4 @@
-import React from 'react';
+﻿import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -22,7 +22,7 @@ function ProtectedRoute({ children, requirePlan = true }) {
   const { user, isAuthenticated, loading } = useAuth();
   
   if (loading) {
-    return <div className="min-h-screen bg-aldebaran-dark flex items-center justify-center text-amber-500 font-bold tracking-widest uppercase text-sm">Carregando...</div>;
+    return <div className="min-h-screen bg-slate-50 flex items-center justify-center text-amber-500 font-bold tracking-widest uppercase text-sm">Carregando...</div>;
   }
   
   if (!isAuthenticated) {
@@ -46,17 +46,17 @@ function ProtectedRoute({ children, requirePlan = true }) {
 // Layout principal do sistema
 function MainLayout() {
   return (
-    <div className="flex bg-aldebaran-dark min-h-screen text-slate-100 font-sans">
+    <div className="flex bg-slate-50 min-h-screen text-slate-800 font-sans">
       {/* Barra Lateral Esquerda */}
       <Sidebar />
 
       {/* Corpo Principal do Sistema */}
-      <div className="flex-1 flex flex-col min-w-0 bg-aldebaran-dark">
+      <div className="flex-1 flex flex-col min-w-0 bg-slate-50">
         {/* Cabeçalho Superior Fixo */}
         <Header />
 
         {/* Área de Visualização das Páginas */}
-        <main className="flex-1 overflow-y-auto bg-aldebaran-dark">
+        <main className="flex-1 overflow-y-auto bg-slate-50">
           <Outlet />
         </main>
       </div>
@@ -102,3 +102,4 @@ function App() {
 }
 
 export default App;
+

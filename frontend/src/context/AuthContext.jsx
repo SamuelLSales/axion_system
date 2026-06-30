@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useEffect } from 'react';
+﻿import React, { createContext, useContext, useState, useEffect } from 'react';
 import { login as apiLogin, apiLogout, getMe } from '../services/api';
 
 const AuthContext = createContext(null);
@@ -9,7 +9,7 @@ export const AuthProvider = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const token = localStorage.getItem('aldebaran_token');
+      const token = localStorage.getItem('geogest_token');
       if (token) {
         const userData = await getMe();
         setUser(userData);
@@ -19,8 +19,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error("Erro ao checar autenticação:", error);
       setUser(null);
-      localStorage.removeItem('aldebaran_token');
-      localStorage.removeItem('aldebaran_refresh_token');
+      localStorage.removeItem('geogest_token');
+      localStorage.removeItem('geogest_refresh_token');
     } finally {
       setLoading(false);
     }
@@ -32,9 +32,9 @@ export const AuthProvider = ({ children }) => {
 
   const loginUser = async (username, password) => {
     const data = await apiLogin(username, password);
-    localStorage.setItem('aldebaran_token', data.token);
+    localStorage.setItem('geogest_token', data.token);
     if (data.refresh_token) {
-      localStorage.setItem('aldebaran_refresh_token', data.refresh_token);
+      localStorage.setItem('geogest_refresh_token', data.refresh_token);
     }
     setUser(data.user);
     return data.user;
@@ -46,8 +46,8 @@ export const AuthProvider = ({ children }) => {
     } catch (error) {
       console.error(error);
     } finally {
-      localStorage.removeItem('aldebaran_token');
-      localStorage.removeItem('aldebaran_refresh_token');
+      localStorage.removeItem('geogest_token');
+      localStorage.removeItem('geogest_refresh_token');
       setUser(null);
     }
   };
@@ -71,3 +71,4 @@ export const useAuth = () => {
   }
   return context;
 };
+

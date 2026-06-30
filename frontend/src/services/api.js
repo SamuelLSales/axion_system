@@ -1,4 +1,4 @@
-// frontend/src/services/api.js
+﻿// frontend/src/services/api.js
 import axios from 'axios';
 
 // Sempre usa /api — em dev o Vite faz proxy para localhost:8000, em prod usa /api direto
@@ -13,7 +13,7 @@ const api = axios.create({
 
 // Interceptor para injetar o token de autenticação em todas as requisições
 api.interceptors.request.use((config) => {
-  const token = localStorage.getItem('aldebaran_token');
+  const token = localStorage.getItem('geogest_token');
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
@@ -67,7 +67,7 @@ api.interceptors.response.use((response) => {
     originalRequest._retry = true;
     isRefreshing = true;
 
-    const refreshToken = localStorage.getItem('aldebaran_refresh_token');
+    const refreshToken = localStorage.getItem('geogest_refresh_token');
     
     if (refreshToken) {
       try {
@@ -76,7 +76,7 @@ api.interceptors.response.use((response) => {
         });
         
         const newToken = data.token;
-        localStorage.setItem('aldebaran_token', newToken);
+        localStorage.setItem('geogest_token', newToken);
         
         processQueue(null, newToken);
         
@@ -85,8 +85,8 @@ api.interceptors.response.use((response) => {
       } catch (refreshError) {
         processQueue(refreshError, null);
         // Refresh falhou — limpa tudo e redireciona pro login
-        localStorage.removeItem('aldebaran_token');
-        localStorage.removeItem('aldebaran_refresh_token');
+        localStorage.removeItem('geogest_token');
+        localStorage.removeItem('geogest_refresh_token');
         if (!window.location.pathname.includes('/login')) {
           window.location.href = '/login';
         }
@@ -97,7 +97,7 @@ api.interceptors.response.use((response) => {
     } else {
       // Sem refresh token — vai pro login
       isRefreshing = false;
-      localStorage.removeItem('aldebaran_token');
+      localStorage.removeItem('geogest_token');
       if (!window.location.pathname.includes('/login')) {
         window.location.href = '/login';
       }
@@ -269,7 +269,7 @@ export const deleteAreaAtuacao = async (id) => {
 // === EXPORTAR CSV ===
 export const exportarCSV = (contratoId = null) => {
   // Dispara o download nativo abrindo a rota de exportação no navegador
-  const token = localStorage.getItem('aldebaran_token');
+  const token = localStorage.getItem('geogest_token');
   let url = `${API_BASE_URL}/exportar/csv?`;
   if (token) url += `token=${token}&`;
   if (contratoId) url += `contrato_id=${contratoId}`;
@@ -340,3 +340,4 @@ export const criarCheckoutTransparente = async (payload) => {
 };
 
 export default api;
+
