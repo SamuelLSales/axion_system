@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { useNavigate, Link } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { Lock, User, AlertCircle, ArrowRight, Eye, EyeOff, ArrowLeft, ShieldCheck } from "lucide-react";
@@ -146,12 +146,9 @@ export default function Login() {
         <div className="absolute inset-0 bg-gradient-to-br from-[#0a0f1e]/80 via-[#0a0f1e]/60 to-[#0D9488]/10 pointer-events-none z-[1]" />
         <div className="relative z-10 flex flex-col justify-between h-full p-10">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0">
-              <span className="text-white font-extrabold text-base">G</span>
-            </div>
             <div>
-              <p className="text-white font-extrabold text-base tracking-widest leading-none">GEOGEST</p>
-              <p className="text-[#0D9488] text-[9px] font-bold tracking-[0.2em] uppercase leading-none mt-0.5">Contratos & Prazos</p>
+              <p className="text-white font-extrabold text-2xl tracking-widest leading-none">GEOGEST</p>
+              <p className="text-[#0D9488] text-[9px] font-bold tracking-[0.2em] uppercase leading-none mt-1">Contratos & Prazos</p>
             </div>
           </div>
           <div className="space-y-5">

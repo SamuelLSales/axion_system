@@ -1,4 +1,4 @@
-﻿// frontend/src/pages/ActivateAccount.jsx
+// frontend/src/pages/ActivateAccount.jsx
 import React, { useEffect, useState, useRef } from 'react';
 import { useSearchParams, Link } from 'react-router-dom';
 import { activateUser } from '../services/api';
@@ -49,10 +49,7 @@ export default function ActivateAccount() {
         {/* Logo Branding */}
         <div className="flex flex-col items-center mb-8">
           <div className="flex items-center gap-2.5 mb-4 justify-center">
-              <div className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0">
-                <span className="text-white font-extrabold text-sm">G</span>
-              </div>
-              <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
+              <span className="text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
                 GEOGEST
               </span>
             </div>

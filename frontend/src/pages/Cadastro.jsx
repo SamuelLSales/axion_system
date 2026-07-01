@@ -1,4 +1,4 @@
-﻿import React, { useState } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { registerUser } from '../services/api';
 import {
@@ -88,7 +88,7 @@ export default function Cadastro() {
         <div className="relative z-10">
           <Link
             to="/"
-            className="inline-flex items-center gap-1.5 text-slate-500 hover:text-slate-200 text-xs font-semibold transition-colors group"
+            className="inline-flex items-center gap-1.5 text-slate-300 hover:text-white text-xs font-semibold transition-colors group"
           >
             <ArrowLeft className="w-3.5 h-3.5 group-hover:-translate-x-0.5 transition-transform" />
             Voltar para a Home
@@ -99,10 +99,7 @@ export default function Cadastro() {
         <div className="relative z-10 flex flex-col flex-1 justify-center mt-8 md:mt-0">
           <div className="mb-8 flex flex-col items-start">
             <div className="flex items-center gap-2.5 mb-4">
-              <div className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0">
-                <span className="text-white font-extrabold text-sm">G</span>
-              </div>
-              <span className="text-lg font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
+              <span className="text-2xl font-extrabold tracking-wide text-transparent bg-clip-text bg-gradient-to-r from-[#0D9488] to-[#34d399]">
                 GEOGEST
               </span>
             </div>

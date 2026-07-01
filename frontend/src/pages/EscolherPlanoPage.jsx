@@ -86,10 +86,7 @@ export default function EscolherPlanoPage() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-20">
             <div className="flex items-center gap-2.5">
-              <div className="w-8 h-8 rounded-lg bg-[#0D9488] flex items-center justify-center shrink-0">
-                <span className="text-white font-extrabold text-sm">G</span>
-              </div>
-              <span className="font-title font-extrabold text-slate-100 text-xl tracking-tight">
+              <span className="font-title font-extrabold text-slate-100 text-2xl tracking-tight">
                 GEOGEST <span className="text-[#34d399]">SaaS</span>
               </span>
             </div>
