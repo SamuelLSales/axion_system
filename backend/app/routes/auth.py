@@ -185,7 +185,7 @@ def register(request: Request, register_data: RegisterRequest, db: Session = Dep
         
         import uuid
         token = uuid.uuid4().hex
-        expira_em = datetime.now(timezone.utc) + timedelta(hours=24)
+        expira_em = datetime.utcnow() + timedelta(hours=24)
         
         novo_usuario = Usuario(
             nome=f"{register_data.nome} {register_data.sobrenome}".strip(),
@@ -239,7 +239,7 @@ def activate(token: str, db: Session = Depends(get_db)):
     if not usuario:
         raise HTTPException(status_code=400, detail="Token de ativação inválido.")
     
-    if usuario.activation_token_expires and usuario.activation_token_expires < datetime.now(timezone.utc):
+    if usuario.activation_token_expires and usuario.activation_token_expires < datetime.utcnow():
         raise HTTPException(status_code=400, detail="Este token de ativação expirou.")
     
     # Ativa o usuário e limpa os campos de token

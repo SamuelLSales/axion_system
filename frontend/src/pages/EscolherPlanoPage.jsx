@@ -59,7 +59,7 @@ const FEATURES = [
 ];
 
 export default function EscolherPlanoPage() {
-  const { logoutUser } = useAuth();
+  const { user, logoutUser } = useAuth();
   const [cicloAtivo, setCicloAtivo] = useState('anual');
   const [step, setStep] = useState(1);
   const [error, setError] = useState('');
@@ -70,6 +70,13 @@ export default function EscolherPlanoPage() {
     setError('');
     setStep(2);
   };
+
+  // Verificar se o período de testes expirou (7 dias)
+  const criadoEm = user?.empresa?.criado_em ? new Date(user.empresa.criado_em) : null;
+  const agora = new Date();
+  const diffTime = criadoEm ? agora - criadoEm : 0;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const trialExpired = criadoEm && diffDays >= 7;
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-700 font-sans selection:bg-[#0D9488] selection:text-white flex flex-col">
@@ -112,6 +119,20 @@ export default function EscolherPlanoPage() {
                   Um único plano com acesso a todas as ferramentas de gestão. Economize escolhendo um ciclo maior.
                 </p>
               </div>
+
+              {trialExpired && (
+                <div className="mb-8 p-5 bg-amber-50 border border-amber-200 text-amber-800 text-center text-sm font-medium animate-fade-in max-w-3xl mx-auto rounded-xl shadow-sm flex flex-col items-center gap-1.5">
+                  <span className="font-extrabold text-[#0D9488] text-xs tracking-widest uppercase block mb-1">
+                    ⚠️ Período de Testes Encerrado
+                  </span>
+                  <span>
+                    Seu período de testes gratuito de <strong>7 dias</strong> chegou ao fim.
+                  </span>
+                  <span className="text-slate-500 max-w-xl text-xs">
+                    Escolha um ciclo abaixo e ative sua assinatura para continuar acessando seus contratos, painéis e relatórios.
+                  </span>
+                </div>
+              )}
 
               {error && (
                 <div className="mb-8 p-4 bg-rose-50 border border-rose-200 text-rose-600 text-center text-sm font-bold animate-fade-in max-w-3xl mx-auto rounded-xl">

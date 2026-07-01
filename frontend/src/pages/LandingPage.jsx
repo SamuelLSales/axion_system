@@ -1,4 +1,4 @@
-﻿import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { 
   CheckCircle, 
@@ -126,7 +126,7 @@ const PricingSection = () => {
           <button
             key={p.id}
             onClick={() => setCicloAtivo(p.id)}
-            className={`w-full flex items-center justify-between px-5 py-4 border transition-all text-left ${
+            className={`w-full flex items-center justify-between px-5 py-4 border rounded-xl transition-all text-left ${
               cicloAtivo === p.id
                 ? 'border-[#0D9488] bg-[#0D9488]/10 text-slate-900'
                 : 'border-slate-200 bg-white text-slate-400 hover:border-slate-200 hover:bg-white/80'
@@ -154,10 +154,10 @@ const PricingSection = () => {
       </div>
 
       {/* Card de preço — direita */}
-      <div className="flex-1 bg-white border border-slate-200 p-8 relative overflow-hidden">
+      <div className="flex-1 bg-white border border-slate-200 p-8 rounded-2xl relative overflow-hidden">
         {plano.destaque && (
           <div className="absolute top-4 right-4">
-            <span className="px-3 py-1 bg-emerald-50/60 text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
+            <span className="px-3 py-1 bg-emerald-50/60 text-emerald-400 text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20 rounded-lg">
               ⭐ Melhor Custo-Benefício
             </span>
           </div>
@@ -217,7 +217,7 @@ const PricingSection = () => {
         {/* CTA */}
         <Link
           to="/cadastro"
-          className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-[#0D9488] hover:bg-amber-500 text-white font-bold text-sm tracking-wider uppercase transition-all shadow-lg group"
+          className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-8 py-4 bg-[#0D9488] hover:bg-[#0b7c71] text-white font-bold text-sm tracking-wider uppercase rounded-xl transition-all shadow-lg group"
         >
           Começar agora — Plano {plano.label}
           <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
@@ -430,8 +430,8 @@ const LandingPage = () => {
 
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             {/* Feature 1 */}
-            <div className="bg-white border border-slate-200 p-8 hover:border-[#0D9488]/50 transition-colors shadow-sm">
-              <div className="w-12 h-12 bg-blue-500/10 flex items-center justify-center mb-6">
+            <div className="bg-white border border-slate-200 p-8 rounded-2xl hover:border-[#0D9488]/50 transition-colors shadow-sm">
+              <div className="w-12 h-12 bg-blue-500/10 flex items-center justify-center rounded-xl mb-6">
                 <Layers className="w-6 h-6 text-blue-500" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Multidisciplinar</h3>
@@ -441,8 +441,8 @@ const LandingPage = () => {
             </div>
 
             {/* Feature 2 */}
-            <div className="bg-white border border-slate-200 p-8 hover:border-[#0D9488]/50 transition-colors shadow-sm">
-              <div className="w-12 h-12 bg-amber-500/10 flex items-center justify-center mb-6">
+            <div className="bg-white border border-slate-200 p-8 rounded-2xl hover:border-[#0D9488]/50 transition-colors shadow-sm">
+              <div className="w-12 h-12 bg-amber-500/10 flex items-center justify-center rounded-xl mb-6">
                 <Clock className="w-6 h-6 text-amber-500" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Alertas de Prazo</h3>
@@ -452,8 +452,8 @@ const LandingPage = () => {
             </div>
 
             {/* Feature 3 */}
-            <div className="bg-white border border-slate-200 p-8 hover:border-teal-500/50 transition-colors shadow-sm">
-              <div className="w-12 h-12 bg-teal-500/10 flex items-center justify-center mb-6">
+            <div className="bg-white border border-slate-200 p-8 rounded-2xl hover:border-teal-500/50 transition-colors shadow-sm">
+              <div className="w-12 h-12 bg-teal-500/10 flex items-center justify-center rounded-xl mb-6">
                 <BarChart2 className="w-6 h-6 text-teal-500" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Dashboard de Projetos</h3>
@@ -463,8 +463,8 @@ const LandingPage = () => {
             </div>
 
             {/* Feature 4 — Painel Financeiro */}
-            <div className="bg-white border border-emerald-500/30 p-8 hover:border-emerald-500/60 transition-colors shadow-sm relative overflow-hidden">
-              <div className="w-12 h-12 bg-emerald-50/60 flex items-center justify-center mb-6">
+            <div className="bg-white border border-emerald-500/30 p-8 rounded-2xl hover:border-emerald-500/60 transition-colors shadow-sm relative overflow-hidden">
+              <div className="w-12 h-12 bg-emerald-50/60 flex items-center justify-center rounded-xl mb-6">
                 <DollarSign className="w-6 h-6 text-emerald-600" />
               </div>
               <h3 className="text-xl font-bold text-slate-900 mb-3">Painel Financeiro</h3>
@@ -502,7 +502,7 @@ const LandingPage = () => {
               { label: 'Lucro Líquido', value: 'R$ 428K', icon: DollarSign, color: 'text-emerald-400', bg: 'bg-emerald-50/60' },
               { label: 'Imposto Projetado', value: 'R$ 84K', icon: FileSpreadsheet, color: 'text-orange-400', bg: 'bg-orange-500/10' },
             ].map((kpi, i) => (
-              <div key={i} className="border border-slate-200 p-5 bg-white flex items-start gap-3 shadow-sm">
+              <div key={i} className="border border-slate-200 p-5 bg-white rounded-2xl flex items-start gap-3 shadow-sm">
                 <div className={`p-2.5 ${kpi.bg} rounded-xl ${kpi.color} shrink-0`}>
                   <kpi.icon className="w-4 h-4" />
                 </div>
@@ -517,7 +517,7 @@ const LandingPage = () => {
           {/* Features do painel financeiro */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-emerald-50/60 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-emerald-50/60 flex items-center justify-center shrink-0 rounded-xl">
                 <PieChart className="w-5 h-5 text-emerald-600" />
               </div>
               <div>
@@ -529,7 +529,7 @@ const LandingPage = () => {
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-blue-500/10 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-blue-500/10 flex items-center justify-center shrink-0 rounded-xl">
                 <TrendingUp className="w-5 h-5 text-blue-500" />
               </div>
               <div>
@@ -541,7 +541,7 @@ const LandingPage = () => {
             </div>
 
             <div className="flex gap-4">
-              <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center shrink-0">
+              <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center shrink-0 rounded-xl">
                 <FileSpreadsheet className="w-5 h-5 text-amber-500" />
               </div>
               <div>
@@ -604,9 +604,9 @@ const LandingPage = () => {
             <div className="lg:col-span-5 space-y-6">
               
               {/* Missão Card */}
-              <div className="bg-white border border-slate-200 p-6 shadow-sm hover:border-[#0D9488]/30 transition-colors">
+              <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:border-[#0D9488]/30 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-[#0D9488]/10 flex items-center justify-center text-[#34d399]">
+                  <div className="w-10 h-10 bg-[#0D9488]/10 flex items-center justify-center rounded-xl text-[#0D9488]">
                     <Target className="w-5 h-5" />
                   </div>
                   <h3 className="font-bold text-lg text-slate-900">Missão</h3>
@@ -617,9 +617,9 @@ const LandingPage = () => {
               </div>
               
               {/* Visão Card */}
-              <div className="bg-white border border-slate-200 p-6 shadow-sm hover:border-[#0D9488]/30 transition-colors">
+              <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:border-[#0D9488]/30 transition-colors">
                 <div className="flex items-center gap-3 mb-3">
-                  <div className="w-10 h-10 bg-[#0D9488]/10 flex items-center justify-center text-[#0D9488]">
+                  <div className="w-10 h-10 bg-[#0D9488]/10 flex items-center justify-center rounded-xl text-[#0D9488]">
                     <Compass className="w-5 h-5" />
                   </div>
                   <h3 className="font-bold text-lg text-slate-900">Visão</h3>
@@ -630,9 +630,9 @@ const LandingPage = () => {
               </div>
               
               {/* Valores Card */}
-              <div className="bg-white border border-slate-200 p-6 shadow-sm hover:border-amber-500/30 transition-colors">
+              <div className="bg-white border border-slate-200 p-6 rounded-2xl shadow-sm hover:border-amber-500/30 transition-colors">
                 <div className="flex items-center gap-3 mb-4">
-                  <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center text-amber-500">
+                  <div className="w-10 h-10 bg-amber-500/10 flex items-center justify-center rounded-xl text-amber-500">
                     <Award className="w-5 h-5" />
                   </div>
                   <h3 className="font-bold text-lg text-slate-900">Valores</h3>

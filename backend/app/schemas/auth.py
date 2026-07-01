@@ -61,6 +61,7 @@ class CompanyResponse(BaseModel):
     taxa_imposto: float = 0.0
     plano: str | None = None
     status_pagamento: str = "ativo"
+    criado_em: datetime
 
     class Config:
         from_attributes = True

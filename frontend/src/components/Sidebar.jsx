@@ -45,6 +45,14 @@ const Sidebar = () => {
   const { user, logoutUser } = useAuth();
   const [areas, setAreas] = useState([]);
 
+  // Cálculos do Período de Testes (Trial de 7 dias)
+  const criadoEm = user?.empresa?.criado_em ? new Date(user.empresa.criado_em) : null;
+  const agora = new Date();
+  const diffTime = criadoEm ? agora - criadoEm : 0;
+  const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+  const isTrial = user?.empresa && user.empresa.plano !== "isento" && !(user.empresa.plano && user.empresa.status_pagamento === "ativo");
+  const daysLeft = Math.max(0, 7 - diffDays);
+
   useEffect(() => {
     const carregarAreas = async () => {
       if (!user) return;
@@ -113,6 +121,36 @@ const Sidebar = () => {
 
       {/* FOOTER */}
       <div className="p-3 border-t border-slate-100 space-y-2">
+        {/* Trial indicator */}
+        {isTrial && (
+          isExpanded ? (
+            <div className="flex flex-col gap-1 p-2.5 bg-amber-50 border border-amber-200 rounded-xl animate-fade-in">
+              <span className="text-[9px] font-extrabold text-[#0D9488] uppercase tracking-widest block">
+                ⚠️ Período de Testes
+              </span>
+              <span className="text-[11px] font-bold text-slate-700">
+                {daysLeft > 0 ? `${daysLeft} dias restantes` : "Expirado"}
+              </span>
+              <NavLink
+                to="/escolher-plano"
+                className="text-[9px] font-extrabold text-[#0D9488] hover:text-[#0b7c71] underline mt-0.5 block"
+              >
+                Assinar plano
+              </NavLink>
+            </div>
+          ) : (
+            <NavLink
+              to="/escolher-plano"
+              className="flex flex-col items-center justify-center p-1.5 bg-amber-50 border border-amber-200 rounded-xl text-[#0D9488] hover:bg-amber-100 transition-colors"
+              title={`Período de Testes: ${daysLeft} dias restantes`}
+            >
+              <span className="text-[10px] font-extrabold">
+                {daysLeft}d
+              </span>
+            </NavLink>
+          )
+        )}
+
         {/* User card */}
         {isExpanded && (
           <div className="flex items-center gap-2.5 p-2.5 bg-slate-50 rounded-xl border border-slate-100">

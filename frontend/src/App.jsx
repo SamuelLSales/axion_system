@@ -1,4 +1,4 @@
-﻿import React from 'react';
+import React from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate, Outlet } from 'react-router-dom';
 import Sidebar from './components/Sidebar';
 import Header from './components/Header';
@@ -31,12 +31,19 @@ function ProtectedRoute({ children, requirePlan = true }) {
   
   // Se a rota exige um plano ativo, e o usuário não tem plano ou está inadimplente
   if (requirePlan && user?.empresa) {
-    // Permite bypass apenas se o banco de dados marcar explicitamente plano="isento"
     const isIsento = user.empresa.plano === "isento";
     const isPlanOk = user.empresa.plano && user.empresa.status_pagamento === "ativo";
     
     if (!isIsento && !isPlanOk) {
-      return <Navigate to="/escolher-plano" replace />;
+      // Verificar se o período de teste de 7 dias expirou
+      const criadoEm = new Date(user.empresa.criado_em);
+      const agora = new Date();
+      const diffTime = agora - criadoEm;
+      const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
+      
+      if (diffDays >= 7) {
+        return <Navigate to="/escolher-plano" replace />;
+      }
     }
   }
   

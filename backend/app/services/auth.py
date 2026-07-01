@@ -7,7 +7,7 @@ from typing import Optional
 from jose import jwt, JWTError
 from passlib.context import CryptContext
 from sqlalchemy.orm import Session
-from fastapi import HTTPException, Security, Depends
+from fastapi import HTTPException, Security, Depends, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 
 from app.models.usuario import Usuario
@@ -87,6 +87,7 @@ def decodificar_token(token: str) -> Optional[dict]:
 
 
 def get_usuario_atual(
+    request: Request = None,
     credentials: HTTPAuthorizationCredentials = Security(security),
     db: Session = Depends(get_db)
 ) -> Usuario:
@@ -117,6 +118,20 @@ def get_usuario_atual(
     
     if not usuario.is_active:
         raise HTTPException(status_code=401, detail="Conta desativada")
+    
+    # Validar se o período de teste (trial) expirou
+    if request:
+        path = request.url.path
+        is_auth_route = path.startswith("/auth/") or path == "/auth"
+        is_payment_route = path.startswith("/assinaturas/") or path == "/assinaturas"
+        
+        if not (is_auth_route or is_payment_route):
+            if usuario.empresa and usuario.empresa.plano != "isento":
+                is_plan_ok = usuario.empresa.plano and usuario.empresa.status_pagamento == "ativo"
+                if not is_plan_ok:
+                    diferenca = datetime.utcnow() - usuario.empresa.criado_em
+                    if diferenca.days >= 7:
+                        raise HTTPException(status_code=403, detail="TRIAL_EXPIRED")
     
     return usuario
 
